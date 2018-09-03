@@ -2,7 +2,7 @@
 
 Convert records to and from different MARC formats. Deserializes MARC to [@natlibfi/marc-record](https://github.com/natlibfi/marc-record-js).
 
-This a fork of the original [marc-record-js](https://github.com/petuomin/marc-record-serializers). The new implementation uses ES6 syntax.
+This a fork of the original [marc-record-serializers](https://github.com/petuomin/marc-record-serializers). The new implementation uses ES6 syntax.
 
 ## License and copyright
 
