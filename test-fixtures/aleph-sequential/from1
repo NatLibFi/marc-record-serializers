@@ -1,0 +1,26 @@
+000000004 FMT   L BK
+000000004 LDR   L ^^^^^cam^a22002777i^4500
+000000004 001   L 000000004
+000000004 005   L 20090820094953.0
+000000004 008   L 850308s1983^^^^be^|||||||||||||||||arm||
+000000004 0411  L $$aarm$$afre$$harm
+000000004 080   L $$a281.914$$x(093)
+000000004 080   L $$a223.1
+000000004 1000  L $$aHesychios av Jerusalem.
+000000004 24510 L $$aHomélies sur Job :$$bversion arménienne.$$n1,$$pHomélies I-XI /$$cHésychius de Jérusalem ; éd., introd. et notes par Charles Renoux ; trad. par Charles Mercier et Charles Renoux.
+000000004 260   L $$aTurnhout :$$bBrepols,$$c1983.
+000000004 300   L $$a297 s.
+000000004 336   L $$aTeksti
+000000004 337   L $$aei välittävää laitetta
+000000004 4901  L $$aPatrologia orientalis;$$vt. 42, fasc. 1, no. 190
+000000004 650 7 L $$amanuscripts, Armenian$$2atla
+000000004 650 7 L $$aOrthodox Eastern Church$$2atla
+000000004 650 7 L $$aBible (OT)- Job$$2atla
+000000004 650 7 L $$aBible$$xcriticism, interpretation$$2atla
+000000004 655 7 L $$akalenterit$$2ysa
+000000004 7001  L $$aRenoux, Charles.
+000000004 7001  L $$aMercier, B.-Ch.
+000000004 830 0 L $$aPatrologia orientalis;$$vt. 42, fasc. 1, no. 190
+000000004 CAT   L $$aLOAD$$b$$c20090122$$lFIN01$$h1151
+000000004 CAT   L $$aKVP1003$$b30$$c20090820$$lFIN01$$h0949
+000000004 CAT   L $$aCONV-ISBD$$b$$c20120401$$lFIN01$$h2007
