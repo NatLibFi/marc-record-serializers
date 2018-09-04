@@ -106,8 +106,7 @@ export function to(record) {
 		return cf;
 	}
 
-	return `<?xml version="1.0" encoding="UTF-8"?>
-${serializer.serializeToString(xmlRecord)}`;
+	return serializer.serializeToString(xmlRecord);
 }
 
 export function from(xmlString) {
