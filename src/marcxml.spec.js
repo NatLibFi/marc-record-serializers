@@ -121,8 +121,7 @@ describe('marcxml', () => {
 				const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
 				const record = MarcRecord.fromString(sourceRecord);
 
-				expect(`<?xml version="1.0" encoding="UTF-8"?>
-${Converter.to(record)}`).to.equal(expectedRecord);
+				expect(Converter.to(record)).to.equal(expectedRecord);
 			});
 		});
 	});
