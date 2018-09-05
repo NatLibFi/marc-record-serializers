@@ -20,7 +20,7 @@
 		"url": "git@github.com:natlibfi/marc-record-serializers.git"
 	},
 	"license": "MIT",
-	"version": "1.0.3",
+	"version": "1.1.0",
 	"main": "./dist/index.js",
 	"bin": "./dist/cli",
 	"engines": {
