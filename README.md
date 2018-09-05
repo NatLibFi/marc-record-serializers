@@ -4,6 +4,15 @@ Convert records to and from different MARC formats. Deserializes MARC to [@natli
 
 This a fork of the original [marc-record-serializers](https://github.com/petuomin/marc-record-serializers). The new implementation uses ES6 syntax.
 
+## Usage
+```js
+import fs from 'fs';
+import {MARCXML} from '@natlibfi/marc-record-serializers';
+const reader = new MARCXML.Reader(fs.createReadStream('marc.xml'));
+
+reader.on('data', record => console.log(record));
+```
+
 ## License and copyright
 
 Copyright (c) 2014-2017 **Pasi Tuominen <pasi.tuominen@gmail.com>**
