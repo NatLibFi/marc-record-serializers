@@ -26,9 +26,9 @@ import * as MARCXML from './marcxml';
 run();
 
 async function run() {
-  try {
-    if (process.argv.length < 5) {
-      console.log(`USAGE: <SOURCE> <TARGET> <FILE>
+	try {
+		if (process.argv.length < 5) {
+			console.log(`USAGE: <SOURCE> <TARGET> <FILE>
 
 Parameters:
   SOURCE    Source format
@@ -40,63 +40,62 @@ Supported formats:
   marcxml
   iso2709
       `);
-      process.exit(-1);
-    }
+			process.exit(-1);
+		}
 
-    const [sourceType, targetType, file] = process.argv.slice(2);
-    const serialize = getSerializer(targetType);
-    const Reader = getReader(sourceType);
-    const reader = new Reader(fs.createReadStream(file));
+		const [sourceType, targetType, file] = process.argv.slice(2);
+		const serialize = getSerializer(targetType);
+		const Reader = getReader(sourceType);
+		const reader = new Reader(fs.createReadStream(file));
 
-    await new Promise((resolve, reject) => {
-      reader.on('error', reject);
-      reader.on('end', resolve);
-      reader.on('data', record => {
-        process.stdout.write(serialize(record));
-      });
-    });
+		await new Promise((resolve, reject) => {
+			reader.on('error', reject);
+			reader.on('end', resolve);
+			reader.on('data', record => {
+				process.stdout.write(serialize(record));
+			});
+		});
 
-    process.exit();
-  } catch (err) {
-    if (process.env.NODE_ENV === 'debug') {
-      console.error(err);
-      process.exit(-1);
-    }
+		process.exit();
+	} catch (err) {
+		if (process.env.NODE_ENV === 'debug') {
+			console.error(err);
+			process.exit(-1);
+		}
 
-    console.error(`ERROR: ${err.message}`);
-    process.exit(-1);
-  }
+		console.error(`ERROR: ${err.message}`);
+		process.exit(-1);
+	}
 
-  function getSerializer(type) {
-    const obj = getObject(type);
+	function getSerializer(type) {
+		const obj = getObject(type);
 
-    if (obj) {
-      return obj.to;
-    }
+		if (obj) {
+			return obj.to;
+		}
 
-    throw new Error(`No such serializer: ${type}`);
-  }
+		throw new Error(`No such serializer: ${type}`);
+	}
 
-  function getReader(type) {
-    const obj = getObject(type);
+	function getReader(type) {
+		const obj = getObject(type);
 
-    if (obj) {
-      return obj.Reader;
-    }
+		if (obj) {
+			return obj.Reader;
+		}
 
-    throw new Error(`No such parser: ${type}`);
-  }
+		throw new Error(`No such parser: ${type}`);
+	}
 
-  function getObject(type) {
-    switch (type) {
-      case 'alephseq':
-      return AlephSequential;
-      case 'marcxml':
-      return MARCXML;
-      case 'iso2709':
-      return ISO2709;
-      default:
-      return;
-    }
-  }
+	function getObject(type) {
+		switch (type) {
+			case 'alephseq':
+				return AlephSequential;
+			case 'marcxml':
+				return MARCXML;
+			case 'iso2709':
+				return ISO2709;
+			default:
+		}
+	}
 }

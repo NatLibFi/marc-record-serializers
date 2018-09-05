@@ -22,7 +22,7 @@
 	"license": "MIT",
 	"version": "1.1.0",
 	"main": "./dist/index.js",
-	"bin": "./dist/cli",
+	"bin": "./dist/cli.js",
 	"engines": {
 		"node": ">=7"
 	},
