@@ -72,14 +72,12 @@ export function to(record) {
 		datafield.setAttribute('ind1', formatIndicator(field.ind1));
 		datafield.setAttribute('ind2', formatIndicator(field.ind2));
 
-		if (field.subfields) {
-			field.subfields.forEach(subfield => {
-				const sub = mkElementValue('subfield', subfield.value);
-				sub.setAttribute('code', subfield.code);
+		field.subfields.forEach(subfield => {
+			const sub = mkElementValue('subfield', subfield.value);
+			sub.setAttribute('code', subfield.code);
 
-				datafield.appendChild(sub);
-			});
-		}
+			datafield.appendChild(sub);
+		});
 
 		return datafield;
 	}

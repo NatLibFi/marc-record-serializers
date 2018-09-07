@@ -47,17 +47,25 @@ describe('marcxml', () => {
 			});
 		});
 
-		it('Should do nothing because of invalid data', () => {
+		it('Should emit an error because of invalid data', () => {
 			return new Promise((resolve, reject) => {
 				const filePath = path.resolve(fixturesPath, 'erroneous');
 				const reader = new Converter.Reader(fs.createReadStream(filePath));
 
-				reader.on('end', resolve);
 				reader.on('data', () => {
 					reject(new Error('Emitted a data-event'));
 				});
-				reader.on('error', () => {
-					reject(new Error('Emitted an error-event'));
+				reader.on('end', () => {
+					reject(new Error('Emitted an end-event'));
+				});
+
+				reader.on('error', err => {
+					try {
+						expect(err.message).to.match(/^Unable to parse node:/);
+						resolve();
+					} catch (exp) {
+						reject(exp);
+					}
 				});
 			});
 		});
