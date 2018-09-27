@@ -20,6 +20,8 @@
 'use strict';
 
 import fs from 'fs';
+import path from 'path';
+import ora from 'ora';
 import * as Text from './text';
 import * as Json from './json';
 import * as AlephSequential from './aleph-sequential';
@@ -41,6 +43,7 @@ async function run() {
 		const serialize = getSerializer(targetType);
 		const Reader = getReader(sourceType);
 		const reader = new Reader(fs.createReadStream(file));
+		const spinner = ora('Converting records').start();
 
 		await new Promise((resolve, reject) => {
 			let count = 0;
@@ -48,6 +51,8 @@ async function run() {
 			reader.on('error', reject);
 
 			reader.on('end', () => {
+				spinner.succeed();
+
 				if (outputDirectory) {
 					console.log(`Wrote ${count} records to ${outputDirectory}`);
 				}
@@ -57,12 +62,13 @@ async function run() {
 
 			reader.on('data', record => {
 				if (outputDirectory) {
+					const filename = `${String(++count).padStart(5, '0')}.${getFileSuffix(targetType)}`;
+
 					if (!fs.existsSync(outputDirectory)) {
 						fs.mkdirSync(outputDirectory);
 					}
 
-					const file = `${outputDirectory}/${++count}.${getFileSuffix(targetType)}`;
-					fs.writeFileSync(file, serialize(record));
+					fs.writeFileSync(path.join(outputDirectory, filename), serialize(record));
 				} else {
 					process.stdout.write(serialize(record));
 				}
