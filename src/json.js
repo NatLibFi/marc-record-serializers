@@ -16,20 +16,35 @@
 *
 */
 
-'use strict';
+/* eslint-disable valid-jsdoc */
 
-import * as Text from './text';
-import * as Json from './json';
-import * as AlephSequential from './aleph-sequential';
-import * as ISO2709 from './iso2709';
-import * as MARCXML from './marcxml';
-import * as OAI_MARCXML from './oai-marcxml';
+import {Readable} from 'stream';
+import {MarcRecord} from '@natlibfi/marc-record';
+import StreamArray from 'stream-json/streamers/StreamArray';
 
-export {
-	Text,
-	Json,
-	AlephSequential,
-	ISO2709,
-	MARCXML,
-	OAI_MARCXML
-};
+export class Reader extends Readable {
+	constructor(stream) {
+		super(stream);
+
+		const pipeline = stream.pipe(StreamArray.withParser());
+		pipeline.on('data', data => {
+			this.emit('data', new MarcRecord(data.value));
+		});
+
+		pipeline.on('end', () => {
+			this.emit('end');
+		});
+
+		pipeline.on('error', error => {
+			this.emit('error', error);
+		});
+	}
+}
+
+export function to(record) {
+	return JSON.stringify(record, undefined, 2);
+}
+
+export function from(str) {
+	return new MarcRecord(JSON.parse(str));
+}

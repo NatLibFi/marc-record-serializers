@@ -1,0 +1,123 @@
+/**
+*
+* @licstart  The following is the entire license notice for the JavaScript code in this file.
+*
+* Copyright 2014-2017 Pasi Tuominen
+* Copyright 2018 University Of Helsinki (The National Library Of Finland)
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*
+* @licend  The above is the entire license notice
+* for the JavaScript code in this file.
+*
+*/
+
+/* eslint-disable no-undef, max-nested-callbacks, no-unused-expressions */
+
+'use strict';
+
+import fs from 'fs';
+import path from 'path';
+import {expect} from 'chai';
+import {MarcRecord} from '@natlibfi/marc-record';
+import * as Converter from './text';
+
+describe('text', () => {
+	const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'text');
+	const fixtureCount = fs.readdirSync(fixturesPath).filter(f => /^from[0-9]+/.test(f)).length;
+
+	describe('#Reader', () => {
+		it('Should emit only an end-event because of invalid data', () => {
+			return new Promise((resolve, reject) => {
+				const filePath = path.resolve(fixturesPath, 'erroneous');
+				const reader = new Converter.Reader(fs.createReadStream(filePath));
+
+				reader.on('end', () => {
+					resolve();
+				});
+				reader.on('data', () => {
+					reject(new Error('Emitted a data-event'));
+				});
+				reader.on('error', () => {
+					reject(new Error('Emitted an error-event'));
+				});
+			});
+		});
+	});
+
+	describe('#from', () => {
+		it('Should convert a single record', () => {
+			const fromPath = path.resolve(fixturesPath, 'from1');
+			const str = fs.readFileSync(fromPath, 'utf8');
+			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to1'), 'utf8');
+
+			expect(Converter.from(str).toString()).to.equal(expectedRecord);
+		});
+
+		Array.from(Array(fixtureCount)).forEach((e, i) => {
+			const index = i + 1;
+
+			it(`Should convert file from${index} to file to${index}`, () => {
+				return new Promise((resolve, reject) => {
+					const records = [];
+					const fromPath = path.resolve(fixturesPath, `from${index}`);
+					const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
+					const reader = new Converter.Reader(fs.createReadStream(fromPath));
+
+					reader.on('error', reject);
+					reader.on('data', record => records.push(record));
+					reader.on('end', () => {
+						try {
+							expect(records).to.have.length(1);
+							expect(records.shift().toString()).to.equal(expectedRecord);
+							resolve();
+						} catch (err) {
+							reject(err);
+						}
+					});
+				});
+			});
+		});
+
+		it('Should convert multiple records from a file', () => {
+			return new Promise((resolve, reject) => {
+				const records = [];
+				const fromPath = path.resolve(fixturesPath, 'from_multiple');
+				const firstExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple1'), 'utf8');
+				const secondExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple2'), 'utf8');
+				const reader = new Converter.Reader(fs.createReadStream(fromPath));
+
+				reader.on('error', reject);
+				reader.on('data', record => records.push(record));
+				reader.on('end', () => {
+					try {
+						expect(records).to.have.length(2);
+						expect(records.shift().toString()).to.equal(firstExpectedRecord);
+						expect(records.shift().toString()).to.equal(secondExpectedRecord);
+						resolve();
+					} catch (err) {
+						reject(err);
+					}
+				});
+			});
+		});
+	});
+
+	describe('#to', () => {
+		Array.from(Array(fixtureCount)).forEach((e, i) => {
+			const index = i + 1;
+
+			it(`Should convert file to${index} to file from${index}`, () => {
+				const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `from${index}`), 'utf8');
+				const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
+				const record = MarcRecord.fromString(sourceRecord);
+
+				expect(Converter.to(record)).to.equal(expectedRecord);
+			});
+		});
+	});
+});

@@ -20,40 +20,58 @@
 'use strict';
 
 import fs from 'fs';
+import path from 'path';
+import ora from 'ora';
+import * as Text from './text';
+import * as Json from './json';
 import * as AlephSequential from './aleph-sequential';
 import * as ISO2709 from './iso2709';
 import * as MARCXML from './marcxml';
+import * as OAI_MARCXML from './oai-marcxml';
 
 run();
 
 async function run() {
 	try {
-		if (process.argv.length < 5) {
-			console.log(`USAGE: <SOURCE> <TARGET> <FILE>
+		const [outputDirectory, sourceType, targetType, file] = parseArgs(process.argv.slice(2));
 
-Parameters:
-  SOURCE    Source format
-  TARGET    Target format
-  FILE      File to read
-
-Supported formats:
-  alephseq
-  marcxml
-  iso2709
-      `);
+		if (!(sourceType || targetType || file)) {
+			printUsage();
 			process.exit(-1);
 		}
 
-		const [sourceType, targetType, file] = process.argv.slice(2);
 		const serialize = getSerializer(targetType);
 		const Reader = getReader(sourceType);
 		const reader = new Reader(fs.createReadStream(file));
+		const spinner = ora('Converting records').start();
 
 		await new Promise((resolve, reject) => {
+			let count = 0;
+
 			reader.on('error', reject);
-			reader.on('end', resolve);
+
+			reader.on('end', () => {
+				spinner.succeed();
+
+				if (outputDirectory) {
+					console.log(`Wrote ${count} records to ${outputDirectory}`);
+				}
+
+				resolve();
+			});
+
 			reader.on('data', record => {
-				process.stdout.write(serialize(record));
+				if (outputDirectory) {
+					const filename = `${String(++count).padStart(5, '0')}.${getFileSuffix(targetType)}`;
+
+					if (!fs.existsSync(outputDirectory)) {
+						fs.mkdirSync(outputDirectory);
+					}
+
+					fs.writeFileSync(path.join(outputDirectory, filename), serialize(record));
+				} else {
+					process.stdout.write(serialize(record));
+				}
 			});
 		});
 
@@ -66,6 +84,18 @@ Supported formats:
 
 		console.error(`ERROR: ${err.message}`);
 		process.exit(-1);
+	}
+
+	function parseArgs(args) {
+		if (args[0] === '-d') {
+			if (args.length === 5) {
+				return args.slice(1);
+			}
+		} else if (args.length === 3) {
+			return [undefined].concat(args);
+		}
+
+		return [];
 	}
 
 	function getSerializer(type) {
@@ -90,13 +120,54 @@ Supported formats:
 
 	function getObject(type) {
 		switch (type) {
+			case 'text':
+				return Text;
+			case 'json':
+				return Json;
 			case 'alephseq':
 				return AlephSequential;
 			case 'marcxml':
 				return MARCXML;
+			case 'oai-marcxml':
+				return OAI_MARCXML;
 			case 'iso2709':
 				return ISO2709;
 			default:
 		}
+	}
+
+	function getFileSuffix(type) {
+		switch (type) {
+			case 'text':
+				return 'txt';
+			case 'marcxml':
+			case 'oai-marcxml':
+				return 'xml';
+			case 'iso2709':
+				return 'marc';
+			default:
+				return type;
+		}
+	}
+
+	function printUsage() {
+		console.log(`USAGE: [-d DIRECTORY] <INPUT_FORMAT> <OUTPUT_FORMAT> <FILE>
+
+  Options:
+	-d DIRECTORY   Write records to individual files in DIRECTORY
+
+  Parameters:
+    INPUT_FORMAT   Input format
+    OUTPUT_FORMAT  Output format
+    FILE           File to read
+
+  Supported formats:
+    text
+    json
+    alephseq
+    marcxml
+    oai-marcxml
+    iso2709
+			`);
 	}
 }
