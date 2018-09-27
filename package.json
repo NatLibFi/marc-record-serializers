@@ -43,7 +43,8 @@
 		"publish-to-npm": "npm install && npm test && npm run coverage && npm publish --access=public"
 	},
 	"dependencies": {
-		"@natlibfi/marc-record": "^1.3.2",
+		"@natlibfi/marc-record": "^3.0.0",
+		"stream-json": "^1.1.1",
 		"text-encoding": ">=0.6.4 <1.0.0",
 		"xmldom": "^0.1.27"
 	},

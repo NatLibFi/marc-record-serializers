@@ -16,20 +16,55 @@
 *
 */
 
-'use strict';
+/* eslint-disable valid-jsdoc */
 
-import * as Text from './text';
-import * as Json from './json';
-import * as AlephSequential from './aleph-sequential';
-import * as ISO2709 from './iso2709';
-import * as MARCXML from './marcxml';
-import * as OAI_MARCXML from './oai-marcxml';
+import {Readable} from 'stream';
+import {MarcRecord} from '@natlibfi/marc-record';
 
-export {
-	Text,
-	Json,
-	AlephSequential,
-	ISO2709,
-	MARCXML,
-	OAI_MARCXML
-};
+export class Reader extends Readable {
+	constructor(stream) {
+		super(stream);
+		this.buffer = [];
+
+		const self = this;
+
+		stream.on('data', data => {
+			this.buffer += data;
+			flush();
+		});
+
+		stream.on('end', () => {
+			flush(undefined, true);
+			this.emit('end');
+		});
+
+		stream.on('error', error => {
+			/* istanbul ignore next: Only occurs on I/O errors */
+			this.emit('error', error);
+		});
+
+		function flush(re = /(LDR)/g, force = false) {
+			const result = re.exec(self.buffer);
+			if (result) {
+				if (result.index > 0 || force) {
+					const str = self.buffer.slice(0, result.index || undefined).replace(/\n+$/, '');
+
+					self.emit('data', MarcRecord.fromString(str));
+					self.buffer = self.buffer.slice(result.index);
+
+					flush();
+				} else {
+					flush(re);
+				}
+			}
+		}
+	}
+}
+
+export function to(record) {
+	return record.toString();
+}
+
+export function from(str) {
+	return MarcRecord.fromString(str);
+}
