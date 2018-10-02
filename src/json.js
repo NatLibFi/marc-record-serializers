@@ -28,7 +28,11 @@ export class Reader extends Readable {
 
 		const pipeline = stream.pipe(StreamArray.withParser());
 		pipeline.on('data', data => {
-			this.emit('data', new MarcRecord(data.value));
+			try {
+				this.emit('data', new MarcRecord(data.value));
+			} catch (err) {
+				this.emit('error', err);
+			}
 		});
 
 		pipeline.on('end', () => {
