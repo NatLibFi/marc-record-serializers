@@ -70,7 +70,12 @@ async function run() {
 
 					fs.writeFileSync(path.join(outputDirectory, filename), serialize(record));
 				} else {
-					process.stdout.write(serialize(record));
+					const str = serialize(record);
+					process.stdout.write(format(str));
+				}
+
+				function format(str) {
+					return str.endsWith('\n') ? str : `${str}\n`;
 				}
 			});
 		});
