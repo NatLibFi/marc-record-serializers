@@ -22,28 +22,48 @@
 import fs from 'fs';
 import path from 'path';
 import ora from 'ora';
+import yargs from 'yargs';
 import * as Text from './text';
 import * as Json from './json';
 import * as AlephSequential from './aleph-sequential';
 import * as ISO2709 from './iso2709';
 import * as MARCXML from './marcxml';
 import * as OAI_MARCXML from './oai-marcxml';
+import {MarcRecord} from '@natlibfi/marc-record';
 
 run();
 
 async function run() {
+	const FORMAT_USAGE = `Supported formats:
+  text
+  json
+  alephseq
+  marcxml
+  oai-marcxml
+  iso2709`;
+
 	try {
-		const [outputDirectory, sourceType, targetType, file] = parseArgs(process.argv.slice(2));
+		const args = yargs
+			.scriptName('marc-record-serializers')
+			.command('$0 <inputFormat> <outputFormat> <file>', '', yargs => {
+				yargs
+					.positional('inputFormat', {type: 'string', describe: 'Output format'})
+					.positional('outputFormat', {type: 'string', describe: 'Output format'})
+					.positional('file', {type: 'string', describe: 'File to read'})
+					.epilog(FORMAT_USAGE);
+			})
+			.option('v', {alias: 'validate', default: true, type: 'boolean', describe: 'Validate MARC record structure'})
+			.option('d', {alias: 'outputDirectory', type: 'string', describe: 'Write records to individual files in DIRECTORY'})
+			.parse();
 
-		if (!(sourceType || targetType || file)) {
-			printUsage();
-			process.exit(-1);
-		}
-
-		const serialize = getSerializer(targetType);
-		const Reader = getReader(sourceType);
-		const reader = new Reader(fs.createReadStream(file));
+		const serialize = getSerializer(args.outputFormat);
+		const Reader = getReader(args.inputFormat);
+		const reader = new Reader(fs.createReadStream(args.file));
 		const spinner = ora('Converting records').start();
+
+		if (!args.validate) {
+			MarcRecord.setValidationOptions({fields: false, subfields: false, subfieldValues: false});
+		}
 
 		await new Promise((resolve, reject) => {
 			let count = 0;
@@ -53,22 +73,22 @@ async function run() {
 			reader.on('end', () => {
 				spinner.succeed();
 
-				if (outputDirectory) {
-					console.log(`Wrote ${count} records to ${outputDirectory}`);
+				if (args.outputDirectory) {
+					console.log(`Wrote ${count} records to ${args.outputDirectory}`);
 				}
 
 				resolve();
 			});
 
 			reader.on('data', record => {
-				if (outputDirectory) {
-					const filename = `${String(++count).padStart(5, '0')}.${getFileSuffix(targetType)}`;
+				if (args.outputDirectory) {
+					const filename = `${String(++count).padStart(5, '0')}.${getFileSuffix(args.outputFormat)}`;
 
-					if (!fs.existsSync(outputDirectory)) {
-						fs.mkdirSync(outputDirectory);
+					if (!fs.existsSync(args.outputDirectory)) {
+						fs.mkdirSync(args.outputDirectory);
 					}
 
-					fs.writeFileSync(path.join(outputDirectory, filename), serialize(record));
+					fs.writeFileSync(path.join(args.outputDirectory, filename), serialize(record));
 				} else {
 					const str = serialize(record);
 					process.stdout.write(format(str));
@@ -89,18 +109,6 @@ async function run() {
 
 		console.error(`ERROR: ${err.message}`);
 		process.exit(-1);
-	}
-
-	function parseArgs(args) {
-		if (args[0] === '-d') {
-			if (args.length === 5) {
-				return args.slice(1);
-			}
-		} else if (args.length === 3) {
-			return [undefined].concat(args);
-		}
-
-		return [];
 	}
 
 	function getSerializer(type) {
@@ -153,26 +161,5 @@ async function run() {
 			default:
 				return type;
 		}
-	}
-
-	function printUsage() {
-		console.log(`USAGE: [-d DIRECTORY] <INPUT_FORMAT> <OUTPUT_FORMAT> <FILE>
-
-  Options:
-	-d DIRECTORY   Write records to individual files in DIRECTORY
-
-  Parameters:
-    INPUT_FORMAT   Input format
-    OUTPUT_FORMAT  Output format
-    FILE           File to read
-
-  Supported formats:
-    text
-    json
-    alephseq
-    marcxml
-    oai-marcxml
-    iso2709
-			`);
 	}
 }
