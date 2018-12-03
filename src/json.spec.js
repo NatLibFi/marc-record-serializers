@@ -109,7 +109,7 @@ describe('json', () => {
 					reader.on('data', record => records.push(record));
 					reader.on('end', () => {
 						try {
-							const stringified = JSON.stringify(records.shift(), undefined, 2);
+							const stringified = JSON.stringify(records.shift().toObject(), undefined, 2);
 							expect(Converter.to(record)).to.equal(stringified);
 							resolve();
 						} catch (err) {
