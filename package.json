@@ -36,24 +36,23 @@
 		"test": "npm run lint && npm run test:unit && npm run coverage",
 		"clean": "rimraf build dist",
 		"coverage": "nyc check-coverage --per-file",
-		"build:transpile": "babel src --source-maps --out-dir=dist --minified",
+		"build:transpile": "babel src --source-maps --out-dir=dist",
 		"build": "npm run clean && npm run build:transpile && npm run check-deps",
 		"watch": "cross-env DEBUG=1 NODE_ENV=test chokidar src -c 'npm test && npm run coverage'",
-		"watch:serializer": "cross-env DEBUG=1 NODE_ENV=test chokidar src/$SERIALIZER.js src/$SERIALIZER.spec.js -c 'npm run lint:base -- src/$SERIALIZER.js src/$SERIALIZER.spec.js && npm run test:unit:base -- src/$SERIALIZER.spec.js'",
-		"publish-to-npm": "npm install && npm test && npm run coverage && npm publish --access=public"
+		"watch:serializer": "cross-env DEBUG=1 NODE_ENV=test chokidar src/$SERIALIZER.js src/$SERIALIZER.spec.js -c 'npm run lint:base -- src/$SERIALIZER.js src/$SERIALIZER.spec.js && npm run test:unit:base -- src/$SERIALIZER.spec.js'"
 	},
 	"dependencies": {
 		"@natlibfi/marc-record": "^4.0.1",
 		"ora": "^3.0.0",
 		"stream-json": "^1.1.3",
-		"text-encoding": "^0.7.0",
-		"xmldom": "^0.1.27",
+		"text-encoding": ">=0.7.0 <1.0.0",
+		"xmldom": ">=0.1.27 <1.0.0",
 		"yargs": "^12.0.5"
 	},
 	"devDependencies": {
 		"babel-cli": "^6.26.0",
-		"babel-eslint": "^8.2.6",
-		"babel-plugin-istanbul": "^4.1.5",
+		"babel-eslint": "^10.0.1",
+		"babel-plugin-istanbul": "^5.1.0",
 		"babel-preset-env": "^1.6.1",
 		"babel-register": "^6.26.0",
 		"chai": "^4.1.2",
@@ -66,7 +65,7 @@
 		"eslint-plugin-mocha": "^5.1.0",
 		"mocha": "^5.2.0",
 		"npm-check": "^5.7.1",
-		"nyc": "^12.0.2",
+		"nyc": "^13.1.0",
 		"rimraf": "^2.6.2"
 	},
 	"eslintConfig": {
