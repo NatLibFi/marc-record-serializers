@@ -46,7 +46,7 @@ export class Reader extends Readable {
 						this.count++;
 
 						try {
-							this.emit('data', from(record));
+							this.emit('data', from(record.join('\n')));
 						} catch (excp) {
 							this.emit('error', excp);
 							break;
@@ -64,7 +64,7 @@ export class Reader extends Readable {
 			if (this.linebuffer.length > 0) {
 				this.count++;
 				try {
-					this.emit('data', from(this.linebuffer));
+					this.emit('data', from(this.linebuffer.join('\n')));
 				} catch (excp) {
 					this.emit('error', excp);
 					return;
@@ -374,16 +374,17 @@ export function to(record) {
 
 export function from(data) {
 	let i = 0;
+	const lines = data.split('\n').filter(l => l.length > 0);
 
-	while (i < data.length) {
-		const nextLine = data[i + 1];
+	while (i < lines.length) {
+		const nextLine = lines[i + 1];
 		if (nextLine !== undefined && isContinueFieldLine(nextLine)) {
-			if (data[i].substr(-1) === '^') {
-				data[i] = data[i].substr(0, data[i].length - 1);
+			if (lines[i].substr(-1) === '^') {
+				lines[i] = lines[i].substr(0, lines[i].length - 1);
 			}
 
-			data[i] += parseContinueLineData(nextLine);
-			data.splice(i + 1, 1);
+			lines[i] += parseContinueLineData(nextLine);
+			lines.splice(i + 1, 1);
 			continue;
 		}
 
@@ -393,7 +394,7 @@ export function from(data) {
 	const record = new MarcRecord();
 	record.fields = [];
 
-	data.forEach(line => {
+	lines.forEach(line => {
 		const field = parseFieldFromLine(line);
 
 		// Drop Aleph specific FMT fields.
