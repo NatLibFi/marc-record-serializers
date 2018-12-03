@@ -46,7 +46,7 @@ export class Reader extends Readable {
 }
 
 export function to(record) {
-	return JSON.stringify(record, undefined, 2);
+	return JSON.stringify(record.toObject(), undefined, 2);
 }
 
 export function from(str) {
