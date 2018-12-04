@@ -95,7 +95,8 @@ export function to(record) {
 	const SPLIT_MAX_FIELD_LENGTH = 1000;
 
 	const f001 = record.get(/^001/);
-	const id = f001.length > 0 ? f001.shift().value : '000000000';
+	// Aleph doesn't accept new records if their id is all zeroes...
+	const id = f001.length > 0 ? f001.shift().value : '000000001';
 	const staticFields = [
 		{
 			tag: 'FMT',
