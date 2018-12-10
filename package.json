@@ -24,7 +24,7 @@
 	"main": "./dist/index.js",
 	"bin": "./dist/cli.js",
 	"engines": {
-		"node": ">=7"
+		"node": ">=8"
 	},
 	"scripts": {
 		"prepublishOnly": "npm run build:transpile",
@@ -92,7 +92,7 @@
 				"env",
 				{
 					"targets": {
-						"node": "7"
+						"node": "8"
 					}
 				}
 			]
