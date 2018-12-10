@@ -5,6 +5,7 @@ import {MarcRecord} from '@natlibfi/marc-record';
 import {XMLSerializer, DOMParser, DOMImplementation} from 'xmldom';
 
 const NODE_TYPE = {
+	ELEMENT_NODE: 1,
 	TEXT_NODE: 3
 };
 
@@ -115,7 +116,7 @@ export function from(xmlString) {
 	const recordNode = doc.getElementsByTagName('record')[0];
 	const childNodes = recordNode === undefined ? [] : Array.prototype.slice.call(recordNode.childNodes);
 
-	childNodes.filter(notTextNode).forEach(node => {
+	childNodes.filter(isValidNodeType).forEach(node => {
 		switch (node.tagName) {
 			case 'leader':
 				handleLeaderNode(node);
@@ -153,7 +154,7 @@ export function from(xmlString) {
 			const ind1 = node.getAttribute('ind1');
 			const ind2 = node.getAttribute('ind2');
 
-			const subfields = Array.prototype.slice.call(node.childNodes).filter(notTextNode).map(subfieldNode => {
+			const subfields = Array.prototype.slice.call(node.childNodes).filter(isValidNodeType).map(subfieldNode => {
 				const code = subfieldNode.getAttribute('code');
 				const text = getChildTextNodeContents(subfieldNode).join('');
 
@@ -184,7 +185,7 @@ export function from(xmlString) {
 
 	return record;
 
-	function notTextNode(node) {
-		return node.nodeType !== NODE_TYPE.TEXT_NODE;
+	function isValidNodeType(node) {
+		return node.nodeType === NODE_TYPE.ELEMENT_NODE;
 	}
 }
