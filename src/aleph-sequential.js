@@ -96,7 +96,7 @@ export function to(record) {
 
 	const f001 = record.get(/^001/);
 	// Aleph doesn't accept new records if their id is all zeroes...
-	const id = f001.length > 0 ? f001.shift().value : '000000001';
+	const id = f001.length > 0 ? formatRecordId(f001.shift().value) : formatRecordId('1');
 	const staticFields = [
 		{
 			tag: 'FMT',
@@ -117,6 +117,10 @@ export function to(record) {
 		}
 		return acc + formatDatafield(field);
 	}, '');
+
+	function formatRecordId(id) {
+		return id.padStart(9, '0');
+	}
 
 	function formatDatafield(field) {
 		let subfieldLines;
@@ -410,7 +414,8 @@ export function from(data) {
 		}
 	});
 
-	return record;
+	/* Validates the record */
+	return new MarcRecord(record);
 
 	function parseContinueLineData(lineStr) {
 		const field = parseFieldFromLine(lineStr);

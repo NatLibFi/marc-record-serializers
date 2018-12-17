@@ -176,7 +176,8 @@ export function from(xmlString) {
 		}
 	});
 
-	return record;
+	/* Validates the record */
+	return new MarcRecord(record);
 
 	function notTextNode(node) {
 		return node.nodeType !== NODE_TYPE.TEXT_NODE;

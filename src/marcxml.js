@@ -183,7 +183,8 @@ export function from(xmlString) {
 		}
 	});
 
-	return record;
+	/* Validates the record */
+	return new MarcRecord(record);
 
 	function isValidNodeType(node) {
 		return node.nodeType === NODE_TYPE.ELEMENT_NODE;
