@@ -111,11 +111,17 @@ export function to(record) {
 	return staticFields.concat(record.fields).reduce((acc, field) => {
 		// Controlfield
 		if (field.value) {
-			const formattedField = id + ' ' + field.tag + '   L ' + field.value;
+			const formattedField = id + ' ' + field.tag + '   L ' + formatControlfield(field.value);
 			return acc + formattedField + '\n';
-			// Datafield
 		}
+
+		// Datafield
 		return acc + formatDatafield(field);
+
+		// Aleph sequential needs whitespace in control fields to be formatted as carets
+		function formatControlfield(value) {
+			return value.replace(/\s/g, '^');
+		}
 	}, '');
 
 	function formatRecordId(id) {

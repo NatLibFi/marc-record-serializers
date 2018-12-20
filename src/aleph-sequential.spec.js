@@ -26,6 +26,8 @@ import {expect} from 'chai';
 import {MarcRecord} from '@natlibfi/marc-record';
 import * as Converter from './aleph-sequential';
 
+MarcRecord.setValidationOptions({subfieldValues: false});
+
 describe('aleph-sequential', () => {
 	const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'aleph-sequential');
 	const fixtureCount = fs.readdirSync(fixturesPath).filter(f => /^from/.test(f)).length;
@@ -109,6 +111,14 @@ describe('aleph-sequential', () => {
 
 				expect(Converter.to(record)).to.equal(expectedRecord);
 			});
+		});
+
+		it('Should convert whitespace in control field to carets', () => {
+			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'sequentialWhitespaceInControlfields'), 'utf8');
+			const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'whitespaceInControlfields'), 'utf8');
+			const record = MarcRecord.fromString(sourceRecord);
+
+			expect(Converter.to(record)).to.equal(expectedRecord);
 		});
 	});
 });
