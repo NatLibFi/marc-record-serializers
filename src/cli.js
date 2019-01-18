@@ -68,7 +68,14 @@ async function run() {
 		await new Promise((resolve, reject) => {
 			let count = 0;
 
-			reader.on('error', reject);
+			reader.on('error', err => {
+				if ('validationResults' in err) {
+					const message = `Record is invalid: ${JSON.stringify(err.validationResults.errors, undefined, 2)}`;
+					reject(new Error(message));
+				} else {
+					reject(err);
+				}
+			});
 
 			reader.on('end', () => {
 				spinner.succeed();
