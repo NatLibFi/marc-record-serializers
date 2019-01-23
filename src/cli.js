@@ -35,12 +35,12 @@ run();
 
 async function run() {
 	const FORMAT_USAGE = `Supported formats:
-  text
-  json
-  alephseq
-  marcxml
-  oai-marcxml
-  iso2709`;
+	text
+	json
+	alephseq
+	marcxml
+	oai-marcxml
+	iso2709`;
 
 	try {
 		const args = yargs
@@ -56,8 +56,8 @@ async function run() {
 			.option('d', {alias: 'outputDirectory', type: 'string', describe: 'Write records to individual files in DIRECTORY'})
 			.parse();
 
-		const serialize = getSerializer(args.outputFormat);
-		const Reader = getReader(args.inputFormat);
+		const {serialize, outputPrefix, outputSuffix, outputSeparator, fileSuffix, recordCallback} = getService(args.outputFormat);
+		const {Reader} = getService(args.inputFormat);
 		const reader = new Reader(fs.createReadStream(args.file));
 		const spinner = ora('Converting records').start();
 
@@ -67,6 +67,10 @@ async function run() {
 
 		await new Promise((resolve, reject) => {
 			let count = 0;
+
+			if (!args.outputDirectory && outputPrefix) {
+				process.stdout.write(outputPrefix);
+			}
 
 			reader.on('error', err => {
 				if ('validationResults' in err) {
@@ -82,6 +86,8 @@ async function run() {
 
 				if (args.outputDirectory) {
 					console.log(`Wrote ${count} records to ${args.outputDirectory}`);
+				} else if (outputSuffix) {
+					process.stdout.write(outputSuffix);
 				}
 
 				resolve();
@@ -89,7 +95,7 @@ async function run() {
 
 			reader.on('data', record => {
 				if (args.outputDirectory) {
-					const filename = `${String(++count).padStart(5, '0')}.${getFileSuffix(args.outputFormat)}`;
+					const filename = `${String(count).padStart(5, '0')}.${fileSuffix}`;
 
 					if (!fs.existsSync(args.outputDirectory)) {
 						fs.mkdirSync(args.outputDirectory);
@@ -98,12 +104,15 @@ async function run() {
 					fs.writeFileSync(path.join(args.outputDirectory, filename), serialize(record));
 				} else {
 					const str = serialize(record);
-					process.stdout.write(format(str));
+
+					if (outputSeparator && count > 0) {
+						process.stdout.write(outputSeparator);
+					}
+
+					process.stdout.write(recordCallback(str));
 				}
 
-				function format(str) {
-					return str.endsWith('\n') ? str : `${str}\n`;
-				}
+				count++;
 			});
 		});
 
@@ -118,55 +127,71 @@ async function run() {
 		process.exit(-1);
 	}
 
-	function getSerializer(type) {
-		const obj = getObject(type);
-
-		if (obj) {
-			return obj.to;
-		}
-
-		throw new Error(`No such serializer: ${type}`);
-	}
-
-	function getReader(type) {
-		const obj = getObject(type);
-
-		if (obj) {
-			return obj.Reader;
-		}
-
-		throw new Error(`No such parser: ${type}`);
-	}
-
-	function getObject(type) {
+	function getService(type) {
 		switch (type) {
 			case 'text':
-				return Text;
+				return {
+					Reader: Text.Reader,
+					serialize: Text.to,
+					fileSuffix: 'txt',
+					recordCallback: ensureLineBreak
+				};
 			case 'json':
-				return Json;
+				return {
+					Reader: Json.Reader,
+					serialize: Json.to,
+					outputPrefix: '[',
+					outputSuffix: ']',
+					outputSeparator: ',',
+					fileSuffix: 'json',
+					recordCallback: defaultRecordCallback
+				};
 			case 'alephseq':
-				return AlephSequential;
+				return {
+					Reader: AlephSequential,
+					serialize: AlephSequential.to,
+					fileSuffix: 'seq',
+					recordCallback: ensureLineBreak
+				};
 			case 'marcxml':
-				return MARCXML;
+				return {
+					Reader: MARCXML.Reader,
+					serialize: MARCXML.to,
+					outputPrefix: '<?xml version="1.0" encoding="UTF-8"?><records>',
+					outputSuffix: '</records>',
+					fileSuffix: 'xml',
+					recordCallback: removeXmlDeclaration
+				};
 			case 'oai-marcxml':
-				return OAI_MARCXML;
+				return {
+					Reader: OAI_MARCXML.Reader,
+					serialize: OAI_MARCXML.to,
+					outputPrefix: '<?xml version="1.0" encoding="UTF-8"?><records>',
+					outputSuffix: '</records>',
+					fileSuffix: 'xml',
+					recordCallback: removeXmlDeclaration
+				};
 			case 'iso2709':
-				return ISO2709;
+				return {
+					Reader: ISO2709.Reader,
+					serialize: ISO2709.to,
+					fileSuffix: 'marc',
+					recordCallback: defaultRecordCallback
+				};
 			default:
+				throw new Error(`Unsupported format ${type}`);
 		}
-	}
 
-	function getFileSuffix(type) {
-		switch (type) {
-			case 'text':
-				return 'txt';
-			case 'marcxml':
-			case 'oai-marcxml':
-				return 'xml';
-			case 'iso2709':
-				return 'marc';
-			default:
-				return type;
+		function defaultRecordCallback(s) {
+			return s;
+		}
+
+		function ensureLineBreak(s) {
+			return s.endsWith('\n') ? s : `${s}\n`;
+		}
+
+		function removeXmlDeclaration(s) {
+			return s.replace(/^<\?xml version="1\.0" encoding="UTF-8"\?>/, '');
 		}
 	}
 }
