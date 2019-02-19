@@ -22,6 +22,7 @@ export class Reader extends Readable {
 				if (pos === -1) {
 					break;
 				}
+
 				const raw = this.charbuffer.substr(0, pos);
 				this.charbuffer = this.charbuffer.substr(pos + 1);
 				this.linebuffer.push(raw);
@@ -55,6 +56,7 @@ export class Reader extends Readable {
 						this.currentId = lineId;
 						i = 0;
 					}
+
 					i++;
 				}
 			}
@@ -70,6 +72,7 @@ export class Reader extends Readable {
 					return;
 				}
 			}
+
 			this.emit('end');
 		});
 
@@ -160,6 +163,7 @@ export function to(record) {
 				return acc + header + line + '\n';
 			}, '');
 		}
+
 		return header + decode(formattedSubfields).join('') + '\n';
 
 		function decode(subfields) {
@@ -271,6 +275,7 @@ export function to(record) {
 							if (offset <= SPLIT_MAX_FIELD_LENGTH) {
 								return offset;
 							}
+
 							return findSeparatorOffset(arr.slice(0, offset - 3));
 						}
 
@@ -306,6 +311,7 @@ export function to(record) {
 							if (offset <= SPLIT_MAX_FIELD_LENGTH) {
 								return offset;
 							}
+
 							return findPeriodOffset(arr.slice(0, offset - 2));
 						}
 
@@ -359,6 +365,7 @@ export function to(record) {
 		if (l6 === 'm') {
 			return 'CF';
 		}
+
 		if (['a', 't'].includes(l6) && ['b', 'i', 's'].includes(l7)) {
 			return 'CR';
 		}
@@ -430,9 +437,11 @@ export function from(data) {
 		if (firstSubfield.value === '^') {
 			return lineStr.substr(22);
 		}
+
 		if (firstSubfield.value === '^^') {
 			return ' ' + lineStr.substr(26, lineStr.length - 1);
 		}
+
 		throw new Error('Could not parse Aleph Sequential subfield 9-continued line.');
 	}
 
@@ -473,6 +482,7 @@ export function from(data) {
 			const data = lineStr.substr(18);
 			return {tag: tag, value: data};
 		}
+
 		// Varfield
 		const ind1 = lineStr.substr(13, 1);
 		const ind2 = lineStr.substr(14, 1);

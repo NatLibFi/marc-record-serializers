@@ -28,7 +28,7 @@ import * as Converter from './oai-marcxml';
 
 describe('oai-marcxml', () => {
 	const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'oai-marcxml');
-	const fixtureCount = fs.readdirSync(fixturesPath).filter(f => /^from/.test(f)).length;
+	const fixtureCount = fs.readdirSync(fixturesPath).filter(f => /^from[0-9]+/.test(f)).length;
 
 	describe('#Reader', () => {
 		it('Should emit an error because the file does not exist', () => {
@@ -95,6 +95,14 @@ describe('oai-marcxml', () => {
 	});
 
 	describe('#from', () => {
+		it('Should serialize the record without XML declaration', () => {
+			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to-no-xml-decl'), 'utf8');
+			const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'from-no-xml-decl'), 'utf8');
+			const record = MarcRecord.fromString(sourceRecord);
+
+			expect(Converter.to(record, {omitDeclaration: true})).to.equal(expectedRecord);
+		});
+
 		Array.from(Array(fixtureCount)).forEach((e, i) => {
 			const index = i + 1;
 
