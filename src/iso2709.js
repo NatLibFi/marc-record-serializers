@@ -84,6 +84,7 @@ export function from(dataStr) {
 			if (ind1 === '\x1F') { // eslint-disable-line max-depth
 				ind1 = ' ';
 			}
+
 			let ind2 = dataElementStr.charAt(1);
 			if (ind2 === '\x1F') {
 				ind2 = ' ';
@@ -156,6 +157,7 @@ export function from(dataStr) {
 				throw new Error('Invalid record');
 			}
 		}
+
 		return directory;
 	}
 
@@ -170,6 +172,7 @@ export function from(dataStr) {
 			pos += 12;
 			count++;
 		}
+
 		return directoryEntries;
 	}
 
@@ -178,6 +181,7 @@ export function from(dataStr) {
 		while (input.length > 1 && input.charAt(0) === '0') {
 			input = input.substring(1);
 		}
+
 		return input;
 	}
 
@@ -286,6 +290,7 @@ export function to(record) {
 		while (numField.toString().length < length) {
 			numField = '0' + numField.toString();
 		}
+
 		return numField;
 	}
 
@@ -306,6 +311,7 @@ function utf8Substr(str, startInBytes, lengthInBytes) {
 		subStrBytes.push(strBytes[i]);
 		count++;
 	}
+
 	return byteArrayToString(subStrBytes);
 
 	// Converts the byte array to a UTF-8 string.
@@ -316,6 +322,7 @@ function utf8Substr(str, startInBytes, lengthInBytes) {
 			str += byteArray[i] <= 0x7F ? byteArray[i] === 0x25 ? '%25' : // %
 				String.fromCharCode(byteArray[i]) : '%' + byteArray[i].toString(16).toUpperCase();
 		}
+
 		return decodeURIComponent(str);
 	}
 }
@@ -334,5 +341,6 @@ function stringToByteArray(str) {
 			}
 		}
 	}
+
 	return byteArray;
 }

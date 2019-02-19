@@ -51,7 +51,7 @@ export class Reader extends Readable {
 	}
 }
 
-export function to(record) {
+export function to(record, {omitDeclaration = false} = {}) {
 	const serializer = new XMLSerializer();
 	const doc = new DOMImplementation().createDocument();
 	const xmlRecord = mkElement('record');
@@ -93,6 +93,7 @@ export function to(record) {
 		el.appendChild(t);
 		return el;
 	}
+
 	function mkElement(name) {
 		return doc.createElement(name);
 	}
@@ -103,6 +104,10 @@ export function to(record) {
 		const t = doc.createTextNode(value);
 		cf.appendChild(t);
 		return cf;
+	}
+
+	if (omitDeclaration) {
+		return serializer.serializeToString(xmlRecord);
 	}
 
 	return `<?xml version="1.0" encoding="UTF-8"?>\n${serializer.serializeToString(xmlRecord)}`;
