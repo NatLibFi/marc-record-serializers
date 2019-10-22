@@ -20,7 +20,7 @@
 		"url": "git@github.com:natlibfi/marc-record-serializers.git"
 	},
 	"license": "MIT",
-	"version": "4.1.1",
+	"version": "5.0.0",
 	"main": "./dist/index.js",
 	"bin": "./dist/cli.js",
 	"engines": {
@@ -31,7 +31,7 @@
 		"check-deps": "npm-check;exit 0",
 		"lint:base": "eslint --fix",
 		"lint": "npm run lint:base -- src",
-		"test:unit:base": "cross-env NODE_ENV=test nyc -x src/**/*.spec.js mocha --require babel-core/register",
+		"test:unit:base": "cross-env NODE_ENV=test nyc -x src/**/*.spec.js mocha --require @babel/register",
 		"test:unit": "npm run test:unit:base -- src/**/*.spec.js",
 		"test": "npm run lint && npm run test:unit && npm run coverage",
 		"clean": "rimraf build dist",
@@ -42,30 +42,30 @@
 		"watch:serializer": "cross-env DEBUG=1 NODE_ENV=test chokidar src/$SERIALIZER.js src/$SERIALIZER.spec.js -c 'npm run lint:base -- src/$SERIALIZER.js src/$SERIALIZER.spec.js && npm run test:unit:base -- src/$SERIALIZER.spec.js'"
 	},
 	"dependencies": {
+		"@babel/register": "^7.6.2",
 		"@natlibfi/marc-record": "^4.0.4",
-		"ora": "^3.1.0",
+		"ora": "^4.0.2",
 		"stream-json": "^1.1.4",
 		"text-encoding": ">=0.7.0 <1.0.0",
 		"xmldom": ">=0.1.27 <1.0.0",
-		"yargs": "^13.2.1"
+		"yargs": "^14.2.0"
 	},
 	"devDependencies": {
-		"babel-cli": "^6.26.0",
+		"@babel/cli": "^7.6.4",
+		"@babel/preset-env": "^7.6.3",
 		"babel-eslint": "^10.0.1",
 		"babel-plugin-istanbul": "^5.1.1",
-		"babel-preset-env": "^1.6.1",
-		"babel-register": "^6.26.0",
 		"chai": "^4.1.2",
-		"chokidar-cli": "^1.2.2",
-		"cross-env": "^5.2.0",
-		"eslint": "^5.14.1",
+		"chokidar-cli": "^2.0.0",
+		"cross-env": "^6.0.3",
+		"eslint": "^6.5.1",
 		"eslint-config-xo": ">=0.26.0 <1.0.0",
 		"eslint-plugin-import": "^2.16.0",
-		"eslint-plugin-mocha": "^5.3.0",
+		"eslint-plugin-mocha": "^6.2.0",
 		"mocha": "^6.0.0",
 		"npm-check": "^5.7.1",
-		"nyc": "^13.3.0",
-		"rimraf": "^2.6.3"
+		"nyc": "^14.1.1",
+		"rimraf": "^3.0.0"
 	},
 	"eslintConfig": {
 		"parser": "babel-eslint",
@@ -88,7 +88,7 @@
 	"babel": {
 		"presets": [
 			[
-				"env",
+				"@babel/preset-env",
 				{
 					"targets": {
 						"node": "10"
@@ -110,7 +110,7 @@
 			"html"
 		],
 		"require": [
-			"babel-register"
+			"@babel/register"
 		],
 		"sourceMap": false,
 		"instrument": false,
