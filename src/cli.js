@@ -148,7 +148,7 @@ async function run() {
 				};
 			case 'alephseq':
 				return {
-					Reader: AlephSequential,
+					Reader: AlephSequential.Reader,
 					serialize: AlephSequential.to,
 					fileSuffix: 'seq',
 					recordCallback: ensureLineBreak
