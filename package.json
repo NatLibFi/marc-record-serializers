@@ -42,6 +42,7 @@
 		"watch:serializer": "cross-env DEBUG=1 NODE_ENV=test chokidar src/$SERIALIZER.js src/$SERIALIZER.spec.js -c 'npm run lint:base -- src/$SERIALIZER.js src/$SERIALIZER.spec.js && npm run test:unit:base -- src/$SERIALIZER.spec.js'"
 	},
 	"dependencies": {
+		"@babel/core": "^7.6.4",
 		"@babel/register": "^7.6.2",
 		"@natlibfi/marc-record": "^4.0.4",
 		"ora": "^4.0.2",
