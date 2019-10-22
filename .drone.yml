@@ -12,3 +12,5 @@ pipeline:
     secrets: [npm_token]
     when:
       event: tag
+trigger:
+  event: [push, tag]    
