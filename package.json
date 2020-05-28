@@ -24,49 +24,49 @@
 	"main": "./dist/index.js",
 	"bin": "./dist/cli.js",
 	"engines": {
-		"node": ">=10"
+		"node": ">=12"
 	},
 	"scripts": {
-		"prepublishOnly": "npm run build:transpile",
-		"check-deps": "npm-check;exit 0",
-		"lint:base": "eslint --fix",
+		"prepare": "npm run build:transpile",				
+		"lint:base:dev": "eslint --fix",
+		"lint:base": "eslint",
 		"lint": "npm run lint:base -- src",
+		"lint:dev": "npm run lint:base:dev -- src",
 		"test:unit:base": "cross-env NODE_ENV=test nyc -x src/**/*.spec.js mocha --require @babel/register",
 		"test:unit": "npm run test:unit:base -- src/**/*.spec.js",
 		"test": "npm run lint && npm run test:unit && npm run coverage",
-		"clean": "rimraf build dist",
-		"coverage": "nyc check-coverage --per-file",
-		"build:transpile": "babel src --source-maps --out-dir=dist",
-		"build": "npm run clean && npm run build:transpile && npm run check-deps",
-		"watch": "cross-env DEBUG=1 NODE_ENV=test chokidar src -c 'npm test && npm run coverage'",
-		"watch:serializer": "cross-env DEBUG=1 NODE_ENV=test chokidar src/$SERIALIZER.js src/$SERIALIZER.spec.js -c 'npm run lint:base -- src/$SERIALIZER.js src/$SERIALIZER.spec.js && npm run test:unit:base -- src/$SERIALIZER.spec.js'"
+		"test:dev": "npm run lint:dev && npm run test:unit && npm run coverage",		
+		"coverage": "nyc check-coverage --per-file",		
+		"build": "npm run clean && babel src --delete-dir-on-start --source-maps --out-dir=dist",
+		"watch": "cross-env DEBUG=1 NODE_ENV=test chokidar src -c 'npm test:dev && npm run coverage'",
+		"watch:serializer": "cross-env DEBUG=1 NODE_ENV=test chokidar src/$SERIALIZER.js src/$SERIALIZER.spec.js -c 'npm run lint:base:dev -- src/$SERIALIZER.js src/$SERIALIZER.spec.js && npm run test:unit:base -- src/$SERIALIZER.spec.js'"
 	},
 	"dependencies": {
 		"@natlibfi/marc-record": "^4.0.4",
-		"ora": "^4.0.2",
-		"stream-json": "^1.1.4",
+		"ora": "^4.0.4",
+		"stream-json": "^1.5.0",
 		"text-encoding": ">=0.7.0 <1.0.0",
-		"xmldom": ">=0.1.27 <1.0.0",
-		"yargs": "^14.2.0"
+		"xmldom": "^0.3.0",
+		"yargs": "^15.3.1"
 	},
 	"devDependencies": {
-		"@babel/cli": "^7.6.4",
-		"@babel/core": "^7.6.4",
-		"@babel/register": "^7.6.2",
-		"@babel/preset-env": "^7.6.3",
-		"babel-eslint": "^10.0.1",
-		"babel-plugin-istanbul": "^5.1.1",
+		"@babel/cli": "^7.10.1",
+		"@babel/core": "^7.10.1",
+		"@babel/preset-env": "^7.10.1",
+		"@babel/register": "^7.10.1",
+		"babel-eslint": "^10.1.0",
+		"babel-plugin-istanbul": "^6.0.0",
 		"chai": "^4.1.2",
 		"chokidar-cli": "^2.0.0",
-		"cross-env": "^6.0.3",
-		"eslint": "^6.5.1",
-		"eslint-config-xo": ">=0.26.0 <1.0.0",
-		"eslint-plugin-import": "^2.16.0",
-		"eslint-plugin-mocha": "^6.2.0",
-		"mocha": "^6.0.0",
-		"npm-check": "^5.7.1",
-		"nyc": "^14.1.1",
-		"rimraf": "^3.0.0"
+		"cross-env": "^7.0.2",
+		"eslint": "^7.1.0",
+		"eslint-config-xo": "^0.29.1",
+		"eslint-plugin-import": "^2.20.2",
+		"eslint-plugin-mocha": "^7.0.0",
+		"mocha": "^7.2.0",
+		"npm-check": "^5.9.2",
+		"nyc": "^15.0.1",
+		"rimraf": "^3.0.2"
 	},
 	"eslintConfig": {
 		"parser": "babel-eslint",
@@ -92,7 +92,7 @@
 				"@babel/preset-env",
 				{
 					"targets": {
-						"node": "10"
+						"node": "12"
 					}
 				}
 			]
