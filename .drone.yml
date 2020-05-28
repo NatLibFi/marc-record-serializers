@@ -16,9 +16,13 @@ steps:
   image: node:12
   commands: ['npm test']
 
+- name: build
+  image: node:12
+  commands: ['npm run build']
+
 - name: static-security-scan
   image: quay.io/natlibfi/nodejsscan
-  commands: ['python /usr/src/app/cli.py -d src']
+  commands: ['python /usr/src/app/cli.py -d dist']
 
 - name: npm-publish
   image: plugins/npm
