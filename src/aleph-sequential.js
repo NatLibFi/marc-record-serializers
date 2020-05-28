@@ -129,7 +129,7 @@ export function to(record) {
 
 	return staticFields.concat(record.fields).reduce((acc, field) => {
 		// Controlfield
-		if (field.value) {
+		if ('value' in field) {
 			const formattedField = id + ' ' + field.tag + '   L ' + formatControlfield(field.value);
 			return acc + formattedField + '\n';
 		}

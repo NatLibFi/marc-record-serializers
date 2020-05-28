@@ -27,7 +27,7 @@
 		"node": ">=12"
 	},
 	"scripts": {
-		"prepare": "npm run build:transpile",				
+		"prepare": "npm run build",				
 		"lint:base:dev": "eslint --fix",
 		"lint:base": "eslint",
 		"lint": "npm run lint:base -- src",
@@ -37,7 +37,7 @@
 		"test": "npm run lint && npm run test:unit && npm run coverage",
 		"test:dev": "npm run lint:dev && npm run test:unit && npm run coverage",		
 		"coverage": "nyc check-coverage --per-file",		
-		"build": "npm run clean && babel src --delete-dir-on-start --source-maps --out-dir=dist",
+		"build": "babel src --delete-dir-on-start --source-maps --out-dir=dist",
 		"watch": "cross-env DEBUG=1 NODE_ENV=test chokidar src -c 'npm test:dev && npm run coverage'",
 		"watch:serializer": "cross-env DEBUG=1 NODE_ENV=test chokidar src/$SERIALIZER.js src/$SERIALIZER.spec.js -c 'npm run lint:base:dev -- src/$SERIALIZER.js src/$SERIALIZER.spec.js && npm run test:unit:base -- src/$SERIALIZER.spec.js'"
 	},

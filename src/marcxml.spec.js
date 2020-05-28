@@ -67,28 +67,6 @@ describe('marcxml', () => {
 				});
 			});
 		});
-
-		it('Should emit and error because or a invalid leader', () => {
-			return new Promise((resolve, reject) => {
-				const filePath = path.resolve(fixturesPath, 'erroneous-leader');
-				const reader = new Converter.Reader(fs.createReadStream(filePath));
-
-				reader.on('end', () => {
-					reject(new Error('Emitted an end-event'));
-				});
-				reader.on('data', () => {
-					reject(new Error('Emitted a data-event'));
-				});
-				reader.on('error', err => {
-					try {
-						expect(err.message).to.match(/^Record has invalid leader/);
-						resolve();
-					} catch (exp) {
-						reject(exp);
-					}
-				});
-			});
-		});
 	});
 
 	describe('#from', () => {
