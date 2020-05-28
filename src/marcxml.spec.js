@@ -3,7 +3,7 @@
 * @licstart  The following is the entire license notice for the JavaScript code in this file.
 *
 * Copyright 2014-2017 Pasi Tuominen
-* Copyright 2018-2019 University Of Helsinki (The National Library Of Finland)
+* Copyright 2018-2020 University Of Helsinki (The National Library Of Finland)
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 *
@@ -15,8 +15,6 @@
 * for the JavaScript code in this file.
 *
 */
-
-/* eslint-disable no-undef, max-nested-callbacks, no-unused-expressions */
 
 'use strict';
 
@@ -62,28 +60,6 @@ describe('marcxml', () => {
 				reader.on('error', err => {
 					try {
 						expect(err.message).to.match(/^Unable to parse node:/);
-						resolve();
-					} catch (exp) {
-						reject(exp);
-					}
-				});
-			});
-		});
-
-		it('Should emit and error because or a invalid leader', () => {
-			return new Promise((resolve, reject) => {
-				const filePath = path.resolve(fixturesPath, 'erroneous-leader');
-				const reader = new Converter.Reader(fs.createReadStream(filePath));
-
-				reader.on('end', () => {
-					reject(new Error('Emitted an end-event'));
-				});
-				reader.on('data', () => {
-					reject(new Error('Emitted a data-event'));
-				});
-				reader.on('error', err => {
-					try {
-						expect(err.message).to.match(/^Record has invalid leader/);
 						resolve();
 					} catch (exp) {
 						reject(exp);

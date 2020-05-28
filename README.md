@@ -22,6 +22,6 @@ npx @natlibfi/marc-record-serializers
 
 Copyright (c) 2014-2017 **Pasi Tuominen <pasi.tuominen@gmail.com>**
 
-Copyright (c) 2018-2019 **University Of Helsinki (The National Library Of Finland)**
+Copyright (c) 2018-2020 **University Of Helsinki (The National Library Of Finland)**
 
 This project's source code is licensed under the terms of **MIT License** or any later version.

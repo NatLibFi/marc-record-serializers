@@ -1,16 +1,39 @@
-pipeline:
-  build:
-    image: node:10
-    commands:
-    - npm install
-    - npm test
-    - npm run build
-  npm:
-    image: plugins/npm
-    settings:
-      token: $NPM_TOKEN
-    secrets: [npm_token]
-    when:
-      event: tag
-trigger:
-  event: [push, tag]    
+---
+kind: pipeline
+name: default
+
+steps:
+
+- name: audit
+  image: node:12
+  commands: ['npm audit --package-json-only --audit-level=moderate']
+            
+- name: install
+  image: node:12
+  commands: ['npm ci --ignore-scripts']
+
+- name: test
+  image: node:12
+  commands: ['npm test']
+
+- name: static-security-scan
+  image: quay.io/natlibfi/nodejsscan
+  commands: ['python /usr/src/app/cli.py -d src']
+
+- name: npm-publish
+  image: plugins/npm
+  settings:
+    registry: 'https://registry.npmjs.org/'
+    token:
+      from_secret: npm_token
+  when:
+    event: tag   
+---
+kind: secret
+name: npm_token
+data: 57r1iBfIVFGrmpGB+wayB9QvaSRFFNtnohL1IKLT5isAsCIlSzOcYv4NWdPijJTnL7vzoFpD/h75U9N5pKM9cA==
+---
+kind: signature
+hmac: a4fc38086272230862589908e01b6f706c6291571e1ff4d175f757c81c7b0a5a
+
+...
