@@ -26,6 +26,9 @@
 	"engines": {
 		"node": ">=12"
 	},
+	"publishConfig": {
+		"access": "public"
+	},
 	"scripts": {
 		"prepare": "npm run build",				
 		"lint:base:dev": "eslint --fix",
