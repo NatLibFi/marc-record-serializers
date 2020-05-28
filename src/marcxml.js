@@ -137,6 +137,7 @@ export function from(xmlString) {
 		}
 
 		function handleLeaderNode(node) {
+			console.log(node.childNodes);
 			if (node.childNodes[0] !== undefined && node.childNodes[0].nodeType === NODE_TYPE.TEXT_NODE) {
 				record.leader = node.childNodes[0].data;
 			} else {
