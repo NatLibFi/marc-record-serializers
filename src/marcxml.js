@@ -37,7 +37,7 @@ export class Reader extends Readable {
 			this.emit('error', error);
 		});
 
-		stream.on('data', data => {
+		stream.on('data', async data => {
 			this.charbuffer += data.toString();
 
 			while (1) { // eslint-disable-line no-constant-condition
@@ -57,7 +57,7 @@ export class Reader extends Readable {
 				this.charbuffer = this.charbuffer.substr(pos + 10);
 
 				try {
-					this.emit('data', from(raw));
+					this.emit('data', await from(raw)); // eslint-disable-line no-await-in-loop
 				} catch (e) {
 					this.emit('error', e);
 				}
@@ -128,11 +128,9 @@ export function to(record, {omitDeclaration = false} = {}) {
 	return `<?xml version="1.0" encoding="UTF-8"?>\n${serializer.serializeToString(xmlRecord)}`;
 }
 
-export function from(xmlString) {
-	const parser = new DOMParser();
+export async function from(xmlString) {
+	const doc = await parse();
 	const record = new MarcRecord();
-
-	const doc = parser.parseFromString(xmlString);
 	const recordNode = doc.getElementsByTagName('record')[0];
 	const childNodes = recordNode === undefined ? [] : Array.prototype.slice.call(recordNode.childNodes);
 
@@ -209,5 +207,19 @@ export function from(xmlString) {
 
 	function isValidNodeType(node) {
 		return node.nodeType === NODE_TYPE.ELEMENT_NODE;
+	}
+
+	async function parse() {
+		return new Promise((resolve, reject) => {
+			const parser = new DOMParser({
+				errorHandler: {
+					error: e => reject(new Error(e)),
+					fatalError: e => reject(new Error(e))
+				}
+			});
+
+			const doc = parser.parseFromString(xmlString);
+			resolve(doc);
+		});
 	}
 }

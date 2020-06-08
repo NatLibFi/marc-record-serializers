@@ -20,7 +20,7 @@
 		"url": "git@github.com:natlibfi/marc-record-serializers.git"
 	},
 	"license": "MIT",
-	"version": "5.0.3",
+	"version": "6.0.0",
 	"main": "./dist/index.js",
 	"bin": "./dist/cli.js",
 	"engines": {
@@ -30,7 +30,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"prepare": "npm run build",				
+		"prepare": "npm run build",
 		"lint:base:dev": "eslint --fix",
 		"lint:base": "eslint",
 		"lint": "npm run lint:base -- src",
@@ -38,8 +38,8 @@
 		"test:unit:base": "cross-env NODE_ENV=test nyc -x src/**/*.spec.js mocha --require @babel/register",
 		"test:unit": "npm run test:unit:base -- src/**/*.spec.js",
 		"test": "npm run lint && npm run test:unit && npm run coverage",
-		"test:dev": "npm run lint:dev && npm run test:unit && npm run coverage",		
-		"coverage": "nyc check-coverage --per-file",		
+		"test:dev": "npm run lint:dev && npm run test:unit && npm run coverage",
+		"coverage": "nyc check-coverage --per-file",
 		"build": "babel src --delete-dir-on-start --source-maps --out-dir=dist",
 		"watch": "cross-env DEBUG=1 NODE_ENV=test chokidar src -c 'npm test:dev && npm run coverage'",
 		"watch:serializer": "cross-env DEBUG=1 NODE_ENV=test chokidar src/$SERIALIZER.js src/$SERIALIZER.spec.js -c 'npm run lint:base:dev -- src/$SERIALIZER.js src/$SERIALIZER.spec.js && npm run test:unit:base -- src/$SERIALIZER.spec.js'"
@@ -54,21 +54,21 @@
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.10.1",
-		"@babel/core": "^7.10.1",
-		"@babel/preset-env": "^7.10.1",
+		"@babel/core": "^7.10.2",
+		"@babel/preset-env": "^7.10.2",
 		"@babel/register": "^7.10.1",
 		"babel-eslint": "^10.1.0",
 		"babel-plugin-istanbul": "^6.0.0",
 		"chai": "^4.1.2",
 		"chokidar-cli": "^2.0.0",
 		"cross-env": "^7.0.2",
-		"eslint": "^7.1.0",
-		"eslint-config-xo": "^0.29.1",
-		"eslint-plugin-import": "^2.20.2",
-		"eslint-plugin-mocha": "^7.0.0",
+		"eslint": "^7.2.0",
+		"eslint-config-xo": "^0.30.0",
+		"eslint-plugin-import": "^2.21.1",
+		"eslint-plugin-mocha": "^7.0.1",
 		"mocha": "^7.2.0",
 		"npm-check": "^5.9.2",
-		"nyc": "^15.0.1",
+		"nyc": "^15.1.0",
 		"rimraf": "^3.0.2"
 	},
 	"eslintConfig": {
