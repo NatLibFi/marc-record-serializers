@@ -212,8 +212,10 @@ export async function from(xmlString) {
 	async function parse() {
 		return new Promise((resolve, reject) => {
 			const parser = new DOMParser({
-				error: e => reject(new Error(e)),
-				fatalError: e => reject(new Error(e))
+				errorHandler: {
+					error: e => reject(new Error(e)),
+					fatalError: e => reject(new Error(e))
+				}
 			});
 
 			const doc = parser.parseFromString(xmlString);
