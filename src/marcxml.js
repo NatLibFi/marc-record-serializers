@@ -69,7 +69,7 @@ export class Reader extends Readable {
 export function to(record, {omitDeclaration = false} = {}) {
 	const serializer = new XMLSerializer();
 	const doc = new DOMImplementation().createDocument();
-	const xmlRecord = mkElement('record');
+	const xmlRecord = doc.createElementNS('http://www.loc.gov/MARC21/slim', 'record');
 	const leader = mkElementValue('leader', record.leader);
 
 	xmlRecord.appendChild(leader);
@@ -81,6 +81,12 @@ export function to(record, {omitDeclaration = false} = {}) {
 	record.getDatafields().forEach(field => {
 		xmlRecord.appendChild(mkDatafield(field));
 	});
+
+	if (omitDeclaration) {
+		return serializer.serializeToString(xmlRecord);
+	}
+
+	return `<?xml version="1.0" encoding="UTF-8"?>\n${serializer.serializeToString(xmlRecord)}`;
 
 	function mkDatafield(field) {
 		const datafield = mkElement('datafield');
@@ -120,12 +126,6 @@ export function to(record, {omitDeclaration = false} = {}) {
 		cf.appendChild(t);
 		return cf;
 	}
-
-	if (omitDeclaration) {
-		return serializer.serializeToString(xmlRecord);
-	}
-
-	return `<?xml version="1.0" encoding="UTF-8"?>\n${serializer.serializeToString(xmlRecord)}`;
 }
 
 export async function from(xmlString) {
