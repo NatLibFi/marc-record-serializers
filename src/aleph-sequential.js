@@ -406,7 +406,9 @@ export function to(record) {
 	}
 }
 
-export function from(data) {
+export function from(data, validationOptions = {}) {
+	MarcRecord.setValidationOptions(validationOptions);
+
 	let i = 0;
 	const lines = data.split('\n').filter(l => l.length > 0);
 

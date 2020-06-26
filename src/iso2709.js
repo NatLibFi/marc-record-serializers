@@ -55,7 +55,9 @@ export class Reader extends Readable {
 	}
 }
 
-export function from(dataStr) {
+export function from(dataStr, validationOptions = {}) {
+	MarcRecord.setValidationOptions(validationOptions);
+
 	const leader = dataStr.substring(0, 24);
 	const record = {
 		leader: leader,

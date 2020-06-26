@@ -127,7 +127,9 @@ export function to(record, {omitDeclaration = false} = {}) {
 	return `<?xml version="1.0" encoding="UTF-8"?>\n${serializer.serializeToString(xmlRecord)}`;
 }
 
-export function from(xmlString) {
+export function from(xmlString, validationOptions = {}) {
+	MarcRecord.setValidationOptions(validationOptions);
+
 	const parser = new DOMParser();
 	const record = new MarcRecord();
 
