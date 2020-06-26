@@ -63,6 +63,7 @@ export function to(record) {
 	return record.toString();
 }
 
-export function from(str) {
+export function from(str, validationOptions = {}) {
+	MarcRecord.setValidationOptions(validationOptions);
 	return MarcRecord.fromString(str);
 }

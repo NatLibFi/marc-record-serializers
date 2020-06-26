@@ -110,13 +110,5 @@ describe('aleph-sequential', () => {
 				expect(Converter.to(record)).to.equal(expectedRecord);
 			});
 		});
-
-		it('Should convert whitespace in control field to carets', () => {
-			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'sequentialWhitespaceInControlfields'), 'utf8');
-			const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'whitespaceInControlfields'), 'utf8');
-			const record = MarcRecord.fromString(sourceRecord);
-
-			expect(Converter.to(record)).to.equal(expectedRecord);
-		});
 	});
 });

@@ -128,7 +128,9 @@ export function to(record, {omitDeclaration = false} = {}) {
 	}
 }
 
-export async function from(xmlString) {
+export async function from(xmlString, validationOptions = {}) {
+	MarcRecord.setValidationOptions(validationOptions);
+
 	const doc = await parse();
 	const record = new MarcRecord();
 	const recordNode = doc.getElementsByTagName('record')[0];
