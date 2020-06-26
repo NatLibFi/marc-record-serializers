@@ -495,7 +495,7 @@ export function from(data) {
 		}
 
 		if (isFixFieldTag(tag) || tag === 'LDR') {
-			const data = lineStr.substr(18);
+			const data = formatControlField(lineStr.substr(18));
 			return {tag: tag, value: data};
 		}
 
@@ -521,5 +521,10 @@ export function from(data) {
 			ind2: ind2,
 			subfields: subfields
 		};
+
+		// Aleph sequential uses whitespace in control fields formatted as carets
+		function formatControlField(data) {
+			return data.replace(/\^/g, ' ');
+		}
 	}
 }
