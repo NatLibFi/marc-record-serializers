@@ -17,12 +17,7 @@
 */
 import {Readable} from 'stream';
 import {MarcRecord} from '@natlibfi/marc-record';
-import {XMLSerializer, DOMParser, DOMImplementation} from 'xmldom';
-
-const NODE_TYPE = {
-	ELEMENT_NODE: 1,
-	TEXT_NODE: 3
-};
+import {Parser, Builder} from 'xml2js';
 
 export class Reader extends Readable {
 	constructor(stream) {
@@ -66,162 +61,133 @@ export class Reader extends Readable {
 	}
 }
 
-export function to(record, {omitDeclaration = false} = {}) {
-	const serializer = new XMLSerializer();
-	const doc = new DOMImplementation().createDocument();
-	const xmlRecord = doc.createElementNS('http://www.loc.gov/MARC21/slim', 'record');
-	const leader = mkElementValue('leader', record.leader);
-
-	xmlRecord.appendChild(leader);
-
-	record.getControlfields().forEach(field => {
-		xmlRecord.appendChild(mkControlfield(field.tag, field.value));
-	});
-
-	record.getDatafields().forEach(field => {
-		xmlRecord.appendChild(mkDatafield(field));
-	});
-
-	if (omitDeclaration) {
-		return serializer.serializeToString(xmlRecord);
-	}
-
-	return `<?xml version="1.0" encoding="UTF-8"?>\n${serializer.serializeToString(xmlRecord)}`;
-
-	function mkDatafield(field) {
-		const datafield = mkElement('datafield');
-		datafield.setAttribute('tag', field.tag);
-		datafield.setAttribute('ind1', formatIndicator(field.ind1));
-		datafield.setAttribute('ind2', formatIndicator(field.ind2));
-
-		field.subfields.forEach(subfield => {
-			const sub = mkElementValue('subfield', subfield.value);
-			sub.setAttribute('code', subfield.code);
-
-			datafield.appendChild(sub);
-		});
-
-		return datafield;
-	}
-
-	function formatIndicator(ind) {
-		return ind === '_' ? ' ' : ind;
-	}
-
-	function mkElementValue(name, value) {
-		const el = mkElement(name);
-		const t = doc.createTextNode(value);
-		el.appendChild(t);
-		return el;
-	}
-
-	function mkElement(name) {
-		return doc.createElement(name);
-	}
-
-	function mkControlfield(tag, value) {
-		const cf = mkElement('controlfield');
-		cf.setAttribute('tag', tag);
-		const t = doc.createTextNode(value);
-		cf.appendChild(t);
-		return cf;
-	}
-}
-
-export async function from(xmlString, validationOptions = {}) {
-	MarcRecord.setValidationOptions(validationOptions);
-
-	const doc = await parse();
-	const record = new MarcRecord();
-	const recordNode = doc.getElementsByTagName('record')[0];
-	const childNodes = recordNode === undefined ? [] : Array.prototype.slice.call(recordNode.childNodes);
-
-	childNodes.filter(isValidNodeType).forEach(node => {
-		switch (node.tagName) {
-			case 'leader':
-				handleLeaderNode(node);
-				break;
-			case 'controlfield':
-				handleControlfieldNode(node);
-				break;
-			case 'datafield':
-				handleDatafieldNode(node);
-				break;
-			default:
-				throw new Error('Unable to parse node: ' + node.tagName);
-		}
-
-		function handleLeaderNode(node) {
-			if (node.childNodes[0] !== undefined && node.childNodes[0].nodeType === NODE_TYPE.TEXT_NODE) {
-				record.leader = node.childNodes[0].data;
-				return;
-			}
-
-			record.leader = '';
-		}
-
-		function handleControlfieldNode(node) {
-			const tag = node.getAttribute('tag');
-			if (node.childNodes[0] !== undefined && node.childNodes[0].nodeType === NODE_TYPE.TEXT_NODE) {
-				const value = node.childNodes[0].data;
-				record.appendField({tag, value});
-			} else {
-				throw new Error('Unable to parse controlfield: ' + tag);
+export function to(record, {omitDeclaration = false, indent = false} = {}) {
+	const obj = {
+		record: {
+			...generateFields(),
+			$: {
+				xmlns: 'http://www.loc.gov/MARC21/slim'
 			}
 		}
+	};
 
-		function handleDatafieldNode(node) {
-			const tag = node.getAttribute('tag');
-			const ind1 = node.getAttribute('ind1');
-			const ind2 = node.getAttribute('ind2');
+	return toXML(obj);
 
-			const subfields = Array.prototype.slice.call(node.childNodes).filter(isValidNodeType).map(subfieldNode => {
-				const code = subfieldNode.getAttribute('code');
-				const text = getChildTextNodeContents(subfieldNode).join('');
-
-				return {
-					code: code,
-					value: text
-				};
-			});
-
-			record.appendField({
-				tag: tag,
-				ind1: ind1,
-				ind2: ind2,
-				subfields: subfields
-			});
-		}
-
-		function getChildTextNodeContents(node) {
-			const childNodes = Array.prototype.slice.call(node.childNodes);
-			const textNodes = childNodes.filter(node => {
-				return node.nodeType === NODE_TYPE.TEXT_NODE;
-			});
-			return textNodes.map(node => {
-				return node.data;
-			});
-		}
-	});
-
-	/* Validates the record */
-	return new MarcRecord(record);
-
-	function isValidNodeType(node) {
-		return node.nodeType === NODE_TYPE.ELEMENT_NODE;
-	}
-
-	async function parse() {
-		return new Promise((resolve, reject) => {
-			const parser = new DOMParser({
-				errorHandler: {
-					error: e => reject(new Error(e)),
-					fatalError: e => reject(new Error(e))
+	function generateFields() {
+		return {
+			leader: [record.leader],
+			controlfield: record.getControlfields().map(({value: _, tag}) => ({
+				_,
+				$: {
+					tag: [tag]
 				}
-			});
+			})),
+			datafield: record.getDatafields().map(transformDataField)
+		};
 
-			const doc = parser.parseFromString(xmlString);
-			resolve(doc);
+		function transformDataField({tag, ind1, ind2, subfields}) {
+			return {
+				$: {
+					tag: [tag],
+					ind1: [ind1],
+					ind2: [ind2]
+				},
+				subfield: transformSubfields()
+			};
+
+			function transformSubfields() {
+				return subfields.map(({code, value: _}) => ({
+					_,
+					$: {
+						code: [code]
+					}
+				}));
+			}
+		}
+	}
+
+	function toXML() {
+		try {
+			return new Builder(generateOptions()).buildObject(obj);
+		} catch (err) {
+			/* istanbul ignore next: Too generic to test */
+			throw new Error(`XML conversion failed ${err.message} for object: ${JSON.stringify(obj)}`);
+		}
+
+		function generateOptions() {
+			return {...generateDeclr(), ...generateRender()};
+
+			function generateDeclr() {
+				return omitDeclaration ? {headless: true} : {
+					xmldec: {
+						version: '1.0',
+						encoding: 'UTF-8'
+					}
+				};
+			}
+
+			function generateRender() {
+				return indent ? {
+					renderOpts: {
+						pretty: true,
+						indent: '\t'
+					}
+				} : {
+					renderOpts: {
+						pretty: false
+					}
+				};
+			}
+		}
+	}
+}
+
+export async function from(str, validationOptions = {}) {
+	const record = new MarcRecord(undefined, validationOptions);
+	const obj = await toObject();
+
+	record.leader = obj.record.leader?.[0] || '';
+
+	addControlFields();
+	addDataFields();
+
+	return record;
+
+	function addControlFields() {
+		const fields = obj.record.controlfield || [];
+
+		fields.forEach(({_: value, $: {tag}}) => {
+			record.appendField({tag, value});
+		});
+	}
+
+	function addDataFields() {
+		const fields = obj.record.datafield || [];
+
+		fields.forEach(({subfield, $: {tag, ind1, ind2}}) => {
+			const subfields = parseSubfields();
+			record.appendField({tag, ind1, ind2, subfields});
+
+			function parseSubfields() {
+				const subfields = subfield || [];
+				return subfields.map(({_: value, $: {code}}) => ({code, value}));
+			}
+		});
+	}
+
+	function toObject() {
+		return new Promise((resolve, reject) => {
+			new Parser().parseString(str, (err, obj) => {
+				if (err) {
+					/* istanbul ignore next: Generic error */ return reject(err);
+				}
+
+				resolve(obj);
+			});
 		});
 	}
 }
+
+/* Function getLogger() {
+	return createDebugLogger('@natlibfi/marc-record-serializers/marcxml');
+} */
