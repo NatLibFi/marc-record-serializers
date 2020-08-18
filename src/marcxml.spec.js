@@ -16,8 +16,6 @@
 *
 */
 
-'use strict';
-
 import fs from 'fs';
 import path from 'path';
 import {expect} from 'chai';
@@ -26,73 +24,67 @@ import * as Converter from './marcxml';
 
 describe('marcxml', () => {
 	const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'marcxml');
-	const fixtureCount = fs.readdirSync(fixturesPath).filter(f => /^from[0-9]+/.test(f)).length;
+	const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from[0-9]+/).test(f)).length;
 
 	describe('#Reader', () => {
-		it('Should emit an error because the file does not exist', () => {
-			return new Promise((resolve, reject) => {
-				const reader = new Converter.Reader(fs.createReadStream('foo'));
-				reader.on('data', reject);
-				reader.on('end', reject);
-				reader.on('error', err => {
-					try {
-						expect(err.code).to.equal('ENOENT');
-						resolve();
-					} catch (exp) {
-						reject(exp);
-					}
-				});
+		it('Should emit an error because the file does not exist', () => new Promise((resolve, reject) => {
+			const reader = new Converter.Reader(fs.createReadStream('foo'));
+			reader.on('data', reject);
+			reader.on('end', reject);
+			reader.on('error', err => {
+				try {
+					expect(err.code).to.equal('ENOENT');
+					resolve();
+				} catch (exp) {
+					reject(exp);
+				}
 			});
-		});
+		}));
 
-		it('Should emit an error because of invalid data', () => {
-			return new Promise((resolve, reject) => {
-				const filePath = path.resolve(fixturesPath, 'erroneous');
-				const reader = new Converter.Reader(fs.createReadStream(filePath));
+		it('Should emit an error because of invalid data', () => new Promise((resolve, reject) => {
+			const filePath = path.resolve(fixturesPath, 'erroneous');
+			const reader = new Converter.Reader(fs.createReadStream(filePath));
 
-				reader.on('data', () => {
-					reject(new Error('Emitted a data-event'));
-				});
-				reader.on('end', () => {
-					reject(new Error('Emitted an end-event'));
-				});
-
-				reader.on('error', err => {
-					try {
-						expect(err.message).to.match(/^Unable to parse node:/);
-						resolve();
-					} catch (exp) {
-						reject(exp);
-					}
-				});
+			reader.on('data', () => {
+				reject(new Error('Emitted a data-event'));
 			});
-		});
+			reader.on('end', () => {
+				reject(new Error('Emitted an end-event'));
+			});
+
+			reader.on('error', err => {
+				try {
+					expect(err.message).to.match(/^Invalid tagname /);
+					resolve();
+				} catch (exp) {
+					reject(exp);
+				}
+			});
+		}));
 	});
 
 	describe('#from', () => {
 		Array.from(Array(fixtureCount)).forEach((e, i) => {
 			const index = i + 1;
 
-			it(`Should convert file from${index} to file to${index}`, () => {
-				return new Promise((resolve, reject) => {
-					const records = [];
-					const fromPath = path.resolve(fixturesPath, `from${index}`);
-					const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
-					const reader = new Converter.Reader(fs.createReadStream(fromPath));
+			it(`Should convert file from${index} to file to${index}`, () => new Promise((resolve, reject) => {
+				const records = [];
+				const fromPath = path.resolve(fixturesPath, `from${index}`);
+				const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
+				const reader = new Converter.Reader(fs.createReadStream(fromPath));
 
-					reader.on('error', reject);
-					reader.on('data', record => records.push(record));
-					reader.on('end', () => {
-						try {
-							expect(records).to.have.length(1);
-							expect(records.shift().toString()).to.equal(expectedRecord);
-							resolve();
-						} catch (err) {
-							reject(err);
-						}
-					});
+				reader.on('error', reject);
+				reader.on('data', record => records.push(record));
+				reader.on('end', () => {
+					try {
+						expect(records).to.have.length(1);
+						expect(records.shift().toString()).to.equal(expectedRecord);
+						resolve();
+					} catch (err) {
+						reject(err);
+					}
 				});
-			});
+			}));
 		});
 	});
 
@@ -105,6 +97,14 @@ describe('marcxml', () => {
 			expect(Converter.to(record, {omitDeclaration: true})).to.equal(expectedRecord);
 		});
 
+		it('Should indent the XML', () => {
+			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to-indent'), 'utf8');
+			const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'from-indent'), 'utf8');
+			const record = MarcRecord.fromString(sourceRecord);
+
+			expect(Converter.to(record, {indent: true})).to.equal(expectedRecord);
+		});
+
 		Array.from(Array(fixtureCount)).forEach((e, i) => {
 			const index = i + 1;
 
@@ -112,6 +112,7 @@ describe('marcxml', () => {
 				const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `from${index}`), 'utf8');
 				const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
 				const record = MarcRecord.fromString(sourceRecord);
+
 				expect(Converter.to(record)).to.equal(expectedRecord);
 			});
 		});
