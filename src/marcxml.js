@@ -76,12 +76,13 @@ export function to(record, {omitDeclaration = false, indent = false} = {}) {
 	function generateFields() {
 		return {
 			leader: [record.leader],
-			controlfield: record.getControlfields().map(({value: _, tag}) => ({
-				_,
-				$: {
-					tag: [tag]
+			controlfield: record.getControlfields().map(({value: _, tag}) => {
+				if (_) {
+					return {_, $: {tag: [tag]}};
 				}
-			})),
+
+				return {$: {tag: [tag]}};
+			}),
 			datafield: record.getDatafields().map(transformDataField)
 		};
 
@@ -96,12 +97,13 @@ export function to(record, {omitDeclaration = false, indent = false} = {}) {
 			};
 
 			function transformSubfields() {
-				return subfields.map(({code, value: _}) => ({
-					_,
-					$: {
-						code: [code]
+				return subfields.map(({code, value: _}) => {
+					if (_) {
+						return {_, $: {code: [code]}};
 					}
-				}));
+
+					return {$: {code: [code]}};
+				});
 			}
 		}
 	}

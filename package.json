@@ -45,7 +45,7 @@
 		"watch:serializer": "cross-env DEBUG=1 NODE_ENV=test chokidar src/$SERIALIZER.js src/$SERIALIZER.spec.js -c 'npm run lint:base:dev -- src/$SERIALIZER.js src/$SERIALIZER.spec.js && npm run test:unit:base -- src/$SERIALIZER.spec.js'"
 	},
 	"dependencies": {
-		"@natlibfi/marc-record": "^6.0.2",
+		"@natlibfi/marc-record": "^6.0.3",
 		"ora": "^5.0.0",
 		"stream-json": "^1.7.1",
 		"text-encoding": "^0.7.0",

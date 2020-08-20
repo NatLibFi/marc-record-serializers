@@ -105,6 +105,15 @@ describe('marcxml', () => {
 			expect(Converter.to(record, {indent: true})).to.equal(expectedRecord);
 		});
 
+		it('Should convert from XML with custom validation', async () => {
+			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to-custom-validation'), 'utf8');
+			const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'from-custom-validation'), 'utf8');
+			const record = MarcRecord.fromString(sourceRecord, {fields: false, subfields: false, subfieldValues: false});
+
+			// Console.log(Converter.to(record, {indent:true}));
+			expect(Converter.to(record)).to.equal(expectedRecord);
+		});
+
 		Array.from(Array(fixtureCount)).forEach((e, i) => {
 			const index = i + 1;
 
