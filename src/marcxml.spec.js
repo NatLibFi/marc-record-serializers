@@ -86,6 +86,13 @@ describe('marcxml', () => {
 				});
 			}));
 		});
+
+		it('Should work with default validators', async () => {
+			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'out-custom-validators'), 'utf8');
+			const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'in-custom-validators'), 'utf8');
+			const record = await Converter.from(sourceRecord);
+			expect(JSON.stringify(record)).to.equal(expectedRecord);
+		});
 	});
 
 	describe('#to', () => {

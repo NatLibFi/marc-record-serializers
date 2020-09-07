@@ -21,13 +21,13 @@ import {MarcRecord} from '@natlibfi/marc-record';
 import StreamArray from 'stream-json/streamers/StreamArray';
 
 export class Reader extends Readable {
-	constructor(stream) {
+	constructor(stream, validationOptions = {}) {
 		super(stream);
 
 		const pipeline = stream.pipe(StreamArray.withParser());
 		pipeline.on('data', data => {
 			try {
-				this.emit('data', new MarcRecord(data.value));
+				this.emit('data', new MarcRecord(data.value, validationOptions));
 			} catch (err) {
 				this.emit('error', err);
 			}

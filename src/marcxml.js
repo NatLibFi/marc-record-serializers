@@ -20,7 +20,7 @@ import {MarcRecord} from '@natlibfi/marc-record';
 import {Parser, Builder} from 'xml2js';
 
 export class Reader extends Readable {
-	constructor(stream) {
+	constructor(stream, validationOptions = {}) {
 		super(stream);
 		this.charbuffer = '';
 
@@ -52,7 +52,7 @@ export class Reader extends Readable {
 				this.charbuffer = this.charbuffer.substr(pos + 10);
 
 				try {
-					this.emit('data', await from(raw)); // eslint-disable-line no-await-in-loop
+					this.emit('data', await from(raw, validationOptions)); // eslint-disable-line no-await-in-loop
 				} catch (e) {
 					this.emit('error', e);
 				}
