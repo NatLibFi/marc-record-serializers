@@ -88,6 +88,13 @@ describe('json', () => {
 				});
 			});
 		});
+
+		it('Should work with default validators', () => {
+			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'out-custom-validators'), 'utf8');
+			const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'in-custom-validators'), 'utf8');
+			const record = Converter.from(sourceRecord);
+			expect(JSON.stringify(record)).to.equal(expectedRecord);
+		});
 	});
 
 	describe('#to', () => {
