@@ -20,7 +20,8 @@ import {Readable} from 'stream';
 import {MarcRecord} from '@natlibfi/marc-record';
 
 export class Reader extends Readable {
-	constructor(stream) {
+	constructor(stream, validationOptions = {}) {
+		MarcRecord.setValidationOptions(validationOptions);
 		super(stream);
 		this.buffer = [];
 

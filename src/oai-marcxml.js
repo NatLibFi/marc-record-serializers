@@ -25,7 +25,7 @@ const NODE_TYPE = {
 };
 
 export class Reader extends Readable {
-	constructor(stream) {
+	constructor(stream, validationOptions = {}) {
 		super(stream);
 		this.charbuffer = '';
 
@@ -57,7 +57,7 @@ export class Reader extends Readable {
 				this.charbuffer = this.charbuffer.substr(pos + 12);
 
 				try {
-					this.emit('data', from(raw));
+					this.emit('data', from(raw, validationOptions));
 				} catch (e) {
 					this.emit('error', e);
 				}

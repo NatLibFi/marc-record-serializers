@@ -24,7 +24,7 @@ import {TextEncoder, TextDecoder} from 'text-encoding';
 const FIXED_FIELD_TAGS = ['FMT', '001', '002', '003', '004', '005', '006', '007', '008', '009'];
 
 export class Reader extends Readable {
-	constructor(stream) {
+	constructor(stream, validationOptions = {}) {
 		super(stream);
 		this.charbuffer = '';
 		this.linebuffer = [];
@@ -63,7 +63,7 @@ export class Reader extends Readable {
 						this.count++;
 
 						try {
-							this.emit('data', from(record.join('\n')));
+							this.emit('data', from(record.join('\n'), validationOptions));
 						} catch (excp) {
 							this.emit('error', excp);
 							break;

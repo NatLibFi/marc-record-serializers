@@ -20,7 +20,7 @@ import {Readable} from 'stream';
 import {MarcRecord} from '@natlibfi/marc-record';
 
 export class Reader extends Readable {
-	constructor(stream) {
+	constructor(stream, validationOptions = {}) {
 		super(stream);
 		this.charbuffer = '';
 
@@ -46,7 +46,7 @@ export class Reader extends Readable {
 				this.charbuffer = this.charbuffer.substr(pos + 1);
 
 				try {
-					this.emit('data', from(raw));
+					this.emit('data', from(raw, validationOptions));
 				} catch (excp) {
 					this.emit('error', excp);
 				}
