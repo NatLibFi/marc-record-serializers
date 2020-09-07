@@ -82,7 +82,7 @@ export class Reader extends Readable {
 			if (this.linebuffer.length > 0) {
 				this.count++;
 				try {
-					this.emit('data', from(this.linebuffer.join('\n')));
+					this.emit('data', from(this.linebuffer.join('\n'), validationOptions));
 				} catch (excp) {
 					this.emit('error', excp);
 					return;
