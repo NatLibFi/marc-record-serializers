@@ -446,7 +446,7 @@ export function from(data, validationOptions = {}) {
 	});
 
 	/* Validates the record */
-	return new MarcRecord(record);
+	return new MarcRecord(record, validationOptions);
 
 	function parseContinueLineData(lineStr) {
 		const field = parseFieldFromLine(lineStr);
