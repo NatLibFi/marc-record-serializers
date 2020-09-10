@@ -128,8 +128,6 @@ export function to(record, {omitDeclaration = false} = {}) {
 }
 
 export function from(xmlString, validationOptions = {}) {
-	MarcRecord.setValidationOptions(validationOptions);
-
 	const parser = new DOMParser();
 	const record = new MarcRecord();
 
@@ -200,7 +198,7 @@ export function from(xmlString, validationOptions = {}) {
 	});
 
 	/* Validates the record */
-	return new MarcRecord(record);
+	return new MarcRecord(record, validationOptions);
 
 	function notTextNode(node) {
 		return node.nodeType !== NODE_TYPE.TEXT_NODE;

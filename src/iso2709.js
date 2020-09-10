@@ -56,8 +56,6 @@ export class Reader extends Readable {
 }
 
 export function from(dataStr, validationOptions = {}) {
-	MarcRecord.setValidationOptions(validationOptions);
-
 	const leader = dataStr.substring(0, 24);
 	const record = {
 		leader: leader,
@@ -156,7 +154,7 @@ export function from(dataStr, validationOptions = {}) {
 		}
 	}
 
-	return new MarcRecord(record);
+	return new MarcRecord(record, validationOptions);
 
 	// Returns the entire directory starting at position 24.
 	// Control character '\x1E' marks the end of directory.

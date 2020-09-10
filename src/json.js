@@ -48,6 +48,5 @@ export function to(record) {
 }
 
 export function from(str, validationOptions = {}) {
-	MarcRecord.setValidationOptions(validationOptions);
-	return new MarcRecord(JSON.parse(str));
+	return new MarcRecord(JSON.parse(str), validationOptions);
 }
