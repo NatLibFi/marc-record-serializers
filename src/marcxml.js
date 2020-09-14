@@ -134,11 +134,7 @@ export function to(record, {omitDeclaration = false, indent = false} = {}) {
 						pretty: true,
 						indent: '\t'
 					}
-				} : {
-					renderOpts: {
-						pretty: false
-					}
-				};
+				} : {renderOpts: {pretty: false}};
 			}
 		}
 	}
@@ -158,9 +154,7 @@ export async function from(str, validationOptions = {}) {
 	function addControlFields() {
 		const fields = obj.record.controlfield || [];
 
-		fields.forEach(({_: value, $: {tag}}) => {
-			record.appendField({tag, value});
-		});
+		fields.forEach(({_: value, $: {tag}}) => (record.appendField({tag, value})));
 	}
 
 	function addDataFields() {
@@ -172,7 +166,10 @@ export async function from(str, validationOptions = {}) {
 
 			function parseSubfields() {
 				const subfields = subfield || [];
-				return subfields.map(({_: value, $: {code}}) => ({code, value}));
+				return subfields.map(({_: value, $: {code}}) => {
+					const result = value === undefined ? {code} : {code, value};
+					return result;
+				});
 			}
 		});
 	}
