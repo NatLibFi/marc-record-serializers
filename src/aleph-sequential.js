@@ -63,7 +63,7 @@ export class Reader extends Readable {
 						this.count++;
 
 						try {
-							this.emit('data', from(record.join('\n'), validationOptions));
+							this.emit('data', securef001(record));
 						} catch (excp) {
 							this.emit('error', excp);
 							break;
@@ -82,7 +82,7 @@ export class Reader extends Readable {
 			if (this.linebuffer.length > 0) {
 				this.count++;
 				try {
-					this.emit('data', from(this.linebuffer.join('\n'), validationOptions));
+					this.emit('data', securef001(this.linebuffer));
 				} catch (excp) {
 					this.emit('error', excp);
 					return;
@@ -95,6 +95,21 @@ export class Reader extends Readable {
 		stream.on('error', error => {
 			this.emit('error', error);
 		});
+
+		function securef001(lineArray) {
+			const currentId = lineArray[0].slice(0, 9);
+			const marcRecord = from(lineArray.join('\n'), validationOptions);
+			const [f001] = marcRecord.get('001');
+			if (f001 === undefined) {
+				marcRecord.insertField({
+					tag: '001',
+					value: currentId
+				});
+				return marcRecord;
+			}
+
+			return marcRecord;
+		}
 
 		function getIdFromLine(line) {
 			return line.split(' ')[0];
