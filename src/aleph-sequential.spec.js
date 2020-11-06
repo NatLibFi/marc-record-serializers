@@ -104,7 +104,7 @@ describe('aleph-sequential', () => {
 				const records = [];
 				const fromPath = path.resolve(fixturesPath, 'noF001');
 				const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'yesF001'), 'utf8');
-				const reader = new Converter.Reader(fs.createReadStream(fromPath));
+				const reader = new Converter.Reader(fs.createReadStream(fromPath), undefined, true);
 
 				reader.on('error', reject);
 				reader.on('data', record => records.push(record));
