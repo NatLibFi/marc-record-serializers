@@ -98,6 +98,29 @@ describe('aleph-sequential', () => {
 		});
 	});
 
+	describe('#from no f001', () => {
+		it('Should convert file noF001 and correct f001 value to match file yesF001', () => {
+			return new Promise((resolve, reject) => {
+				const records = [];
+				const fromPath = path.resolve(fixturesPath, 'noF001');
+				const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'yesF001'), 'utf8');
+				const reader = new Converter.Reader(fs.createReadStream(fromPath), undefined, true);
+
+				reader.on('error', reject);
+				reader.on('data', record => records.push(record));
+				reader.on('end', () => {
+					try {
+						expect(records).to.have.length(1);
+						expect(records.shift().toString()).to.equal(expectedRecord);
+						resolve();
+					} catch (err) {
+						reject(err);
+					}
+				});
+			});
+		});
+	});
+
 	describe('#to', () => {
 		Array.from(Array(fixtureCount)).forEach((e, i) => {
 			const index = i + 1;
