@@ -175,7 +175,7 @@ export function to(record) {
 			let content = '';
 
 			if (subfield.code.length > 0 || subfield.value.length > 0) {
-				content = '$$' + subfield.code + subfield.value;
+				content = subfield.value === undefined ? '$$' + subfield.code : '$$' + subfield.code + subfield.value;
 			}
 
 			return encoder.encode(content);
