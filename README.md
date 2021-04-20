@@ -29,6 +29,9 @@ reader.on('data', record => console.log(record));
   - **omitDeclaration**: Whether to omit XML declaration. Defaults to *false*.
   - **indent**: Whether to indent te XML. Defaults to *false*.
 
+### Aleph Sequential
+- **to**: If second argument useCrForContinuingResources is true, uses 'CR' in FMT field for continuing resources, otherwise uses Aleph standard 'SE'. Defaults to *false*.
+
 ### CLI
 ```sh
 npx @natlibfi/marc-record-serializers

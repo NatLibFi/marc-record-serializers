@@ -124,7 +124,7 @@ export class Reader extends Readable {
 * This implementation attempts to mimic the conversion done by marc_to_aleph.sh script and should at least produce a format which is accepted by Aleph
 * Also, javascript strings are UTF-16 so conversion to bytes is necessary to cut the text at correct offsets
 */
-export function to(record) {
+export function to(record, useCrForContinuingResource = false) {
 	const MAX_FIELD_LENGTH = 2000;
 	const SPLIT_MAX_FIELD_LENGTH = 1000;
 
@@ -134,7 +134,7 @@ export function to(record) {
 	const staticFields = [
 		{
 			tag: 'FMT',
-			value: recordFormat(record)
+			value: recordFormat(record, useCrForContinuingResource)
 		},
 		{
 			tag: 'LDR',
@@ -388,8 +388,9 @@ export function to(record) {
 	**/
 	/**
 	* Determine the record format for the FMT field.
+	* Uses FMT SE (instead of CR) for continuing resource, because Aleph does that
 	*/
-	function recordFormat(record) {
+	function recordFormat(record, useCrForContinuingResource) {
 		const leader = record.leader;
 		const l6 = leader.slice(6, 7);
 		const l7 = leader.slice(7, 8);
@@ -398,7 +399,11 @@ export function to(record) {
 		}
 
 		if (['a', 't'].includes(l6) && ['b', 'i', 's'].includes(l7)) {
-			return 'CR';
+			if (useCrForContinuingResource) {
+				return 'CR';
+			}
+
+			return 'SE';
 		}
 
 		if (['e', 'f'].includes(l6)) {
