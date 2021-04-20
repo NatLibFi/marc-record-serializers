@@ -134,4 +134,14 @@ describe('aleph-sequential', () => {
 			});
 		});
 	});
+
+	describe('#to with useCrForContinuingResources', () => {
+		it('Should convert file to7 to file useCRfrom7, use CR for FMT for continuing resources', () => {
+			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'useCRfrom7'), 'utf8');
+			const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'to7'), 'utf8');
+			const record = MarcRecord.fromString(sourceRecord);
+
+			expect(Converter.to(record, {useCrForContinuingResources: false})).to.equal(expectedRecord);
+		});
+	});
 });
