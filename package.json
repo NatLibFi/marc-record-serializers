@@ -65,6 +65,7 @@
 		"chai": "^4.2.0",
 		"chokidar-cli": "^2.1.0",
 		"cross-env": "^7.0.2",
+		"debug": "^4.3.2",
 		"eslint": "^7.7.0",
 		"eslint-config-xo": "^0.32.1",
 		"eslint-plugin-import": "^2.22.0",
