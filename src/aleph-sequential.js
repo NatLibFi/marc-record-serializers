@@ -20,8 +20,11 @@ import {Readable} from 'stream';
 import {MarcRecord} from '@natlibfi/marc-record';
 // Node polyfill
 import {TextEncoder, TextDecoder} from 'text-encoding';
+import createDebugLogger from 'debug';
 
 const FIXED_FIELD_TAGS = ['FMT', '001', '002', '003', '004', '005', '006', '007', '008', '009'];
+const debug = createDebugLogger('@natlibfi/marc-record-serializers:aleph-sequential');
+const debugData = debug.extend('data');
 
 export class Reader extends Readable {
 	constructor(stream, validationOptions = {}, genF001fromSysNo = false) {
@@ -432,12 +435,17 @@ export function from(data, validationOptions = {}) {
 
 	while (i < lines.length) {
 		const nextLine = lines[i + 1];
-		if (nextLine !== undefined && isContinueFieldLine(nextLine)) {
+		const currentLine = lines[i];
+		debugData(`Handling inputline: ${currentLine}`);
+
+		if (nextLine !== undefined && isContinueFieldLine(nextLine, currentLine)) {
 			if (lines[i].substr(-1) === '^') {
 				lines[i] = lines[i].substr(0, lines[i].length - 1);
 			}
 
 			lines[i] += parseContinueLineData(nextLine);
+			debug('Adding next line to current line');
+			debugData(`${lines[i]}`);
 			lines.splice(i + 1, 1);
 			continue;
 		}
@@ -449,7 +457,9 @@ export function from(data, validationOptions = {}) {
 	record.fields = [];
 
 	lines.forEach(line => {
+		debugData(`Parsing line: ${line}`);
 		const field = parseFieldFromLine(line);
+		debugData(`Found field: ${JSON.stringify(field)}`);
 
 		// Drop Aleph specific FMT fields.
 		if (field.tag === 'FMT') {
@@ -481,7 +491,7 @@ export function from(data, validationOptions = {}) {
 		throw new Error('Could not parse Aleph Sequential subfield 9-continued line.');
 	}
 
-	function isContinueFieldLine(lineStr) {
+	function isContinueFieldLine(lineStr, prevLineStr) {
 		const field = parseFieldFromLine(lineStr);
 
 		if (isControlfield(field)) {
@@ -494,7 +504,21 @@ export function from(data, validationOptions = {}) {
 			return false;
 		}
 
-		return (firstSubfield.code === '9' && (firstSubfield.value === '^' || firstSubfield.value === '^^'));
+		if (!(firstSubfield.code === '9' && (firstSubfield.value === '^' || firstSubfield.value === '^^'))) {
+			return false;
+		}
+
+		debug('Line is part of a split field');
+		debugData(`${lineStr}`);
+
+		const prevField = parseFieldFromLine(prevLineStr);
+
+		if (field.tag !== prevField.tag || field.ind1 !== prevField.ind1 || field.ind2 !== prevField.ind2) {
+			debug(`Field tags and indicators ( ${field.tag} ${field.ind1}${field.ind2} vs ${prevField.tag} ${prevField.ind1}${prevField.ind2}) do not match, split fields cannot be joined`);
+			return false;
+		}
+
+		return true;
 	}
 
 	function isControlfield(field) {

@@ -23,12 +23,17 @@ import path from 'path';
 import {expect} from 'chai';
 import {MarcRecord} from '@natlibfi/marc-record';
 import * as Converter from './aleph-sequential';
+import createDebugLogger from 'debug';
+
+const debug = createDebugLogger('@natlibfi/marc-record-serializers:aleph-sequential:test');
+// NOT USED const debugData = debug.extend('data');
 
 MarcRecord.setValidationOptions({subfieldValues: false});
 
 describe('aleph-sequential', () => {
 	const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'aleph-sequential');
 	const fixtureCount = fs.readdirSync(fixturesPath).filter(f => /^from/.test(f)).length;
+	const fixtureCountSplitFields = fs.readdirSync(fixturesPath).filter(f => /^splitfields-from/.test(f)).length;
 
 	describe('#Reader', () => {
 		it('Should emit an error because the file does not exist', () => {
@@ -142,6 +147,55 @@ describe('aleph-sequential', () => {
 			const record = MarcRecord.fromString(sourceRecord);
 
 			expect(Converter.to(record, {useCrForContinuingResources: false})).to.equal(expectedRecord);
+		});
+	});
+
+	describe('#from splitfields', () => {
+		Array.from(Array(fixtureCountSplitFields)).forEach((e, i) => {
+			const index = i + 1;
+
+			it(`Should convert file splitfields-from${index} to file splitfields-to${index}`, () => {
+				return new Promise((resolve, reject) => {
+					const records = [];
+					const fromPath = path.resolve(fixturesPath, `splitfields-from${index}`);
+					const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `splitfields-to${index}`), 'utf8');
+					const reader = new Converter.Reader(fs.createReadStream(fromPath));
+
+					reader.on('error', reject);
+					reader.on('data', record => records.push(record));
+					reader.on('end', () => {
+						try {
+							expect(records).to.have.length(1);
+							const resultRecord = records.shift();
+							expect(resultRecord.toString()).to.equal(expectedRecord);
+							resolve();
+						} catch (err) {
+							reject(err);
+						}
+					});
+				});
+			});
+		});
+	});
+
+	describe('#to splitfields', () => {
+		Array.from(Array(fixtureCountSplitFields)).forEach((e, i) => {
+			// Skip those test cases that do not work as a roundtrip
+			const skipIndexes = [1];
+			const index = i + 1;
+
+			if (skipIndexes.includes(index)) {
+				debug(`Skipping splitfields-to${index}`);
+				return;
+			}
+
+			it(`Should convert file splitfields-to${index} to file splitfields-from${index}`, () => {
+				const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `splitfields-from${index}`), 'utf8');
+				const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, `splitfields-to${index}`), 'utf8');
+				const record = MarcRecord.fromString(sourceRecord);
+				const result = Converter.to(record);
+				expect(result).to.equal(expectedRecord);
+			});
 		});
 	});
 });
