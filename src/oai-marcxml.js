@@ -18,7 +18,7 @@
 
 import {Readable} from 'stream';
 import {MarcRecord} from '@natlibfi/marc-record';
-import {XMLSerializer, DOMParser, DOMImplementation} from 'xmldom';
+import {XMLSerializer, DOMParser, DOMImplementation} from '@xmldom/xmldom';
 
 const NODE_TYPE = {
 	TEXT_NODE: 3
