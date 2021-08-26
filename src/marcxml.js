@@ -49,7 +49,7 @@ export class Reader extends Readable {
 				}
 
 				const raw = this.charbuffer.substr(0, pos + 9);
-				this.charbuffer = this.charbuffer.substr(pos + 10);
+				this.charbuffer = this.charbuffer.substr(pos + 9);
 
 				try {
 					this.emit('data', await from(raw, validationOptions)); // eslint-disable-line no-await-in-loop

@@ -1,0 +1,126 @@
+LDR    02731cjm a22006494i 4500
+001    000000021
+003    FI-MELINDA
+005    20210826124448.0
+007    sd|f||g|||m|||
+008    121019s2012    fi zznn  z        | zxx| 
+024 3  ‡a6430037170096
+028 01 ‡bSibarecords‡aSACD-1009
+033 00 ‡a2011----
+035    ‡a(FI-MELINDA)000000021
+080    ‡a294.55
+080    ‡a929 Bhaktivedanta
+084    ‡a78.66‡2ykl
+100 1  ‡aRantanen, Matti,‡d1952-‡eesittäjä.
+245 10 ‡aMissa brevis :‡bA mass for accordion /‡cMatti Rantanen, accordion.
+260    ‡a[Helsinki] :‡bSibarecords,‡c℗ 2012.
+300    ‡a1 CD-äänilevy (53'42) +‡etekstiliite (12 s.)
+336    ‡aesitetty musiikki‡bprm‡2rdacontent
+337    ‡aaudio‡bs‡2rdamedia
+338    ‡aäänilevy‡bsd‡2rdacarrier
+370    ‡81\u‡gSuomi‡2yso/fin‡0http://www.yso.fi/onto/yso/p94426
+370    ‡81\u‡gFinland‡2yso/swe‡0http://www.yso.fi/onto/yso/p94426
+382 11 ‡81\u‡aharmonikka‡2seko
+382 11 ‡82\u‡aharmonikka‡2seko
+382 11 ‡83\u‡aharmonikka‡2seko
+388    ‡81\u‡a2010-luku‡2yso/fin
+500    ‡aHybridi SACD -levy, stereo / monikanavaääni; toistettavissa myös CD-soittimella.
+500    ‡aInstrumentaaliesitys.
+505 0  ‡aSonata n:o VII: Largo (Pater, in manus tuas commendo spiritum meum- Isä, sinun käsiisi minä annan henkeni) ; Missa brevis for accordion ; Adagio in B minor, KV 540 ; Hymns of Zion for cello and accordion ; Hug ; Chorale prelude.
+511 0  ‡aRantanen, Matti (harmonikka). Ylönen, Marko (sello).
+518    ‡aÄänitys: 2011, Nummi, Nummen kirkko.
+520 2  ‡a6 teosta.
+600 04 ‡aBhaktivedanta, A. C.
+650  7 ‡aKrishna Consciousness Movement‡xbiography‡2atla
+650  7 ‡areligious movements, popular‡2atla
+650  7 ‡aasiasana3
+655  7 ‡82\u‡ahengellinen musiikki‡2slm/fin‡0http://urn.fi/URN:NBN:fi:au:slm:s1139
+655  7 ‡83\u‡ataidemusiikki‡2slm/fin‡0http://urn.fi/URN:NBN:fi:au:slm:s474
+655  7 ‡82\u‡aandlig musik‡2slm/swe‡0http://urn.fi/URN:NBN:fi:au:slm:s1139
+655  7 ‡83\u‡akonstmusik‡2slm/swe‡0http://urn.fi/URN:NBN:fi:au:slm:s474
+700 1  ‡aYlönen, Marko,‡d1966-‡eesittäjä.
+850    ‡aFI-NLD‡aFI-Gmc
+SID    ‡c22‡balma
+SID    ‡c1122808‡bgmc
+CAT    ‡aCONV-ISBD‡bundefined‡c20120401‡lFIN01‡h2007
+CAT    ‡aCONV-RDA‡bundefined‡c20160319‡lFIN01‡h0811
+CAT    ‡aLOAD-GMC‡b20‡c20190205‡lFIN01‡h1140
+CAT    ‡aLOAD-YSO‡b00‡c20190708‡lFIN01‡h1831
+CAT    ‡aMINTTU‡bundefined‡c20210722‡lFIN01‡h1130
+CAT    ‡aMINTTU‡bundefined‡c20210723‡lFIN01‡h1658
+CAT    ‡aMINTTU‡bundefined‡c20210723‡lFIN01‡h1705
+CAT    ‡aLOAD-ALINK‡bundefined‡c20210826‡lFIN01‡h1244
+LOW    ‡aALMA
+LOW    ‡aGMC
+LDR    04289cjm a22008654i 4500
+001    000000020
+003    FI-MELINDA
+005    20210826125600.0
+007    sd |||g|||m||d
+008    121105s2001    no fmnn             smi c
+028 00 ‡bLC00699‡a017019-2
+035    ‡a(FI-MELINDA)000000020
+041    ‡dsmi‡deng
+080    ‡a641
+080    ‡a54
+084    ‡a78.897‡2ykl
+100 1  ‡aBoine, Mari,‡eesittäjä.
+245 10 ‡aEight seasons =‡bGavcci jahkejuogu.
+260    ‡a[Kustannuspaikka tuntematon] :‡bUniversal Music,‡cp2001.
+300    ‡a1 CD-äänilevy +‡etekstiliite.
+336    ‡aesitetty musiikki‡bprm‡2rdacontent
+337    ‡aaudio‡bs‡2rdamedia
+338    ‡aäänilevy‡bsd‡2rdacarrier
+370    ‡83\u‡84\u‡85\u‡gNorja‡2yso/fin‡0http://www.yso.fi/onto/yso/p94309
+370    ‡83\u‡84\u‡85\u‡gNorge‡2yso/swe‡0http://www.yso.fi/onto/yso/p94309
+500    ‡a1. Aufl. 1982.
+500    ‡a26. Aufl., 251.-255. Tausend 1983.
+500    ‡aLiite sis. laulujen sanat.
+505 0  ‡aBoadan nuppi bealde / M. Boine, Svein Schultz. Song for the unborn / Giuliano Contardo, Inga R. Eira, Boine, R. Ludvigsen. Sarahka viina ; Guovssahasaid ajagattis / Risten Sokki, Boine, Ludvigsen. Sielu dlakkas / Nils Viktor Holmberg, Åge Anthi. Mu vaibmu vadjul doppe / Brorson, trad. Butterfly / Merle Collins, Boine, Ludvigsen. Liegga gokcas sis / Kirsti Paltto, Boine. You never know / Synnöve Persen, Boine. Duottar rassi / Nils Johan Heatta, Boine, Ludvigsen. Silba varjala / Boine, Marry A. Somby, Paltto, Ludvigsen. Bottoza dahtun / Boine.
+511 0  ‡aMari Boine (voc), Jan Garbarek (ts), Roger Ludvigsen (g), Sven Schultz (b), Kenneth Ekornes (dr, perc), Richard Thomas (ss, fl), Carlos Z. Quispe (fl, charango), Bugge Wesseltoft (synt, tuott.).
+650  7 ‡81\u‡82\u‡asaamelaiset‡2yso/fin‡0http://www.yso.fi/onto/yso/p11537
+650  7 ‡81\u‡amaailmanmusiikki‡2yso/fin‡0http://www.yso.fi/onto/yso/p3065
+650  7 ‡82\u‡amusiikki‡2yso/fin‡0http://www.yso.fi/onto/yso/p1808
+650  7 ‡81\u‡82\u‡asamer‡2yso/swe‡0http://www.yso.fi/onto/yso/p11537
+650  7 ‡81\u‡avärldsmusik‡2yso/swe‡0http://www.yso.fi/onto/yso/p3065
+650  7 ‡82\u‡amusik‡2yso/swe‡0http://www.yso.fi/onto/yso/p1808
+650  7 ‡achemistry‡2atla
+650  7 ‡afood‡2atla
+650  7 ‡aasiasana
+650  7 ‡aasiasana‡2é
+650  7 ‡aasiasana2
+650  7 ‡aasiasana3
+651  7 ‡82\u‡aNorja‡2yso/fin‡0http://www.yso.fi/onto/yso/p94309
+651  7 ‡82\u‡aNorge‡2yso/swe‡0http://www.yso.fi/onto/yso/p94309
+655  7 ‡83\u‡amaailmanmusiikki‡2slm/fin‡0http://urn.fi/URN:NBN:fi:au:slm:s1188
+655  7 ‡84\u‡apopulaarimusiikki‡2slm/fin‡0http://urn.fi/URN:NBN:fi:au:slm:s1218
+655  7 ‡85\u‡aperinnemusiikki‡2slm/fin‡0http://urn.fi/URN:NBN:fi:au:slm:s662
+655  7 ‡83\u‡avärldsmusik‡2slm/swe‡0http://urn.fi/URN:NBN:fi:au:slm:s1188
+655  7 ‡84\u‡apopulärmusik‡2slm/swe‡0http://urn.fi/URN:NBN:fi:au:slm:s1218
+655  7 ‡85\u‡atraditionell musik‡2slm/swe‡0http://urn.fi/URN:NBN:fi:au:slm:s662
+710 2  ‡aKatalyse-Umweltgruppe Köln.
+700 1  ‡aBoine, Mari,‡eesittäjä.
+850    ‡aFI-Gmc
+SID    ‡c21‡balma
+SID    ‡c1130723‡bgmc
+CAT    ‡aX4005‡b30‡c20100329‡lFIN01‡h1428
+CAT    ‡aCONV-ISBD‡b‡c20120401‡lFIN01‡h2007
+CAT    ‡aCONV-RDA‡b‡c20160319‡lFIN01‡h0811
+CAT    ‡aLOAD-GMC‡b20‡c20190205‡lFIN01‡h1140
+CAT    ‡aLOAD-YSO‡b00‡c20190703‡lFIN01‡h1607
+CAT    ‡aLOAD-YSO‡b00‡c20190705‡lFIN01‡h1101
+CAT    ‡aMINTTU‡b‡c20210722‡lFIN01‡h1126
+CAT    ‡aLOAD-ALINK‡b‡c20210722‡lFIN01‡h1222
+CAT    ‡aMINTTU‡b‡c20210722‡lFIN01‡h1818
+CAT    ‡aMINTTU‡b‡c20210723‡lFIN01‡h1316
+CAT    ‡aMINTTU‡b‡c20210723‡lFIN01‡h1634
+CAT    ‡aMINTTU‡b‡c20210723‡lFIN01‡h1652
+CAT    ‡aMINTTU‡b‡c20210723‡lFIN01‡h1656
+CAT    ‡aMINTTU‡b‡c20210726‡lFIN01‡h1848
+CAT    ‡aMINTTU‡b‡c20210726‡lFIN01‡h1922
+CAT    ‡aMINTTU‡b‡c20210726‡lFIN01‡h1952
+CAT    ‡aLOAD-ALINK‡b‡c20210826‡lFIN01‡h1237
+CAT    ‡aLOAD-ALINK‡b‡c20210826‡lFIN01‡h1250
+CAT    ‡aLOAD-ALINK‡b‡c20210826‡lFIN01‡h1256
+LOW    ‡aVAARI
+LOW    ‡aGMC

@@ -95,6 +95,27 @@ describe('marcxml', () => {
 		});
 	});
 
+	describe('#from2records', () => {
+		it('Should convert file 2RecordsFrom to file 2RecordsTo', () => new Promise((resolve, reject) => {
+			const records = [];
+			const fromPath = path.resolve(fixturesPath, '2RecordsFrom');
+			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, '2RecordsTo'), 'utf8');
+			const reader = new Converter.Reader(fs.createReadStream(fromPath));
+
+			reader.on('error', reject);
+			reader.on('data', record => records.push(record));
+			reader.on('end', () => {
+				try {
+					expect(records).to.have.length(2);
+					expect(records.shift().toString() + '\n' + records.shift().toString()).to.equal(expectedRecord);
+					resolve();
+				} catch (err) {
+					reject(err);
+				}
+			});
+		}));
+	});
+
 	describe('#to', () => {
 		it('Should serialize the record without XML declaration', () => {
 			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to-no-xml-decl'), 'utf8');
