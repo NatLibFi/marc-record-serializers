@@ -25,6 +25,7 @@ import * as Converter from './marcxml';
 describe('marcxml', () => {
 	const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'marcxml');
 	const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from[0-9]+/).test(f)).length;
+	const fixtureCount2Records = fs.readdirSync(fixturesPath).filter(f => (/^2RecordsFrom[0-9]+/).test(f)).length;
 
 	describe('#Reader', () => {
 		it('Should emit an error because the file does not exist', () => new Promise((resolve, reject) => {
@@ -96,24 +97,27 @@ describe('marcxml', () => {
 	});
 
 	describe('#from2records', () => {
-		it('Should convert file 2RecordsFrom to file 2RecordsTo', () => new Promise((resolve, reject) => {
-			const records = [];
-			const fromPath = path.resolve(fixturesPath, '2RecordsFrom');
-			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, '2RecordsTo'), 'utf8');
-			const reader = new Converter.Reader(fs.createReadStream(fromPath));
+		Array.from(Array(fixtureCount2Records)).forEach((e, i) => {
+			const index = i + 1;
+			it(`Should convert file 2RecordsFrom${index} to file 2RecordsTo${index}`, () => new Promise((resolve, reject) => {
+				const records = [];
+				const fromPath = path.resolve(fixturesPath, `2RecordsFrom${index}`);
+				const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `2RecordsTo${index}`), 'utf8');
+				const reader = new Converter.Reader(fs.createReadStream(fromPath));
 
-			reader.on('error', reject);
-			reader.on('data', record => records.push(record));
-			reader.on('end', () => {
-				try {
-					expect(records).to.have.length(2);
-					expect(records.shift().toString() + '\n' + records.shift().toString()).to.equal(expectedRecord);
-					resolve();
-				} catch (err) {
-					reject(err);
-				}
-			});
-		}));
+				reader.on('error', reject);
+				reader.on('data', record => records.push(record));
+				reader.on('end', () => {
+					try {
+						expect(records).to.have.length(2);
+						expect(records.shift().toString() + '\n' + records.shift().toString()).to.equal(expectedRecord);
+						resolve();
+					} catch (err) {
+						reject(err);
+					}
+				});
+			}));
+		});
 	});
 
 	describe('#to', () => {
