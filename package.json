@@ -72,7 +72,7 @@
 		"rimraf": "^3.0.2"
 	},
 	"eslintConfig": {
-		"parser": "babel-eslint",
+		"parser": "@babel/eslint-parser",
 		"plugins": [
 			"import"
 		],
