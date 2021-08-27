@@ -126,6 +126,27 @@ describe('oai-marcxml', () => {
 			});
 		});
 
+		it('Should convert file 2RecordsFrom to file 2RecordsTo', () => {
+			return new Promise((resolve, reject) => {
+				const records = [];
+				const fromPath = path.resolve(fixturesPath, '2RecordsFrom');
+				const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, '2RecordsTo'), 'utf8');
+				const reader = new Converter.Reader(fs.createReadStream(fromPath));
+
+				reader.on('error', reject);
+				reader.on('data', record => records.push(record));
+				reader.on('end', () => {
+					try {
+						expect(records).to.have.length(2);
+						expect(records.shift().toString() + '\n' + records.shift().toString()).to.equal(expectedRecord);
+						resolve();
+					} catch (err) {
+						reject(err);
+					}
+				});
+			});
+		});
+
 		it('Should work with default validators', async () => {
 			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'out-custom-validators'), 'utf8');
 			const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'in-custom-validators'), 'utf8');

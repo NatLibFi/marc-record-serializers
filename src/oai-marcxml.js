@@ -54,7 +54,7 @@ export class Reader extends Readable {
 				}
 
 				const raw = this.charbuffer.substr(0, pos + 11);
-				this.charbuffer = this.charbuffer.substr(pos + 12);
+				this.charbuffer = this.charbuffer.substr(pos + 11);
 
 				try {
 					this.emit('data', from(raw, validationOptions));

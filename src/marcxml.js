@@ -18,6 +18,10 @@
 import {Readable} from 'stream';
 import {MarcRecord} from '@natlibfi/marc-record';
 import {Parser, Builder} from 'xml2js';
+import createDebugLogger from 'debug';
+
+const debug = createDebugLogger('@natlibfi/marc-record-serializers:marcxml');
+const debugData = debug.extend('data');
 
 export class Reader extends Readable {
 	constructor(stream, validationOptions = {}) {
@@ -42,16 +46,23 @@ export class Reader extends Readable {
 					return;
 				}
 
+				debug(`Found record start "<record" in pos ${pos}`);
+
 				this.charbuffer = this.charbuffer.substr(pos);
 				pos = this.charbuffer.indexOf('</record>');
 				if (pos === -1) {
 					return;
 				}
 
+				debug(`Found record end "</record>" in pos ${pos}`);
+
 				const raw = this.charbuffer.substr(0, pos + 9);
-				this.charbuffer = this.charbuffer.substr(pos + 10);
+				this.charbuffer = this.charbuffer.substr(pos + 9);
+
+				debugData(`Found record: ${raw}`);
 
 				try {
+					debug('Emitting record');
 					this.emit('data', await from(raw, validationOptions)); // eslint-disable-line no-await-in-loop
 				} catch (e) {
 					this.emit('error', e);
