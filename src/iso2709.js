@@ -58,8 +58,8 @@ export class Reader extends Readable {
 export function from(dataStr, validationOptions = {}) {
 	const leader = dataStr.substring(0, 24);
 	const record = {
-		leader: leader,
-		fields: []
+		leader,
+		fields: [],
 	};
 
 	// Parse directory section
@@ -86,8 +86,8 @@ export function from(dataStr, validationOptions = {}) {
 			const fieldElementStr = dataFieldStr.substring(startCharPos, parseInt(startCharPos, 10) + parseInt(fieldLength, 10) - 1);
 
 			record.fields.push({
-				tag: tag,
-				value: fieldElementStr
+				tag,
+				value: fieldElementStr,
 			});
 		} else {
 			let dataElementStr = utf8Substr(dataFieldStr, parseInt(startCharPos, 10), parseInt(fieldLength, 10));
@@ -111,10 +111,10 @@ export function from(dataStr, validationOptions = {}) {
 			// Create a <datafield> element
 
 			const datafield = {
-				tag: tag,
-				ind1: ind1,
-				ind2: ind2,
-				subfields: []
+				tag,
+				ind1,
+				ind2,
+				subfields: [],
 			};
 
 			// Parse all subfields
@@ -142,7 +142,7 @@ export function from(dataStr, validationOptions = {}) {
 
 						// Create a <subfield> element
 
-						datafield.subfields.push({code: code, value: currElementStr});
+						datafield.subfields.push({code, value: currElementStr});
 						currElementStr = '';
 					}
 				} else {
@@ -223,7 +223,7 @@ export function to(record) {
 	let ind1;
 	let ind2;
 
-	let leader = record.leader;
+	let {leader} = record;
 	let marcStr = '';
 	let directoryStr = '';
 	let dataFieldStr = '';
@@ -263,7 +263,7 @@ export function to(record) {
 
 		field.subfields.forEach((subfield, i) => {
 			let subFieldStr = subfield.value;
-			const code = subfield.code;
+			const {code} = subfield;
 			subFieldStr = code + subFieldStr;
 
 			// Add terminator for subfield or data field
@@ -337,8 +337,8 @@ function utf8Substr(str, startInBytes, lengthInBytes) {
 	function byteArrayToString(byteArray) {
 		let str = '';
 		for (let i = 0; i < byteArray.length; i++) {
-			str += byteArray[i] <= 0x7F ? byteArray[i] === 0x25 ? '%25' : // %
-				String.fromCharCode(byteArray[i]) : '%' + byteArray[i].toString(16).toUpperCase();
+			str += byteArray[i] <= 0x7F ? byteArray[i] === 0x25 ? '%25' // %
+				: String.fromCharCode(byteArray[i]) : '%' + byteArray[i].toString(16).toUpperCase();
 		}
 
 		return decodeURIComponent(str);

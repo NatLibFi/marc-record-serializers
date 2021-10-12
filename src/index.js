@@ -31,5 +31,5 @@ export {
 	AlephSequential,
 	ISO2709,
 	MARCXML,
-	OAI_MARCXML
+	OAI_MARCXML,
 };

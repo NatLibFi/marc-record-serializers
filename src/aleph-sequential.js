@@ -106,7 +106,7 @@ export class Reader extends Readable {
 			if (f001 === undefined && genF001fromSysNo) {
 				marcRecord.insertField({
 					tag: '001',
-					value: currentId
+					value: currentId,
 				});
 				return marcRecord;
 			}
@@ -137,12 +137,12 @@ export function to(record, useCrForContinuingResource = false) {
 	const staticFields = [
 		{
 			tag: 'FMT',
-			value: recordFormat(record, useCrForContinuingResource)
+			value: recordFormat(record, useCrForContinuingResource),
 		},
 		{
 			tag: 'LDR',
-			value: record.leader
-		}
+			value: record.leader,
+		},
 	];
 
 	return staticFields.concat(record.fields).reduce((acc, field) => {
@@ -184,26 +184,20 @@ export function to(record, useCrForContinuingResource = false) {
 			return encoder.encode(content);
 		});
 
-		const dataLength = formattedSubfields.reduce((acc, value) => {
-			return acc + value.length;
-		}, 0);
+		const dataLength = formattedSubfields.reduce((acc, value) => acc + value.length, 0);
 
 		if (dataLength > MAX_FIELD_LENGTH) {
 			subfieldLines = formattedSubfields.reduce(reduceToLines, {
-				lines: []
+				lines: [],
 			});
 
-			return decode(subfieldLines).reduce((acc, line) => {
-				return acc + header + line + '\n';
-			}, '');
+			return decode(subfieldLines).reduce((acc, line) => acc + header + line + '\n', '');
 		}
 
 		return header + decode(formattedSubfields).join('') + '\n';
 
 		function decode(subfields) {
-			return subfields.map(value => {
-				return decoder.decode(value);
-			});
+			return subfields.map(value => decoder.decode(value));
 		}
 
 		/**
@@ -243,9 +237,7 @@ export function to(record, useCrForContinuingResource = false) {
 			return result;
 
 			function concatByteArrays(a, b, ...args) {
-				const length = [a, b].concat(args).reduce((acc, value) => {
-					return acc + value.length;
-				}, 0);
+				const length = [a, b].concat(args).reduce((acc, value) => acc + value.length, 0);
 				const arr = new Uint8Array(length);
 
 				[a, b].concat(args).reduce((acc, value) => {
@@ -279,9 +271,7 @@ export function to(record, useCrForContinuingResource = false) {
 				function addPrefix(arr) {
 					let prefix;
 
-					if (arr.slice(0, 2).every(value => {
-						return value === DOLLAR;
-					})) {
+					if (arr.slice(0, 2).every(value => value === DOLLAR)) {
 						prefix = '$$9^';
 					} else {
 						prefix = '$$9^^$$' + code;
@@ -394,7 +384,7 @@ export function to(record, useCrForContinuingResource = false) {
 	* Uses FMT SE (instead of CR) for continuing resource, because Aleph does that
 	*/
 	function recordFormat(record, useCrForContinuingResource) {
-		const leader = record.leader;
+		const {leader} = record;
 		const l6 = leader.slice(6, 7);
 		const l7 = leader.slice(7, 8);
 		if (l6 === 'm') {
@@ -540,7 +530,7 @@ export function from(data, validationOptions = {}) {
 
 		if (isFixFieldTag(tag) || tag === 'LDR') {
 			const data = formatControlField(lineStr.substr(18));
-			return {tag: tag, value: data};
+			return {tag, value: data};
 		}
 
 		// Varfield
@@ -550,20 +540,18 @@ export function from(data, validationOptions = {}) {
 		const subfieldData = lineStr.substr(18);
 
 		const subfields = subfieldData.split('$$')
-			.filter(sf => {
-				return sf.length !== 0;
-			})
+			.filter(sf => sf.length !== 0)
 			.map(subfield => {
 				const code = subfield.substr(0, 1);
 				const value = subfield.substr(1);
-				return {code: code, value: value};
+				return {code, value};
 			});
 
 		return {
-			tag: tag,
-			ind1: ind1,
-			ind2: ind2,
-			subfields: subfields
+			tag,
+			ind1,
+			ind2,
+			subfields,
 		};
 
 		// Aleph sequential uses whitespace in control fields formatted as carets

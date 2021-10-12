@@ -29,22 +29,20 @@ describe('text', () => {
 	const fixtureCount = fs.readdirSync(fixturesPath).filter(f => /^from[0-9]+/.test(f)).length;
 
 	describe('#Reader', () => {
-		it('Should emit only an end-event because of invalid data', () => {
-			return new Promise((resolve, reject) => {
-				const filePath = path.resolve(fixturesPath, 'erroneous');
-				const reader = new Converter.Reader(fs.createReadStream(filePath));
+		it('Should emit only an end-event because of invalid data', () => new Promise((resolve, reject) => {
+			const filePath = path.resolve(fixturesPath, 'erroneous');
+			const reader = new Converter.Reader(fs.createReadStream(filePath));
 
-				reader.on('end', () => {
-					resolve();
-				});
-				reader.on('data', () => {
-					reject(new Error('Emitted a data-event'));
-				});
-				reader.on('error', () => {
-					reject(new Error('Emitted an error-event'));
-				});
+			reader.on('end', () => {
+				resolve();
 			});
-		});
+			reader.on('data', () => {
+				reject(new Error('Emitted a data-event'));
+			});
+			reader.on('error', () => {
+				reject(new Error('Emitted an error-event'));
+			});
+		}));
 	});
 
 	describe('#from', () => {
@@ -59,50 +57,46 @@ describe('text', () => {
 		Array.from(Array(fixtureCount)).forEach((e, i) => {
 			const index = i + 1;
 
-			it(`Should convert file from${index} to file to${index}`, () => {
-				return new Promise((resolve, reject) => {
-					const records = [];
-					const fromPath = path.resolve(fixturesPath, `from${index}`);
-					const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
-					const reader = new Converter.Reader(fs.createReadStream(fromPath));
-
-					reader.on('error', reject);
-					reader.on('data', record => records.push(record));
-					reader.on('end', () => {
-						try {
-							expect(records).to.have.length(1);
-							expect(records.shift().toString()).to.equal(expectedRecord);
-							resolve();
-						} catch (err) {
-							reject(err);
-						}
-					});
-				});
-			});
-		});
-
-		it('Should convert multiple records from a file', () => {
-			return new Promise((resolve, reject) => {
+			it(`Should convert file from${index} to file to${index}`, () => new Promise((resolve, reject) => {
 				const records = [];
-				const fromPath = path.resolve(fixturesPath, 'from_multiple');
-				const firstExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple1'), 'utf8');
-				const secondExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple2'), 'utf8');
+				const fromPath = path.resolve(fixturesPath, `from${index}`);
+				const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
 				const reader = new Converter.Reader(fs.createReadStream(fromPath));
 
 				reader.on('error', reject);
 				reader.on('data', record => records.push(record));
 				reader.on('end', () => {
 					try {
-						expect(records).to.have.length(2);
-						expect(records.shift().toString()).to.equal(firstExpectedRecord);
-						expect(records.shift().toString()).to.equal(secondExpectedRecord);
+						expect(records).to.have.length(1);
+						expect(records.shift().toString()).to.equal(expectedRecord);
 						resolve();
 					} catch (err) {
 						reject(err);
 					}
 				});
-			});
+			}));
 		});
+
+		it('Should convert multiple records from a file', () => new Promise((resolve, reject) => {
+			const records = [];
+			const fromPath = path.resolve(fixturesPath, 'from_multiple');
+			const firstExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple1'), 'utf8');
+			const secondExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple2'), 'utf8');
+			const reader = new Converter.Reader(fs.createReadStream(fromPath));
+
+			reader.on('error', reject);
+			reader.on('data', record => records.push(record));
+			reader.on('end', () => {
+				try {
+					expect(records).to.have.length(2);
+					expect(records.shift().toString()).to.equal(firstExpectedRecord);
+					expect(records.shift().toString()).to.equal(secondExpectedRecord);
+					resolve();
+				} catch (err) {
+					reject(err);
+				}
+			});
+		}));
 
 		it('Should work with default validators', async () => {
 			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'out-custom-validators'), 'utf8');

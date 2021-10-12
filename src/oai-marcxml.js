@@ -21,7 +21,7 @@ import {MarcRecord} from '@natlibfi/marc-record';
 import {XMLSerializer, DOMParser, DOMImplementation} from '@xmldom/xmldom';
 
 const NODE_TYPE = {
-	TEXT_NODE: 3
+	TEXT_NODE: 3,
 };
 
 export class Reader extends Readable {
@@ -174,26 +174,22 @@ export function from(xmlString, validationOptions = {}) {
 
 				return {
 					code,
-					value
+					value,
 				};
 			});
 
 			record.appendField({
-				tag: tag,
-				ind1: ind1,
-				ind2: ind2,
-				subfields: subfields
+				tag,
+				ind1,
+				ind2,
+				subfields,
 			});
 		}
 
 		function getChildTextNodeContents(node) {
 			const childNodes = Array.prototype.slice.call(node.childNodes);
-			const textNodes = childNodes.filter(node => {
-				return node.nodeType === NODE_TYPE.TEXT_NODE;
-			});
-			return textNodes.map(node => {
-				return node.data;
-			});
+			const textNodes = childNodes.filter(node => node.nodeType === NODE_TYPE.TEXT_NODE);
+			return textNodes.map(node => node.data);
 		}
 	});
 

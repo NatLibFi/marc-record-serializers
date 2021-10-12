@@ -29,62 +29,56 @@ describe('iso2709', () => {
 	const fixtureCount = fs.readdirSync(fixturesPath).filter(f => /^from/.test(f)).length;
 
 	describe('#Reader', () => {
-		it('Should emit an error because the file does not exist', () => {
-			return new Promise((resolve, reject) => {
-				const reader = new Converter.Reader(fs.createReadStream('foo'));
-				reader.on('data', reject);
-				reader.on('end', reject);
-				reader.on('error', err => {
-					try {
-						expect(err.code).to.equal('ENOENT');
-						resolve();
-					} catch (exp) {
-						reject(exp);
-					}
-				});
+		it('Should emit an error because the file does not exist', () => new Promise((resolve, reject) => {
+			const reader = new Converter.Reader(fs.createReadStream('foo'));
+			reader.on('data', reject);
+			reader.on('end', reject);
+			reader.on('error', err => {
+				try {
+					expect(err.code).to.equal('ENOENT');
+					resolve();
+				} catch (exp) {
+					reject(exp);
+				}
 			});
-		});
+		}));
 
-		it('Should do nothing because of invalid data', () => {
-			return new Promise((resolve, reject) => {
-				const filePath = path.resolve(fixturesPath, 'erroneous');
-				const reader = new Converter.Reader(fs.createReadStream(filePath));
+		it('Should do nothing because of invalid data', () => new Promise((resolve, reject) => {
+			const filePath = path.resolve(fixturesPath, 'erroneous');
+			const reader = new Converter.Reader(fs.createReadStream(filePath));
 
-				reader.on('end', resolve);
-				reader.on('data', () => {
-					reject(new Error('Emitted a data-event'));
-				});
-				reader.on('error', () => {
-					reject(new Error('Emitted an error-event'));
-				});
+			reader.on('end', resolve);
+			reader.on('data', () => {
+				reject(new Error('Emitted a data-event'));
 			});
-		});
+			reader.on('error', () => {
+				reject(new Error('Emitted an error-event'));
+			});
+		}));
 	});
 
 	describe('#from', () => {
 		Array.from(Array(fixtureCount)).forEach((e, i) => {
 			const index = i + 1;
 
-			it(`Should convert file from${index} to file to${index}`, () => {
-				return new Promise((resolve, reject) => {
-					const records = [];
-					const fromPath = path.resolve(fixturesPath, `from${index}`);
-					const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
-					const reader = new Converter.Reader(fs.createReadStream(fromPath));
+			it(`Should convert file from${index} to file to${index}`, () => new Promise((resolve, reject) => {
+				const records = [];
+				const fromPath = path.resolve(fixturesPath, `from${index}`);
+				const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
+				const reader = new Converter.Reader(fs.createReadStream(fromPath));
 
-					reader.on('error', reject);
-					reader.on('data', record => records.push(record));
-					reader.on('end', () => {
-						try {
-							expect(records).to.have.length(1);
-							expect(records.shift().toString()).to.equal(expectedRecord);
-							resolve();
-						} catch (err) {
-							reject(err);
-						}
-					});
+				reader.on('error', reject);
+				reader.on('data', record => records.push(record));
+				reader.on('end', () => {
+					try {
+						expect(records).to.have.length(1);
+						expect(records.shift().toString()).to.equal(expectedRecord);
+						resolve();
+					} catch (err) {
+						reject(err);
+					}
 				});
-			});
+			}));
 		});
 
 		it('Should work with default validators', async () => {

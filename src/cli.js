@@ -134,7 +134,7 @@ async function run() {
 					Reader: Text.Reader,
 					serialize: Text.to,
 					fileSuffix: 'txt',
-					recordCallback: ensureLineBreak
+					recordCallback: ensureLineBreak,
 				};
 			case 'json':
 				return {
@@ -144,14 +144,14 @@ async function run() {
 					outputSuffix: ']',
 					outputSeparator: ',',
 					fileSuffix: 'json',
-					recordCallback: defaultRecordCallback
+					recordCallback: defaultRecordCallback,
 				};
 			case 'alephseq':
 				return {
 					Reader: AlephSequential.Reader,
 					serialize: AlephSequential.to,
 					fileSuffix: 'seq',
-					recordCallback: ensureLineBreak
+					recordCallback: ensureLineBreak,
 				};
 			case 'marcxml':
 				return {
@@ -160,7 +160,7 @@ async function run() {
 					outputPrefix: '<?xml version="1.0" encoding="UTF-8"?><records>',
 					outputSuffix: '</records>',
 					fileSuffix: 'xml',
-					recordCallback: removeXmlDeclaration
+					recordCallback: removeXmlDeclaration,
 				};
 			case 'oai-marcxml':
 				return {
@@ -169,14 +169,14 @@ async function run() {
 					outputPrefix: '<?xml version="1.0" encoding="UTF-8"?><records>',
 					outputSuffix: '</records>',
 					fileSuffix: 'xml',
-					recordCallback: removeXmlDeclaration
+					recordCallback: removeXmlDeclaration,
 				};
 			case 'iso2709':
 				return {
 					Reader: ISO2709.Reader,
 					serialize: ISO2709.to,
 					fileSuffix: 'marc',
-					recordCallback: defaultRecordCallback
+					recordCallback: defaultRecordCallback,
 				};
 			default:
 				throw new Error(`Unsupported format ${type}`);

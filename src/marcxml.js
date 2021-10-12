@@ -77,9 +77,9 @@ export function to(record, {omitDeclaration = false, indent = false} = {}) {
 		record: {
 			...generateFields(),
 			$: {
-				xmlns: 'http://www.loc.gov/MARC21/slim'
-			}
-		}
+				xmlns: 'http://www.loc.gov/MARC21/slim',
+			},
+		},
 	};
 
 	return toXML(obj);
@@ -94,7 +94,7 @@ export function to(record, {omitDeclaration = false, indent = false} = {}) {
 
 				return {$: {tag: [tag]}};
 			}),
-			datafield: record.getDatafields().map(transformDataField)
+			datafield: record.getDatafields().map(transformDataField),
 		};
 
 		function transformDataField({tag, ind1, ind2, subfields}) {
@@ -102,9 +102,9 @@ export function to(record, {omitDeclaration = false, indent = false} = {}) {
 				$: {
 					tag: [tag],
 					ind1: [ind1],
-					ind2: [ind2]
+					ind2: [ind2],
 				},
-				subfield: transformSubfields()
+				subfield: transformSubfields(),
 			};
 
 			function transformSubfields() {
@@ -134,8 +134,8 @@ export function to(record, {omitDeclaration = false, indent = false} = {}) {
 				return omitDeclaration ? {headless: true} : {
 					xmldec: {
 						version: '1.0',
-						encoding: 'UTF-8'
-					}
+						encoding: 'UTF-8',
+					},
 				};
 			}
 
@@ -143,8 +143,8 @@ export function to(record, {omitDeclaration = false, indent = false} = {}) {
 				return indent ? {
 					renderOpts: {
 						pretty: true,
-						indent: '\t'
-					}
+						indent: '\t',
+					},
 				} : {renderOpts: {pretty: false}};
 			}
 		}
