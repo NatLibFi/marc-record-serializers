@@ -47,7 +47,7 @@ async function run() {
 			.scriptName('marc-record-serializers')
 			.command('$0 <inputFormat> <outputFormat> <file>', '', yargs => {
 				yargs
-					.positional('inputFormat', {type: 'string', describe: 'Output format'})
+					.positional('inputFormat', {type: 'string', describe: 'Input format'})
 					.positional('outputFormat', {type: 'string', describe: 'Output format'})
 					.positional('file', {type: 'string', describe: 'File to read'})
 					.epilog(FORMAT_USAGE);
@@ -59,7 +59,7 @@ async function run() {
 		const {serialize, outputPrefix, outputSuffix, outputSeparator, fileSuffix, recordCallback} = getService(args.outputFormat);
 		const {Reader} = getService(args.inputFormat);
 		const reader = new Reader(fs.createReadStream(args.file));
-		const spinner = ora('Converting records').start();
+		const spinner = ora('Converting records.\n').start();
 
 		if (!args.validate) {
 			MarcRecord.setValidationOptions({fields: false, subfields: false, subfieldValues: false});
