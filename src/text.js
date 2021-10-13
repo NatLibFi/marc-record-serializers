@@ -16,54 +16,60 @@
 *
 */
 
-import {Readable} from 'stream';
 import {MarcRecord} from '@natlibfi/marc-record';
+import {EventEmitter} from 'events';
 
-export class Reader extends Readable {
-	constructor(stream, validationOptions = {}) {
-		MarcRecord.setValidationOptions(validationOptions);
-		super(stream);
-		this.buffer = [];
+export function reader(stream, validationOptions = {}) {
+  const emitter = new class extends EventEmitter { }();
+  var buffer = ''; // eslint-disable-line
 
-		const self = this;
+  MarcRecord.setValidationOptions(validationOptions);
 
-		stream.on('data', data => {
-			this.buffer += data;
-			flush();
-		});
+  start();
 
-		stream.on('end', () => {
-			flush(undefined, true);
-			this.emit('end');
-		});
+  return emitter;
 
-		stream.on('error', error => {
-			/* istanbul ignore next: Only occurs on I/O errors */
-			this.emit('error', error);
-		});
+  function start() {
+    stream.on('data', data => {
+      buffer += data; // eslint-disable-line functional/immutable-data
+      flush();
+    });
 
-		function flush(re = /(LDR)/g, force = false) {
-			const result = re.exec(self.buffer);
-			if (result) {
-				if (result.index > 0 || force) {
-					const str = self.buffer.slice(0, result.index || undefined).replace(/\n+$/, '');
+    stream.on('end', () => {
+      flush(undefined, true);
+      emitter.emit('end');
+    });
 
-					self.emit('data', MarcRecord.fromString(str));
-					self.buffer = self.buffer.slice(result.index);
+    stream.on('error', error => {
+      /* istanbul ignore next: Only occurs on I/O errors */
+      emitter.emit('error', error);
+    });
 
-					flush();
-				} else {
-					flush(re);
-				}
-			}
-		}
-	}
+    function flush(re = /(LDR)/gu, force = false) {
+      console.log(`Searching LDR from: ${buffer}`);
+      const result = re.exec(buffer);
+      if (result) {
+        console.log(`Result: ${result}, ${result.index}`);
+        console.log(`Force: ${force}`);
+        if (result.index > 0 || force) {
+          const str = buffer.slice(0, result.index || undefined).replace(/\n+$/u, '');
+          console.log(`Convert to record: ${str}`);
+          emitter.emit('data', MarcRecord.fromString(str));
+          buffer = buffer.slice(result.index === 0 ? buffer.length : result.index);
+          console.log(`Remaining buffer: ${buffer}`);
+          return flush();
+        }
+
+        return flush(re);
+      }
+    }
+  }
 }
 
 export function to(record) {
-	return record.toString();
+  return record.toString();
 }
 
 export function from(str, validationOptions = {}) {
-	return MarcRecord.fromString(str, validationOptions);
+  return MarcRecord.fromString(str, validationOptions);
 }

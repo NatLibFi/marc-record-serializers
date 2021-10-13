@@ -17,7 +17,6 @@
 *
 */
 
-'use strict';
 
 import fs from 'fs';
 import path from 'path';
@@ -34,7 +33,7 @@ import {MarcRecord} from '@natlibfi/marc-record';
 run();
 
 async function run() {
-	const FORMAT_USAGE = `Supported formats:
+  const FORMAT_USAGE = `Supported formats:
 	text
 	json
 	alephseq
@@ -42,156 +41,156 @@ async function run() {
 	oai-marcxml
 	iso2709`;
 
-	try {
-		const args = yargs
-			.scriptName('marc-record-serializers')
-			.command('$0 <inputFormat> <outputFormat> <file>', '', yargs => {
-				yargs
-					.positional('inputFormat', {type: 'string', describe: 'Input format'})
-					.positional('outputFormat', {type: 'string', describe: 'Output format'})
-					.positional('file', {type: 'string', describe: 'File to read'})
-					.epilog(FORMAT_USAGE);
-			})
-			.option('v', {alias: 'validate', default: true, type: 'boolean', describe: 'Validate MARC record structure'})
-			.option('d', {alias: 'outputDirectory', type: 'string', describe: 'Write records to individual files in DIRECTORY'})
-			.parse();
+  try {
+    const args = yargs
+      .scriptName('marc-record-serializers')
+      .command('$0 <inputFormat> <outputFormat> <file>', '', yargs => {
+        yargs
+          .positional('inputFormat', {type: 'string', describe: 'Input format'})
+          .positional('outputFormat', {type: 'string', describe: 'Output format'})
+          .positional('file', {type: 'string', describe: 'File to read'})
+          .epilog(FORMAT_USAGE);
+      })
+      .option('v', {alias: 'validate', default: true, type: 'boolean', describe: 'Validate MARC record structure'})
+      .option('d', {alias: 'outputDirectory', type: 'string', describe: 'Write records to individual files in DIRECTORY'})
+      .parse();
 
-		const {serialize, outputPrefix, outputSuffix, outputSeparator, fileSuffix, recordCallback} = getService(args.outputFormat);
-		const {Reader} = getService(args.inputFormat);
-		const reader = new Reader(fs.createReadStream(args.file));
-		const spinner = ora('Converting records.\n').start();
+    const {serialize, outputPrefix, outputSuffix, outputSeparator, fileSuffix, recordCallback} = getService(args.outputFormat);
+    const {Reader} = getService(args.inputFormat);
+    const reader = new Reader(fs.createReadStream(args.file));
+    const spinner = ora('Converting records.\n').start();
 
-		if (!args.validate) {
-			MarcRecord.setValidationOptions({fields: false, subfields: false, subfieldValues: false});
-		}
+    if (!args.validate) {
+      MarcRecord.setValidationOptions({fields: false, subfields: false, subfieldValues: false});
+    }
 
-		await new Promise((resolve, reject) => {
-			let count = 0;
+    await new Promise((resolve, reject) => {
+      let count = 0;
 
-			if (!args.outputDirectory && outputPrefix) {
-				process.stdout.write(outputPrefix);
-			}
+      if (!args.outputDirectory && outputPrefix) {
+        process.stdout.write(outputPrefix);
+      }
 
-			reader.on('error', err => {
-				if ('validationResults' in err) {
-					const message = `Record is invalid: ${JSON.stringify(err.validationResults.errors, undefined, 2)}`;
-					reject(new Error(message));
-				} else {
-					reject(err);
-				}
-			});
+      reader.on('error', err => {
+        if ('validationResults' in err) {
+          const message = `Record is invalid: ${JSON.stringify(err.validationResults.errors, undefined, 2)}`;
+          reject(new Error(message));
+        } else {
+          reject(err);
+        }
+      });
 
-			reader.on('end', () => {
-				spinner.succeed();
+      reader.on('end', () => {
+        spinner.succeed();
 
-				if (args.outputDirectory) {
-					console.log(`Wrote ${count} records to ${args.outputDirectory}`);
-				} else if (outputSuffix) {
-					process.stdout.write(outputSuffix);
-				}
+        if (args.outputDirectory) {
+          console.log(`Wrote ${count} records to ${args.outputDirectory}`);
+        } else if (outputSuffix) {
+          process.stdout.write(outputSuffix);
+        }
 
-				resolve();
-			});
+        resolve();
+      });
 
-			reader.on('data', record => {
-				if (args.outputDirectory) {
-					const filename = `${String(count).padStart(5, '0')}.${fileSuffix}`;
+      reader.on('data', record => {
+        if (args.outputDirectory) {
+          const filename = `${String(count).padStart(5, '0')}.${fileSuffix}`;
 
-					if (!fs.existsSync(args.outputDirectory)) {
-						fs.mkdirSync(args.outputDirectory);
-					}
+          if (!fs.existsSync(args.outputDirectory)) {
+            fs.mkdirSync(args.outputDirectory);
+          }
 
-					fs.writeFileSync(path.join(args.outputDirectory, filename), serialize(record));
-				} else {
-					const str = serialize(record);
+          fs.writeFileSync(path.join(args.outputDirectory, filename), serialize(record));
+        } else {
+          const str = serialize(record);
 
-					if (outputSeparator && count > 0) {
-						process.stdout.write(outputSeparator);
-					}
+          if (outputSeparator && count > 0) {
+            process.stdout.write(outputSeparator);
+          }
 
-					process.stdout.write(recordCallback(str));
-				}
+          process.stdout.write(recordCallback(str));
+        }
 
-				count++;
-			});
-		});
+        count++;
+      });
+    });
 
-		process.exit();
-	} catch (err) {
-		if (process.env.NODE_ENV === 'debug') {
-			console.error(err);
-			process.exit(-1);
-		}
+    process.exit();
+  } catch (err) {
+    if (process.env.NODE_ENV === 'debug') {
+      console.error(err);
+      process.exit(-1);
+    }
 
-		console.error(`ERROR: ${err.message}`);
-		process.exit(-1);
-	}
+    console.error(`ERROR: ${err.message}`);
+    process.exit(-1);
+  }
 
-	function getService(type) {
-		switch (type) {
-			case 'text':
-				return {
-					Reader: Text.Reader,
-					serialize: Text.to,
-					fileSuffix: 'txt',
-					recordCallback: ensureLineBreak,
-				};
-			case 'json':
-				return {
-					Reader: Json.Reader,
-					serialize: Json.to,
-					outputPrefix: '[',
-					outputSuffix: ']',
-					outputSeparator: ',',
-					fileSuffix: 'json',
-					recordCallback: defaultRecordCallback,
-				};
-			case 'alephseq':
-				return {
-					Reader: AlephSequential.Reader,
-					serialize: AlephSequential.to,
-					fileSuffix: 'seq',
-					recordCallback: ensureLineBreak,
-				};
-			case 'marcxml':
-				return {
-					Reader: MARCXML.Reader,
-					serialize: MARCXML.to,
-					outputPrefix: '<?xml version="1.0" encoding="UTF-8"?><records>',
-					outputSuffix: '</records>',
-					fileSuffix: 'xml',
-					recordCallback: removeXmlDeclaration,
-				};
-			case 'oai-marcxml':
-				return {
-					Reader: OAI_MARCXML.Reader,
-					serialize: OAI_MARCXML.to,
-					outputPrefix: '<?xml version="1.0" encoding="UTF-8"?><records>',
-					outputSuffix: '</records>',
-					fileSuffix: 'xml',
-					recordCallback: removeXmlDeclaration,
-				};
-			case 'iso2709':
-				return {
-					Reader: ISO2709.Reader,
-					serialize: ISO2709.to,
-					fileSuffix: 'marc',
-					recordCallback: defaultRecordCallback,
-				};
-			default:
-				throw new Error(`Unsupported format ${type}`);
-		}
+  function getService(type) {
+    switch (type) {
+    case 'text':
+      return {
+        Reader: Text.Reader,
+        serialize: Text.to,
+        fileSuffix: 'txt',
+        recordCallback: ensureLineBreak
+      };
+    case 'json':
+      return {
+        Reader: Json.Reader,
+        serialize: Json.to,
+        outputPrefix: '[',
+        outputSuffix: ']',
+        outputSeparator: ',',
+        fileSuffix: 'json',
+        recordCallback: defaultRecordCallback
+      };
+    case 'alephseq':
+      return {
+        Reader: AlephSequential.Reader,
+        serialize: AlephSequential.to,
+        fileSuffix: 'seq',
+        recordCallback: ensureLineBreak
+      };
+    case 'marcxml':
+      return {
+        Reader: MARCXML.Reader,
+        serialize: MARCXML.to,
+        outputPrefix: '<?xml version="1.0" encoding="UTF-8"?><records>',
+        outputSuffix: '</records>',
+        fileSuffix: 'xml',
+        recordCallback: removeXmlDeclaration
+      };
+    case 'oai-marcxml':
+      return {
+        Reader: OAI_MARCXML.Reader,
+        serialize: OAI_MARCXML.to,
+        outputPrefix: '<?xml version="1.0" encoding="UTF-8"?><records>',
+        outputSuffix: '</records>',
+        fileSuffix: 'xml',
+        recordCallback: removeXmlDeclaration
+      };
+    case 'iso2709':
+      return {
+        Reader: ISO2709.Reader,
+        serialize: ISO2709.to,
+        fileSuffix: 'marc',
+        recordCallback: defaultRecordCallback
+      };
+    default:
+      throw new Error(`Unsupported format ${type}`);
+    }
 
-		function defaultRecordCallback(s) {
-			return s;
-		}
+    function defaultRecordCallback(s) {
+      return s;
+    }
 
-		function ensureLineBreak(s) {
-			return s.endsWith('\n') ? s : `${s}\n`;
-		}
+    function ensureLineBreak(s) {
+      return s.endsWith('\n') ? s : `${s}\n`;
+    }
 
-		function removeXmlDeclaration(s) {
-			return s.replace(/^<\?xml version="1\.0" encoding="UTF-8"\?>/, '');
-		}
-	}
+    function removeXmlDeclaration(s) {
+      return s.replace(/^<\?xml version="1\.0" encoding="UTF-8"\?>/, '');
+    }
+  }
 }

@@ -21,32 +21,32 @@ import {MarcRecord} from '@natlibfi/marc-record';
 import StreamArray from 'stream-json/streamers/StreamArray';
 
 export class Reader extends Readable {
-	constructor(stream, validationOptions = {}) {
-		super(stream);
+  constructor(stream, validationOptions = {}) {
+    super(stream);
 
-		const pipeline = stream.pipe(StreamArray.withParser());
-		pipeline.on('data', data => {
-			try {
-				this.emit('data', new MarcRecord(data.value, validationOptions));
-			} catch (err) {
-				this.emit('error', err);
-			}
-		});
+    const pipeline = stream.pipe(StreamArray.withParser());
+    pipeline.on('data', data => {
+      try {
+        this.emit('data', new MarcRecord(data.value, validationOptions));
+      } catch (err) {
+        this.emit('error', err);
+      }
+    });
 
-		pipeline.on('end', () => {
-			this.emit('end');
-		});
+    pipeline.on('end', () => {
+      this.emit('end');
+    });
 
-		pipeline.on('error', error => {
-			this.emit('error', error);
-		});
-	}
+    pipeline.on('error', error => {
+      this.emit('error', error);
+    });
+  }
 }
 
 export function to(record) {
-	return JSON.stringify(record.toObject(), undefined, 2);
+  return JSON.stringify(record.toObject(), undefined, 2);
 }
 
 export function from(str, validationOptions = {}) {
-	return new MarcRecord(JSON.parse(str), validationOptions);
+  return new MarcRecord(JSON.parse(str), validationOptions);
 }

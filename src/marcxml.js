@@ -24,178 +24,178 @@ const debug = createDebugLogger('@natlibfi/marc-record-serializers:marcxml');
 const debugData = debug.extend('data');
 
 export class Reader extends Readable {
-	constructor(stream, validationOptions = {}) {
-		super(stream);
-		this.charbuffer = '';
+  constructor(stream, validationOptions = {}) {
+    super(stream);
+    this.charbuffer = '';
 
-		stream.on('end', () => {
-			this.emit('end');
-		});
+    stream.on('end', () => {
+      this.emit('end');
+    });
 
-		stream.on('error', error => {
-			this.emit('error', error);
-		});
+    stream.on('error', error => {
+      this.emit('error', error);
+    });
 
-		stream.on('data', async data => {
-			this.charbuffer += data.toString();
+    stream.on('data', async data => {
+      this.charbuffer += data.toString();
 
-			while (1) { // eslint-disable-line no-constant-condition
-				let pos = this.charbuffer.indexOf('<record');
+      while (1) { // eslint-disable-line no-constant-condition
+        let pos = this.charbuffer.indexOf('<record');
 
-				if (pos === -1) {
-					return;
-				}
+        if (pos === -1) {
+          return;
+        }
 
-				debug(`Found record start "<record" in pos ${pos}`);
+        debug(`Found record start "<record" in pos ${pos}`);
 
-				this.charbuffer = this.charbuffer.substr(pos);
-				pos = this.charbuffer.indexOf('</record>');
-				if (pos === -1) {
-					return;
-				}
+        this.charbuffer = this.charbuffer.substr(pos);
+        pos = this.charbuffer.indexOf('</record>');
+        if (pos === -1) {
+          return;
+        }
 
-				debug(`Found record end "</record>" in pos ${pos}`);
+        debug(`Found record end "</record>" in pos ${pos}`);
 
-				const raw = this.charbuffer.substr(0, pos + 9);
-				this.charbuffer = this.charbuffer.substr(pos + 9);
+        const raw = this.charbuffer.substr(0, pos + 9);
+        this.charbuffer = this.charbuffer.substr(pos + 9);
 
-				debugData(`Found record: ${raw}`);
+        debugData(`Found record: ${raw}`);
 
-				try {
-					debug('Emitting record');
-					this.emit('data', await from(raw, validationOptions)); // eslint-disable-line no-await-in-loop
-				} catch (e) {
-					this.emit('error', e);
-				}
-			}
-		});
-	}
+        try {
+          debug('Emitting record');
+          this.emit('data', await from(raw, validationOptions)); // eslint-disable-line no-await-in-loop
+        } catch (e) {
+          this.emit('error', e);
+        }
+      }
+    });
+  }
 }
 
 export function to(record, {omitDeclaration = false, indent = false} = {}) {
-	const obj = {
-		record: {
-			...generateFields(),
-			$: {
-				xmlns: 'http://www.loc.gov/MARC21/slim',
-			},
-		},
-	};
+  const obj = {
+    record: {
+      ...generateFields(),
+      $: {
+        xmlns: 'http://www.loc.gov/MARC21/slim'
+      }
+    }
+  };
 
-	return toXML(obj);
+  return toXML(obj);
 
-	function generateFields() {
-		return {
-			leader: [record.leader],
-			controlfield: record.getControlfields().map(({value: _, tag}) => {
-				if (_) {
-					return {_, $: {tag: [tag]}};
-				}
+  function generateFields() {
+    return {
+      leader: [record.leader],
+      controlfield: record.getControlfields().map(({value: _, tag}) => {
+        if (_) {
+          return {_, $: {tag: [tag]}};
+        }
 
-				return {$: {tag: [tag]}};
-			}),
-			datafield: record.getDatafields().map(transformDataField),
-		};
+        return {$: {tag: [tag]}};
+      }),
+      datafield: record.getDatafields().map(transformDataField)
+    };
 
-		function transformDataField({tag, ind1, ind2, subfields}) {
-			return {
-				$: {
-					tag: [tag],
-					ind1: [ind1],
-					ind2: [ind2],
-				},
-				subfield: transformSubfields(),
-			};
+    function transformDataField({tag, ind1, ind2, subfields}) {
+      return {
+        $: {
+          tag: [tag],
+          ind1: [ind1],
+          ind2: [ind2]
+        },
+        subfield: transformSubfields()
+      };
 
-			function transformSubfields() {
-				return subfields.map(({code, value: _}) => {
-					if (_) {
-						return {_, $: {code: [code]}};
-					}
+      function transformSubfields() {
+        return subfields.map(({code, value: _}) => {
+          if (_) {
+            return {_, $: {code: [code]}};
+          }
 
-					return {$: {code: [code]}};
-				});
-			}
-		}
-	}
+          return {$: {code: [code]}};
+        });
+      }
+    }
+  }
 
-	function toXML() {
-		try {
-			return new Builder(generateOptions()).buildObject(obj);
-		} catch (err) {
-			/* istanbul ignore next: Too generic to test */
-			throw new Error(`XML conversion failed ${err.message} for object: ${JSON.stringify(obj)}`);
-		}
+  function toXML() {
+    try {
+      return new Builder(generateOptions()).buildObject(obj);
+    } catch (err) {
+      /* istanbul ignore next: Too generic to test */
+      throw new Error(`XML conversion failed ${err.message} for object: ${JSON.stringify(obj)}`);
+    }
 
-		function generateOptions() {
-			return {...generateDeclr(), ...generateRender()};
+    function generateOptions() {
+      return {...generateDeclr(), ...generateRender()};
 
-			function generateDeclr() {
-				return omitDeclaration ? {headless: true} : {
-					xmldec: {
-						version: '1.0',
-						encoding: 'UTF-8',
-					},
-				};
-			}
+      function generateDeclr() {
+        return omitDeclaration ? {headless: true} : {
+          xmldec: {
+            version: '1.0',
+            encoding: 'UTF-8'
+          }
+        };
+      }
 
-			function generateRender() {
-				return indent ? {
-					renderOpts: {
-						pretty: true,
-						indent: '\t',
-					},
-				} : {renderOpts: {pretty: false}};
-			}
-		}
-	}
+      function generateRender() {
+        return indent ? {
+          renderOpts: {
+            pretty: true,
+            indent: '\t'
+          }
+        } : {renderOpts: {pretty: false}};
+      }
+    }
+  }
 }
 
 export async function from(str, validationOptions = {}) {
-	const record = new MarcRecord(undefined, validationOptions);
-	const obj = await toObject();
+  const record = new MarcRecord(undefined, validationOptions);
+  const obj = await toObject();
 
-	record.leader = obj.record.leader?.[0] || '';
+  record.leader = obj.record.leader?.[0] || '';
 
-	addControlFields();
-	addDataFields();
+  addControlFields();
+  addDataFields();
 
-	return record;
+  return record;
 
-	function addControlFields() {
-		const fields = obj.record.controlfield || [];
+  function addControlFields() {
+    const fields = obj.record.controlfield || [];
 
-		fields.forEach(({_: value, $: {tag}}) => (record.appendField({tag, value})));
-	}
+    fields.forEach(({_: value, $: {tag}}) => record.appendField({tag, value}));
+  }
 
-	function addDataFields() {
-		const fields = obj.record.datafield || [];
+  function addDataFields() {
+    const fields = obj.record.datafield || [];
 
-		fields.forEach(({subfield, $: {tag, ind1, ind2}}) => {
-			const subfields = parseSubfields();
-			record.appendField({tag, ind1, ind2, subfields});
+    fields.forEach(({subfield, $: {tag, ind1, ind2}}) => {
+      const subfields = parseSubfields();
+      record.appendField({tag, ind1, ind2, subfields});
 
-			function parseSubfields() {
-				const subfields = subfield || [];
-				return subfields.map(({_: value, $: {code}}) => {
-					const result = value === undefined ? {code} : {code, value};
-					return result;
-				});
-			}
-		});
-	}
+      function parseSubfields() {
+        const subfields = subfield || [];
+        return subfields.map(({_: value, $: {code}}) => {
+          const result = value === undefined ? {code} : {code, value};
+          return result;
+        });
+      }
+    });
+  }
 
-	function toObject() {
-		return new Promise((resolve, reject) => {
-			new Parser().parseString(str, (err, obj) => {
-				if (err) {
-					/* istanbul ignore next: Generic error */ return reject(err);
-				}
+  function toObject() {
+    return new Promise((resolve, reject) => {
+      new Parser().parseString(str, (err, obj) => {
+        if (err) {
+          /* istanbul ignore next: Generic error */ return reject(err);
+        }
 
-				resolve(obj);
-			});
-		});
-	}
+        resolve(obj);
+      });
+    });
+  }
 }
 
 /* Function getLogger() {

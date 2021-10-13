@@ -16,7 +16,6 @@
 *
 */
 
-'use strict';
 
 import fs from 'fs';
 import path from 'path';
@@ -25,98 +24,101 @@ import {MarcRecord} from '@natlibfi/marc-record';
 import * as Converter from './text';
 
 describe('text', () => {
-	const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'text');
-	const fixtureCount = fs.readdirSync(fixturesPath).filter(f => /^from[0-9]+/.test(f)).length;
+  const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'text');
+  const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from[0-9]+/u).test(f)).length;
 
-	describe('#Reader', () => {
-		it('Should emit only an end-event because of invalid data', () => new Promise((resolve, reject) => {
-			const filePath = path.resolve(fixturesPath, 'erroneous');
-			const reader = new Converter.Reader(fs.createReadStream(filePath));
+  describe('#Reader', () => {
+    it('Should emit only an end-event because of invalid data', () => new Promise((resolve, reject) => {
+      const filePath = path.resolve(fixturesPath, 'erroneous');
+      const reader = new Converter.reader(fs.createReadStream(filePath));
 
-			reader.on('end', () => {
-				resolve();
-			});
-			reader.on('data', () => {
-				reject(new Error('Emitted a data-event'));
-			});
-			reader.on('error', () => {
-				reject(new Error('Emitted an error-event'));
-			});
-		}));
-	});
+      reader.on('end', () => {
+        resolve();
+      });
+      reader.on('data', () => {
+        reject(new Error('Emitted a data-event'));
+      });
+      reader.on('error', () => {
+        reject(new Error('Emitted an error-event'));
+      });
+    }));
+  });
 
-	describe('#from', () => {
-		it('Should convert a single record', () => {
-			const fromPath = path.resolve(fixturesPath, 'from1');
-			const str = fs.readFileSync(fromPath, 'utf8');
-			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to1'), 'utf8');
+  describe('#from', () => {
+    it('Should convert a single record', () => {
+      const fromPath = path.resolve(fixturesPath, 'from1');
+      const str = fs.readFileSync(fromPath, 'utf8');
+      const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to1'), 'utf8');
 
-			expect(Converter.from(str).toString()).to.equal(expectedRecord);
-		});
+      expect(Converter.from(str).toString()).to.equal(expectedRecord);
+    });
 
-		Array.from(Array(fixtureCount)).forEach((e, i) => {
-			const index = i + 1;
+    Array.from(Array(fixtureCount)).forEach((e, i) => {
+      const index = i + 1;
 
-			it(`Should convert file from${index} to file to${index}`, () => new Promise((resolve, reject) => {
-				const records = [];
-				const fromPath = path.resolve(fixturesPath, `from${index}`);
-				const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
-				const reader = new Converter.Reader(fs.createReadStream(fromPath));
+      it(`Should convert file from${index} to file to${index}`, () => new Promise((resolve, reject) => {
+        const records = [];
+        const fromPath = path.resolve(fixturesPath, `from${index}`);
+        const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
+        const reader = new Converter.reader(fs.createReadStream(fromPath));
 
-				reader.on('error', reject);
-				reader.on('data', record => records.push(record));
-				reader.on('end', () => {
-					try {
-						expect(records).to.have.length(1);
-						expect(records.shift().toString()).to.equal(expectedRecord);
-						resolve();
-					} catch (err) {
-						reject(err);
-					}
-				});
-			}));
-		});
+        reader.on('error', reject);
+        reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
+        reader.on('end', () => {
+          try {
+            expect(records).to.have.length(1);
+            const [firstRecord] = records;
+            expect(firstRecord.toString()).to.equal(expectedRecord);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        });
+      }));
+    });
 
-		it('Should convert multiple records from a file', () => new Promise((resolve, reject) => {
-			const records = [];
-			const fromPath = path.resolve(fixturesPath, 'from_multiple');
-			const firstExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple1'), 'utf8');
-			const secondExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple2'), 'utf8');
-			const reader = new Converter.Reader(fs.createReadStream(fromPath));
+    it('Should convert multiple records from a file', () => new Promise((resolve, reject) => {
+      const records = [];
+      const fromPath = path.resolve(fixturesPath, 'from_multiple');
+      const firstExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple1'), 'utf8');
+      const secondExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple2'), 'utf8');
+      const reader = new Converter.reader(fs.createReadStream(fromPath));
 
-			reader.on('error', reject);
-			reader.on('data', record => records.push(record));
-			reader.on('end', () => {
-				try {
-					expect(records).to.have.length(2);
-					expect(records.shift().toString()).to.equal(firstExpectedRecord);
-					expect(records.shift().toString()).to.equal(secondExpectedRecord);
-					resolve();
-				} catch (err) {
-					reject(err);
-				}
-			});
-		}));
+      reader.on('error', reject);
+      reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
+      reader.on('end', () => {
+        try {
+          console.log(records);
+          expect(records).to.have.length(2);
+          const [firstRecord, secondRecord] = records;
+          expect(firstRecord.toString()).to.equal(firstExpectedRecord);
+          expect(secondRecord.toString()).to.equal(secondExpectedRecord);
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }));
 
-		it('Should work with default validators', async () => {
-			const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'out-custom-validators'), 'utf8');
-			const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'in-custom-validators'), 'utf8');
-			const record = await Converter.from(sourceRecord);
-			expect(JSON.stringify(record)).to.equal(expectedRecord);
-		});
-	});
+    it('Should work with default validators', async () => {
+      const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'out-custom-validators'), 'utf8');
+      const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'in-custom-validators'), 'utf8');
+      const record = await Converter.from(sourceRecord);
+      expect(JSON.stringify(record)).to.equal(expectedRecord);
+    });
+  });
 
-	describe('#to', () => {
-		Array.from(Array(fixtureCount)).forEach((e, i) => {
-			const index = i + 1;
+  describe('#to', () => {
+    Array.from(Array(fixtureCount)).forEach((e, i) => {
+      const index = i + 1;
 
-			it(`Should convert file to${index} to file from${index}`, () => {
-				const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `from${index}`), 'utf8');
-				const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
-				const record = MarcRecord.fromString(sourceRecord);
+      it(`Should convert file to${index} to file from${index}`, () => {
+        const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `from${index}`), 'utf8');
+        const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
+        const record = MarcRecord.fromString(sourceRecord);
 
-				expect(Converter.to(record)).to.equal(expectedRecord);
-			});
-		});
-	});
+        expect(Converter.to(record)).to.equal(expectedRecord);
+      });
+    });
+  });
 });

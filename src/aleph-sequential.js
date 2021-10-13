@@ -27,97 +27,97 @@ const debug = createDebugLogger('@natlibfi/marc-record-serializers:aleph-sequent
 const debugData = debug.extend('data');
 
 export class Reader extends Readable {
-	constructor(stream, validationOptions = {}, genF001fromSysNo = false) {
-		super(stream);
-		this.charbuffer = '';
-		this.linebuffer = [];
-		this.count = 0;
+  constructor(stream, validationOptions = {}, genF001fromSysNo = false) {
+    super(stream);
+    this.charbuffer = '';
+    this.linebuffer = [];
+    this.count = 0;
 
-		stream.on('data', data => {
-			this.charbuffer += data.toString();
+    stream.on('data', data => {
+      this.charbuffer += data.toString();
 
-			while (1) { // eslint-disable-line no-constant-condition
-				const pos = this.charbuffer.indexOf('\n');
-				if (pos === -1) {
-					break;
-				}
+      while (1) { // eslint-disable-line no-constant-condition
+        const pos = this.charbuffer.indexOf('\n');
+        if (pos === -1) {
+          break;
+        }
 
-				const raw = this.charbuffer.substr(0, pos);
-				this.charbuffer = this.charbuffer.substr(pos + 1);
-				this.linebuffer.push(raw);
-			}
+        const raw = this.charbuffer.substr(0, pos);
+        this.charbuffer = this.charbuffer.substr(pos + 1);
+        this.linebuffer.push(raw);
+      }
 
-			if (this.linebuffer.length > 0) {
-				if (this.currentId === undefined) {
-					this.currentId = getIdFromLine(this.linebuffer[0]);
-				}
+      if (this.linebuffer.length > 0) {
+        if (this.currentId === undefined) {
+          this.currentId = getIdFromLine(this.linebuffer[0]);
+        }
 
-				let i = 0;
-				while (i < this.linebuffer.length) {
-					if (this.linebuffer[i].length < 9) {
-						break;
-					}
+        let i = 0;
+        while (i < this.linebuffer.length) {
+          if (this.linebuffer[i].length < 9) {
+            break;
+          }
 
-					const lineId = getIdFromLine(this.linebuffer[i]);
+          const lineId = getIdFromLine(this.linebuffer[i]);
 
-					if (this.currentId !== lineId) {
-						const record = this.linebuffer.splice(0, i);
+          if (this.currentId !== lineId) {
+            const record = this.linebuffer.splice(0, i);
 
-						this.count++;
+            this.count++;
 
-						try {
-							this.emit('data', securef001(record));
-						} catch (excp) {
-							this.emit('error', excp);
-							break;
-						}
+            try {
+              this.emit('data', securef001(record));
+            } catch (excp) {
+              this.emit('error', excp);
+              break;
+            }
 
-						this.currentId = lineId;
-						i = 0;
-					}
+            this.currentId = lineId;
+            i = 0;
+          }
 
-					i++;
-				}
-			}
-		});
+          i++;
+        }
+      }
+    });
 
-		stream.on('end', () => {
-			if (this.linebuffer.length > 0) {
-				this.count++;
-				try {
-					this.emit('data', securef001(this.linebuffer));
-				} catch (excp) {
-					this.emit('error', excp);
-					return;
-				}
-			}
+    stream.on('end', () => {
+      if (this.linebuffer.length > 0) {
+        this.count++;
+        try {
+          this.emit('data', securef001(this.linebuffer));
+        } catch (excp) {
+          this.emit('error', excp);
+          return;
+        }
+      }
 
-			this.emit('end');
-		});
+      this.emit('end');
+    });
 
-		stream.on('error', error => {
-			this.emit('error', error);
-		});
+    stream.on('error', error => {
+      this.emit('error', error);
+    });
 
-		function securef001(lineArray) {
-			const currentId = lineArray[0].slice(0, 9);
-			const marcRecord = from(lineArray.join('\n'), validationOptions);
-			const [f001] = marcRecord.get('001');
-			if (f001 === undefined && genF001fromSysNo) {
-				marcRecord.insertField({
-					tag: '001',
-					value: currentId,
-				});
-				return marcRecord;
-			}
+    function securef001(lineArray) {
+      const currentId = lineArray[0].slice(0, 9);
+      const marcRecord = from(lineArray.join('\n'), validationOptions);
+      const [f001] = marcRecord.get('001');
+      if (f001 === undefined && genF001fromSysNo) {
+        marcRecord.insertField({
+          tag: '001',
+          value: currentId
+        });
+        return marcRecord;
+      }
 
-			return marcRecord;
-		}
+      return marcRecord;
+    }
 
-		function getIdFromLine(line) {
-			return line.split(' ')[0];
-		}
-	}
+    function getIdFromLine(line) {
+      return line.split(' ')[0];
+    }
+  }
 }
 
 /**
@@ -128,435 +128,435 @@ export class Reader extends Readable {
 * Also, javascript strings are UTF-16 so conversion to bytes is necessary to cut the text at correct offsets
 */
 export function to(record, useCrForContinuingResource = false) {
-	const MAX_FIELD_LENGTH = 2000;
-	const SPLIT_MAX_FIELD_LENGTH = 1000;
+  const MAX_FIELD_LENGTH = 2000;
+  const SPLIT_MAX_FIELD_LENGTH = 1000;
 
-	const f001 = record.get(/^001/);
-	// Aleph doesn't accept new records if their id is all zeroes...
-	const id = f001.length > 0 ? formatRecordId(f001.shift().value) : formatRecordId('1');
-	const staticFields = [
-		{
-			tag: 'FMT',
-			value: recordFormat(record, useCrForContinuingResource),
-		},
-		{
-			tag: 'LDR',
-			value: record.leader,
-		},
-	];
+  const f001 = record.get(/^001/);
+  // Aleph doesn't accept new records if their id is all zeroes...
+  const id = f001.length > 0 ? formatRecordId(f001.shift().value) : formatRecordId('1');
+  const staticFields = [
+    {
+      tag: 'FMT',
+      value: recordFormat(record, useCrForContinuingResource)
+    },
+    {
+      tag: 'LDR',
+      value: record.leader
+    }
+  ];
 
-	return staticFields.concat(record.fields).reduce((acc, field) => {
-		// Controlfield
-		if ('value' in field) {
-			const formattedField = id + ' ' + field.tag + '   L ' + formatControlfield(field.value);
-			return acc + formattedField + '\n';
-		}
+  return staticFields.concat(record.fields).reduce((acc, field) => {
+    // Controlfield
+    if ('value' in field) {
+      const formattedField = `${id} ${field.tag}   L ${formatControlfield(field.value)}`;
+      return `${acc + formattedField}\n`;
+    }
 
-		// Datafield
-		return acc + formatDatafield(field);
+    // Datafield
+    return acc + formatDatafield(field);
 
-		// Aleph sequential needs whitespace in control fields to be formatted as carets
-		function formatControlfield(value) {
-			return value.replace(/\s/g, '^');
-		}
-	}, '');
+    // Aleph sequential needs whitespace in control fields to be formatted as carets
+    function formatControlfield(value) {
+      return value.replace(/\s/g, '^');
+    }
+  }, '');
 
-	function formatRecordId(id) {
-		return id.padStart(9, '0');
-	}
+  function formatRecordId(id) {
+    return id.padStart(9, '0');
+  }
 
-	function formatDatafield(field) {
-		let subfieldLines;
-		const encoder = new TextEncoder('utf-8');
-		const decoder = new TextDecoder('utf-8');
+  function formatDatafield(field) {
+    let subfieldLines;
+    const encoder = new TextEncoder('utf-8');
+    const decoder = new TextDecoder('utf-8');
 
-		const ind1 = field.ind1 && field.ind1.length > 0 ? field.ind1 : ' ';
-		const ind2 = field.ind2 && field.ind2.length > 0 ? field.ind2 : ' ';
-		const header = id + ' ' + field.tag + ind1 + ind2 + ' L ';
+    const ind1 = field.ind1 && field.ind1.length > 0 ? field.ind1 : ' ';
+    const ind2 = field.ind2 && field.ind2.length > 0 ? field.ind2 : ' ';
+    const header = `${id} ${field.tag}${ind1}${ind2} L `;
 
-		const formattedSubfields = field.subfields.map(subfield => {
-			let content = '';
+    const formattedSubfields = field.subfields.map(subfield => {
+      let content = '';
 
-			if (subfield.code.length > 0 || subfield.value.length > 0) {
-				content = subfield.value === undefined ? '$$' + subfield.code : '$$' + subfield.code + subfield.value;
-			}
+      if (subfield.code.length > 0 || subfield.value.length > 0) {
+        content = subfield.value === undefined ? `$$${subfield.code}` : `$$${subfield.code}${subfield.value}`;
+      }
 
-			return encoder.encode(content);
-		});
+      return encoder.encode(content);
+    });
 
-		const dataLength = formattedSubfields.reduce((acc, value) => acc + value.length, 0);
+    const dataLength = formattedSubfields.reduce((acc, value) => acc + value.length, 0);
 
-		if (dataLength > MAX_FIELD_LENGTH) {
-			subfieldLines = formattedSubfields.reduce(reduceToLines, {
-				lines: [],
-			});
+    if (dataLength > MAX_FIELD_LENGTH) {
+      subfieldLines = formattedSubfields.reduce(reduceToLines, {
+        lines: []
+      });
 
-			return decode(subfieldLines).reduce((acc, line) => acc + header + line + '\n', '');
-		}
+      return decode(subfieldLines).reduce((acc, line) => `${acc + header + line}\n`, '');
+    }
 
-		return header + decode(formattedSubfields).join('') + '\n';
+    return `${header + decode(formattedSubfields).join('')}\n`;
 
-		function decode(subfields) {
-			return subfields.map(value => decoder.decode(value));
-		}
+    function decode(subfields) {
+      return subfields.map(value => decoder.decode(value));
+    }
 
-		/**
+    /**
 		* 1. Append subfields until MAX_FIELD_LENGTH is exceeded
 		* 2. cut at the last subfield
 		* 3. Append prefix to the next subfield and check if it exceeds SPLIT_MAX_FIELD_LENGTH
 		*   - If it is, cut at separators or at boundary. Create a new line for each segment
 		* 4. Repeat step 3 for the rest of the subfields
 		**/
-		function reduceToLines(result, subfield, index, arr) {
-			let code;
-			let sliceOffset;
-			let slicedSegment;
-			const tempLength = result.temp ? result.temp.length : 0;
+    function reduceToLines(result, subfield, index, arr) {
+      let code;
+      let sliceOffset;
+      let slicedSegment;
+      const tempLength = result.temp ? result.temp.length : 0;
 
-			if (tempLength + subfield.length <= MAX_FIELD_LENGTH) {
-				if (tempLength) {
-					result.temp = concatByteArrays(result.temp, subfield);
-				} else {
-					result.temp = subfield;
-				}
-			} else {
-				if (tempLength) {
-					result.lines.push(result.temp);
-					delete result.temp;
-				}
+      if (tempLength + subfield.length <= MAX_FIELD_LENGTH) {
+        if (tempLength) {
+          result.temp = concatByteArrays(result.temp, subfield);
+        } else {
+          result.temp = subfield;
+        }
+      } else {
+        if (tempLength) {
+          result.lines.push(result.temp);
+          delete result.temp;
+        }
 
-				code = decoder.decode(subfield.slice(2, 3));
-				iterate(subfield, index === 0);
-			}
+        code = decoder.decode(subfield.slice(2, 3));
+        iterate(subfield, index === 0);
+      }
 
-			// Flush
-			if (index === arr.length - 1) {
-				result = result.lines.concat(result.temp);
-			}
+      // Flush
+      if (index === arr.length - 1) {
+        result = result.lines.concat(result.temp);
+      }
 
-			return result;
+      return result;
 
-			function concatByteArrays(a, b, ...args) {
-				const length = [a, b].concat(args).reduce((acc, value) => acc + value.length, 0);
-				const arr = new Uint8Array(length);
+      function concatByteArrays(a, b, ...args) {
+        const length = [a, b].concat(args).reduce((acc, value) => acc + value.length, 0);
+        const arr = new Uint8Array(length);
 
-				[a, b].concat(args).reduce((acc, value) => {
-					arr.set(value, acc);
-					acc += value.length;
-					return acc;
-				}, 0);
+        [a, b].concat(args).reduce((acc, value) => {
+          arr.set(value, acc);
+          acc += value.length;
+          return acc;
+        }, 0);
 
-				return arr;
-			}
+        return arr;
+      }
 
-			function iterate(segment, firstCall) {
-				const HYPHEN = 45;
-				const SPACE = 32;
-				const CARET = 94;
-				const DOLLAR = 36;
-				const PERIOD = 46;
+      function iterate(segment, firstCall) {
+        const HYPHEN = 45;
+        const SPACE = 32;
+        const CARET = 94;
+        const DOLLAR = 36;
+        const PERIOD = 46;
 
-				segment = firstCall ? segment : addPrefix(segment);
+        segment = firstCall ? segment : addPrefix(segment);
 
-				if (segment.length <= SPLIT_MAX_FIELD_LENGTH) {
-					result.temp = segment;
-				} else {
-					sliceOffset = getSliceOffset(segment);
-					slicedSegment = sliceSegment(segment, sliceOffset);
+        if (segment.length <= SPLIT_MAX_FIELD_LENGTH) {
+          result.temp = segment;
+        } else {
+          sliceOffset = getSliceOffset(segment);
+          slicedSegment = sliceSegment(segment, sliceOffset);
 
-					result.lines.push(slicedSegment);
-					iterate(segment.slice(sliceOffset));
-				}
+          result.lines.push(slicedSegment);
+          iterate(segment.slice(sliceOffset));
+        }
 
-				function addPrefix(arr) {
-					let prefix;
+        function addPrefix(arr) {
+          let prefix;
 
-					if (arr.slice(0, 2).every(value => value === DOLLAR)) {
-						prefix = '$$9^';
-					} else {
-						prefix = '$$9^^$$' + code;
-					}
+          if (arr.slice(0, 2).every(value => value === DOLLAR)) {
+            prefix = '$$9^';
+          } else {
+            prefix = `$$9^^$$${code}`;
+          }
 
-					return concatByteArrays(encoder.encode(prefix), arr);
-				}
+          return concatByteArrays(encoder.encode(prefix), arr);
+        }
 
-				function getSliceOffset(arr) {
-					let offset = findSeparatorOffset(arr);
+        function getSliceOffset(arr) {
+          let offset = findSeparatorOffset(arr);
 
-					if (!offset) {
-						offset = findPeriodOffset(arr);
-					}
+          if (!offset) {
+            offset = findPeriodOffset(arr);
+          }
 
-					return offset ? offset : SPLIT_MAX_FIELD_LENGTH;
+          return offset ? offset : SPLIT_MAX_FIELD_LENGTH;
 
-					function findSeparatorOffset(arr) {
-						let offset = find();
+          function findSeparatorOffset(arr) {
+            let offset = find();
 
-						if (offset !== undefined) {
-							// Append the number of chars in separator
-							offset += 3;
+            if (offset !== undefined) {
+              // Append the number of chars in separator
+              offset += 3;
 
-							if (offset <= SPLIT_MAX_FIELD_LENGTH) {
-								return offset;
-							}
+              if (offset <= SPLIT_MAX_FIELD_LENGTH) {
+                return offset;
+              }
 
-							return findSeparatorOffset(arr.slice(0, offset - 3));
-						}
+              return findSeparatorOffset(arr.slice(0, offset - 3));
+            }
 
-						function find() {
-							let index;
-							let foundCount = 0;
+            function find() {
+              let index;
+              let foundCount = 0;
 
-							for (let i = arr.length - 1; i--; i >= 0) {
-								if (foundCount === 0 && arr[i] === SPACE) {
-									foundCount++;
-								} else if (foundCount > 0 && arr[i] === HYPHEN) {
-									foundCount++;
-								} else {
-									foundCount = 0;
-								}
+              for (let i = arr.length - 1; i--; i >= 0) {
+                if (foundCount === 0 && arr[i] === SPACE) {
+                  foundCount++;
+                } else if (foundCount > 0 && arr[i] === HYPHEN) {
+                  foundCount++;
+                } else {
+                  foundCount = 0;
+                }
 
-								if (foundCount === 3) {
-									index = i;
-									break;
-								}
-							}
+                if (foundCount === 3) {
+                  index = i;
+                  break;
+                }
+              }
 
-							return index;
-						}
-					}
+              return index;
+            }
+          }
 
-					function findPeriodOffset(arr) {
-						let offset = find();
+          function findPeriodOffset(arr) {
+            let offset = find();
 
-						if (offset !== undefined) {
-							// Append the number of chars in separator
-							offset += 2;
-							if (offset <= SPLIT_MAX_FIELD_LENGTH) {
-								return offset;
-							}
+            if (offset !== undefined) {
+              // Append the number of chars in separator
+              offset += 2;
+              if (offset <= SPLIT_MAX_FIELD_LENGTH) {
+                return offset;
+              }
 
-							return findPeriodOffset(arr.slice(0, offset - 2));
-						}
+              return findPeriodOffset(arr.slice(0, offset - 2));
+            }
 
-						function find() {
-							let index;
-							let foundCount = 0;
+            function find() {
+              let index;
+              let foundCount = 0;
 
-							for (let i = arr.length - 1; i--; i >= 0) {
-								if (foundCount === 0 && arr[i] === SPACE) {
-									foundCount++;
-								} else if (foundCount > 0 && arr[i] === PERIOD) {
-									foundCount++;
-								} else {
-									foundCount = 0;
-								}
+              for (let i = arr.length - 1; i--; i >= 0) {
+                if (foundCount === 0 && arr[i] === SPACE) {
+                  foundCount++;
+                } else if (foundCount > 0 && arr[i] === PERIOD) {
+                  foundCount++;
+                } else {
+                  foundCount = 0;
+                }
 
-								if (foundCount === 2) {
-									index = i;
-									break;
-								}
-							}
+                if (foundCount === 2) {
+                  index = i;
+                  break;
+                }
+              }
 
-							return index;
-						}
-					}
-				}
+              return index;
+            }
+          }
+        }
 
-				function sliceSegment(arr, offset) {
-					const sliced = segment.slice(0, offset);
+        function sliceSegment(arr, offset) {
+          const sliced = segment.slice(0, offset);
 
-					if (sliced.slice(-1)[0] === SPACE) {
-						sliced[sliced.length - 1] = CARET;
-					}
+          if (sliced.slice(-1)[0] === SPACE) {
+            sliced[sliced.length - 1] = CARET;
+          }
 
-					return sliced;
-				}
-			}
-		}
-	}
+          return sliced;
+        }
+      }
+    }
+  }
 
-	/**
+  /**
 	* This function was implemented by tvirolai (https://github.com/tvirolai)
 	**/
-	/**
+  /**
 	* Determine the record format for the FMT field.
 	* Uses FMT SE (instead of CR) for continuing resource, because Aleph does that
 	*/
-	function recordFormat(record, useCrForContinuingResource) {
-		const {leader} = record;
-		const l6 = leader.slice(6, 7);
-		const l7 = leader.slice(7, 8);
-		if (l6 === 'm') {
-			return 'CF';
-		}
+  function recordFormat(record, useCrForContinuingResource) {
+    const {leader} = record;
+    const l6 = leader.slice(6, 7);
+    const l7 = leader.slice(7, 8);
+    if (l6 === 'm') {
+      return 'CF';
+    }
 
-		if (['a', 't'].includes(l6) && ['b', 'i', 's'].includes(l7)) {
-			if (useCrForContinuingResource) {
-				return 'CR';
-			}
+    if (['a', 't'].includes(l6) && ['b', 'i', 's'].includes(l7)) {
+      if (useCrForContinuingResource) {
+        return 'CR';
+      }
 
-			return 'SE';
-		}
+      return 'SE';
+    }
 
-		if (['e', 'f'].includes(l6)) {
-			return 'MP';
-		}
+    if (['e', 'f'].includes(l6)) {
+      return 'MP';
+    }
 
-		if (['c', 'd', 'i', 'j'].includes(l6)) {
-			return 'MU';
-		}
+    if (['c', 'd', 'i', 'j'].includes(l6)) {
+      return 'MU';
+    }
 
-		if (l6 === 'p') {
-			return 'MX';
-		}
+    if (l6 === 'p') {
+      return 'MX';
+    }
 
-		if (['g', 'k', 'o', 'r'].includes(l6)) {
-			return 'VM';
-		}
+    if (['g', 'k', 'o', 'r'].includes(l6)) {
+      return 'VM';
+    }
 
-		return 'BK';
-	}
+    return 'BK';
+  }
 }
 
 export function from(data, validationOptions = {}) {
-	let i = 0;
-	const lines = data.split('\n').filter(l => l.length > 0);
+  let i = 0;
+  const lines = data.split('\n').filter(l => l.length > 0);
 
-	while (i < lines.length) {
-		const nextLine = lines[i + 1];
-		const currentLine = lines[i];
-		debugData(`Handling inputline: ${currentLine}`);
+  while (i < lines.length) {
+    const nextLine = lines[i + 1];
+    const currentLine = lines[i];
+    debugData(`Handling inputline: ${currentLine}`);
 
-		if (nextLine !== undefined && isContinueFieldLine(nextLine, currentLine)) {
-			if (lines[i].substr(-1) === '^') {
-				lines[i] = lines[i].substr(0, lines[i].length - 1);
-			}
+    if (nextLine !== undefined && isContinueFieldLine(nextLine, currentLine)) {
+      if (lines[i].substr(-1) === '^') {
+        lines[i] = lines[i].substr(0, lines[i].length - 1);
+      }
 
-			lines[i] += parseContinueLineData(nextLine);
-			debug('Adding next line to current line');
-			debugData(`${lines[i]}`);
-			lines.splice(i + 1, 1);
-			continue;
-		}
+      lines[i] += parseContinueLineData(nextLine);
+      debug('Adding next line to current line');
+      debugData(`${lines[i]}`);
+      lines.splice(i + 1, 1);
+      continue;
+    }
 
-		i++;
-	}
+    i++;
+  }
 
-	const record = new MarcRecord();
-	record.fields = [];
+  const record = new MarcRecord();
+  record.fields = [];
 
-	lines.forEach(line => {
-		debugData(`Parsing line: ${line}`);
-		const field = parseFieldFromLine(line);
-		debugData(`Found field: ${JSON.stringify(field)}`);
+  lines.forEach(line => {
+    debugData(`Parsing line: ${line}`);
+    const field = parseFieldFromLine(line);
+    debugData(`Found field: ${JSON.stringify(field)}`);
 
-		// Drop Aleph specific FMT fields.
-		if (field.tag === 'FMT') {
-			return;
-		}
+    // Drop Aleph specific FMT fields.
+    if (field.tag === 'FMT') {
+      return;
+    }
 
-		if (field.tag === 'LDR') {
-			record.leader = field.value;
-		} else {
-			record.fields.push(field);
-		}
-	});
+    if (field.tag === 'LDR') {
+      record.leader = field.value;
+    } else {
+      record.fields.push(field);
+    }
+  });
 
-	/* Validates the record */
-	return new MarcRecord(record, validationOptions);
+  /* Validates the record */
+  return new MarcRecord(record, validationOptions);
 
-	function parseContinueLineData(lineStr) {
-		const field = parseFieldFromLine(lineStr);
-		const firstSubfield = field.subfields[0];
+  function parseContinueLineData(lineStr) {
+    const field = parseFieldFromLine(lineStr);
+    const firstSubfield = field.subfields[0];
 
-		if (firstSubfield.value === '^') {
-			return lineStr.substr(22);
-		}
+    if (firstSubfield.value === '^') {
+      return lineStr.substr(22);
+    }
 
-		if (firstSubfield.value === '^^') {
-			return ' ' + lineStr.substr(26, lineStr.length - 1);
-		}
+    if (firstSubfield.value === '^^') {
+      return ` ${lineStr.substr(26, lineStr.length - 1)}`;
+    }
 
-		throw new Error('Could not parse Aleph Sequential subfield 9-continued line.');
-	}
+    throw new Error('Could not parse Aleph Sequential subfield 9-continued line.');
+  }
 
-	function isContinueFieldLine(lineStr, prevLineStr) {
-		const field = parseFieldFromLine(lineStr);
+  function isContinueFieldLine(lineStr, prevLineStr) {
+    const field = parseFieldFromLine(lineStr);
 
-		if (isControlfield(field)) {
-			return false;
-		}
+    if (isControlfield(field)) {
+      return false;
+    }
 
-		const firstSubfield = field.subfields[0];
+    const firstSubfield = field.subfields[0];
 
-		if (firstSubfield === undefined) {
-			return false;
-		}
+    if (firstSubfield === undefined) {
+      return false;
+    }
 
-		if (!(firstSubfield.code === '9' && (firstSubfield.value === '^' || firstSubfield.value === '^^'))) {
-			return false;
-		}
+    if (!(firstSubfield.code === '9' && (firstSubfield.value === '^' || firstSubfield.value === '^^'))) {
+      return false;
+    }
 
-		debug('Line is part of a split field');
-		debugData(`${lineStr}`);
+    debug('Line is part of a split field');
+    debugData(`${lineStr}`);
 
-		const prevField = parseFieldFromLine(prevLineStr);
+    const prevField = parseFieldFromLine(prevLineStr);
 
-		if (field.tag !== prevField.tag || field.ind1 !== prevField.ind1 || field.ind2 !== prevField.ind2) {
-			debug(`Field tags and indicators ( ${field.tag} ${field.ind1}${field.ind2} vs ${prevField.tag} ${prevField.ind1}${prevField.ind2}) do not match, split fields cannot be joined`);
-			return false;
-		}
+    if (field.tag !== prevField.tag || field.ind1 !== prevField.ind1 || field.ind2 !== prevField.ind2) {
+      debug(`Field tags and indicators ( ${field.tag} ${field.ind1}${field.ind2} vs ${prevField.tag} ${prevField.ind1}${prevField.ind2}) do not match, split fields cannot be joined`);
+      return false;
+    }
 
-		return true;
-	}
+    return true;
+  }
 
-	function isControlfield(field) {
-		if (field.subfields === undefined) {
-			return true;
-		}
-	}
+  function isControlfield(field) {
+    if (field.subfields === undefined) {
+      return true;
+    }
+  }
 
-	function isFixFieldTag(tag) {
-		return FIXED_FIELD_TAGS.indexOf(tag) !== -1;
-	}
+  function isFixFieldTag(tag) {
+    return FIXED_FIELD_TAGS.indexOf(tag) !== -1;
+  }
 
-	function parseFieldFromLine(lineStr) {
-		const tag = lineStr.substr(10, 3);
+  function parseFieldFromLine(lineStr) {
+    const tag = lineStr.substr(10, 3);
 
-		if (tag === undefined || tag.length !== 3) {
-			throw new Error('Could not parse tag from line: ' + lineStr);
-		}
+    if (tag === undefined || tag.length !== 3) {
+      throw new Error(`Could not parse tag from line: ${lineStr}`);
+    }
 
-		if (isFixFieldTag(tag) || tag === 'LDR') {
-			const data = formatControlField(lineStr.substr(18));
-			return {tag, value: data};
-		}
+    if (isFixFieldTag(tag) || tag === 'LDR') {
+      const data = formatControlField(lineStr.substr(18));
+      return {tag, value: data};
+    }
 
-		// Varfield
-		const ind1 = lineStr.substr(13, 1);
-		const ind2 = lineStr.substr(14, 1);
+    // Varfield
+    const ind1 = lineStr.substr(13, 1);
+    const ind2 = lineStr.substr(14, 1);
 
-		const subfieldData = lineStr.substr(18);
+    const subfieldData = lineStr.substr(18);
 
-		const subfields = subfieldData.split('$$')
-			.filter(sf => sf.length !== 0)
-			.map(subfield => {
-				const code = subfield.substr(0, 1);
-				const value = subfield.substr(1);
-				return {code, value};
-			});
+    const subfields = subfieldData.split('$$')
+      .filter(sf => sf.length !== 0)
+      .map(subfield => {
+        const code = subfield.substr(0, 1);
+        const value = subfield.substr(1);
+        return {code, value};
+      });
 
-		return {
-			tag,
-			ind1,
-			ind2,
-			subfields,
-		};
+    return {
+      tag,
+      ind1,
+      ind2,
+      subfields
+    };
 
-		// Aleph sequential uses whitespace in control fields formatted as carets
-		function formatControlField(data) {
-			return data.replace(/\^/g, ' ');
-		}
-	}
+    // Aleph sequential uses whitespace in control fields formatted as carets
+    function formatControlField(data) {
+      return data.replace(/\^/g, ' ');
+    }
+  }
 }

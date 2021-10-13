@@ -16,7 +16,6 @@
 *
 */
 
-'use strict';
 
 import * as Text from './text';
 import * as Json from './json';
@@ -26,10 +25,10 @@ import * as MARCXML from './marcxml';
 import * as OAI_MARCXML from './oai-marcxml';
 
 export {
-	Text,
-	Json,
-	AlephSequential,
-	ISO2709,
-	MARCXML,
-	OAI_MARCXML,
+  Text,
+  Json,
+  AlephSequential,
+  ISO2709,
+  MARCXML,
+  OAI_MARCXML
 };
