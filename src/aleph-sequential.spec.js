@@ -31,8 +31,8 @@ MarcRecord.setValidationOptions({subfieldValues: false});
 
 describe('aleph-sequential', () => {
   const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'aleph-sequential');
-  const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from/).test(f)).length;
-  const fixtureCountSplitFields = fs.readdirSync(fixturesPath).filter(f => (/^splitfields-from/).test(f)).length;
+  const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from/u).test(f)).length;
+  const fixtureCountSplitFields = fs.readdirSync(fixturesPath).filter(f => (/^splitfields-from/u).test(f)).length;
 
   describe('#Reader', () => {
     it('Should emit an error because the file does not exist', () => new Promise((resolve, reject) => {
@@ -62,7 +62,7 @@ describe('aleph-sequential', () => {
 
       reader.on('error', err => {
         try {
-          expect(err.message).to.match(/^Could not parse/);
+          expect(err.message).to.match(/^Could not parse/u);
           resolve();
         } catch (exp) {
           reject(exp);
@@ -82,11 +82,12 @@ describe('aleph-sequential', () => {
         const reader = new Converter.Reader(fs.createReadStream(fromPath));
 
         reader.on('error', reject);
-        reader.on('data', record => records.push(record));
+        reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
         reader.on('end', () => {
           try {
             expect(records).to.have.length(1);
-            expect(records.shift().toString()).to.equal(expectedRecord);
+            const [firstRecord] = records;
+            expect(firstRecord.toString()).to.equal(expectedRecord);
             resolve();
           } catch (err) {
             reject(err);
@@ -104,11 +105,12 @@ describe('aleph-sequential', () => {
       const reader = new Converter.Reader(fs.createReadStream(fromPath), undefined, true);
 
       reader.on('error', reject);
-      reader.on('data', record => records.push(record));
+      reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
       reader.on('end', () => {
         try {
           expect(records).to.have.length(1);
-          expect(records.shift().toString()).to.equal(expectedRecord);
+          const [firstRecord] = records;
+          expect(firstRecord.toString()).to.equal(expectedRecord);
           resolve();
         } catch (err) {
           reject(err);
@@ -152,11 +154,11 @@ describe('aleph-sequential', () => {
         const reader = new Converter.Reader(fs.createReadStream(fromPath));
 
         reader.on('error', reject);
-        reader.on('data', record => records.push(record));
+        reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
         reader.on('end', () => {
           try {
             expect(records).to.have.length(1);
-            const resultRecord = records.shift();
+            const [resultRecord] = records;
             expect(resultRecord.toString()).to.equal(expectedRecord);
             resolve();
           } catch (err) {
