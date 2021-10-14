@@ -22,6 +22,10 @@ import path from 'path';
 import {expect} from 'chai';
 import {MarcRecord} from '@natlibfi/marc-record';
 import * as Converter from './text';
+import createDebugLogger from 'debug';
+
+const debug = createDebugLogger('@natlibfi/marc-record-serializers:text:test');
+const debugData = debug.extend('data');
 
 describe('text', () => {
   const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'text');
@@ -30,7 +34,7 @@ describe('text', () => {
   describe('#Reader', () => {
     it('Should emit only an end-event because of invalid data', () => new Promise((resolve, reject) => {
       const filePath = path.resolve(fixturesPath, 'erroneous');
-      const reader = new Converter.reader(fs.createReadStream(filePath));
+      const reader = Converter.reader(fs.createReadStream(filePath));
 
       reader.on('end', () => {
         resolve();
@@ -60,7 +64,7 @@ describe('text', () => {
         const records = [];
         const fromPath = path.resolve(fixturesPath, `from${index}`);
         const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
-        const reader = new Converter.reader(fs.createReadStream(fromPath));
+        const reader = Converter.reader(fs.createReadStream(fromPath));
 
         reader.on('error', reject);
         reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
@@ -77,19 +81,61 @@ describe('text', () => {
       }));
     });
 
-    it('Should convert multiple records from a file', () => new Promise((resolve, reject) => {
+    it('Should not convert a record without leader', () => new Promise((resolve, reject) => {
       const records = [];
-      const fromPath = path.resolve(fixturesPath, 'from_multiple');
-      const firstExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple1'), 'utf8');
-      const secondExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple2'), 'utf8');
-      const reader = new Converter.reader(fs.createReadStream(fromPath));
+      const fromPath = path.resolve(fixturesPath, 'no-ldr');
+      const reader = Converter.reader(fs.createReadStream(fromPath));
 
       reader.on('error', reject);
       reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
       reader.on('end', () => {
         try {
-          console.log(records);
+          debugData(records);
+          expect(records).to.have.length(0);
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }));
+
+
+    it('Should convert multiple records from a file', () => new Promise((resolve, reject) => {
+      const records = [];
+      const fromPath = path.resolve(fixturesPath, 'from_multiple');
+      const firstExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple1'), 'utf8');
+      const secondExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple2'), 'utf8');
+      const reader = Converter.reader(fs.createReadStream(fromPath));
+
+      reader.on('error', reject);
+      reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
+      reader.on('end', () => {
+        try {
+          debugData(records);
           expect(records).to.have.length(2);
+          const [firstRecord, secondRecord] = records;
+          expect(firstRecord.toString()).to.equal(firstExpectedRecord);
+          expect(secondRecord.toString()).to.equal(secondExpectedRecord);
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }));
+
+    it('Should convert multiple records from a file (6 records)', () => new Promise((resolve, reject) => {
+      const records = [];
+      const fromPath = path.resolve(fixturesPath, 'from_multiple2');
+      const firstExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple1'), 'utf8');
+      const secondExpectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to_multiple2'), 'utf8');
+      const reader = Converter.reader(fs.createReadStream(fromPath));
+
+      reader.on('error', reject);
+      reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
+      reader.on('end', () => {
+        try {
+          debugData(records);
+          expect(records).to.have.length(6);
           const [firstRecord, secondRecord] = records;
           expect(firstRecord.toString()).to.equal(firstExpectedRecord);
           expect(secondRecord.toString()).to.equal(secondExpectedRecord);
