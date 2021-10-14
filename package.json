@@ -39,7 +39,8 @@
 		"lint:dev": "eslint --fix src",
 		"test:unit:base": "cross-env NODE_ENV=test nyc -x src/**/*.spec.js mocha --require @babel/register",
 		"test:unit": "npm run test:unit:base -- src/**/*.spec.js",
-		"test": "npm run test:unit && npm run coverage",
+		"test": "npm run lint && npm run test:unit && npm run coverage",
+		"test:nolint": "npm run test:unit && npm run coverage",
 		"test:dev": "npm run lint:dev && npm run test:unit && npm run coverage",
 		"coverage": "nyc check-coverage --per-file",
 		"build": "babel src --delete-dir-on-start --source-maps --out-dir=dist"
