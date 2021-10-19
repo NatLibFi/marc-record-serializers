@@ -24,16 +24,16 @@ const debug = createDebugLogger('@natlibfi/marc-record-serializers:text');
 const debugData = debug.extend('data');
 
 export function reader(stream, validationOptions = {}) {
+
   const emitter = new class extends EventEmitter { }();
-  var buffer = ''; // eslint-disable-line
-
-  MarcRecord.setValidationOptions(validationOptions);
-
   start();
-
   return emitter;
 
   function start() {
+
+    MarcRecord.setValidationOptions(validationOptions);
+    var buffer = ''; // eslint-disable-line
+
     stream.on('data', data => {
       debug(`streamEvent: data`);
       buffer += data; // eslint-disable-line functional/immutable-data

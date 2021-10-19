@@ -16,87 +16,104 @@
 *
 */
 
-import {Readable} from 'stream';
 import {MarcRecord} from '@natlibfi/marc-record';
 // Node polyfill
 import {TextEncoder, TextDecoder} from 'text-encoding';
+import {EventEmitter} from 'events';
 import createDebugLogger from 'debug';
 
 const FIXED_FIELD_TAGS = ['FMT', '001', '002', '003', '004', '005', '006', '007', '008', '009'];
 const debug = createDebugLogger('@natlibfi/marc-record-serializers:aleph-sequential');
 const debugData = debug.extend('data');
 
-export class Reader extends Readable {
-  constructor(stream, validationOptions = {}, genF001fromSysNo = false) {
-    super(stream);
-    this.charbuffer = '';
-    this.linebuffer = [];
-    this.count = 0;
+export function reader(stream, validationOptions = {}, genF001fromSysNo = false) {
 
+  const emitter = new class extends EventEmitter { }();
+  start();
+  return emitter;
+
+  function start() {
+
+    let charbuffer = ''; // eslint-disable-line functional/no-let
+    const linebuffer = []; // eslint-disable-line functional/no-let
+    let count = 0; // eslint-disable-line functional/no-let
+    let currentId; // eslint-disable-line functional/no-let
+
+
+    // eslint-disable-next-line max-statements
     stream.on('data', data => {
-      this.charbuffer += data.toString();
+      charbuffer += data.toString();
 
+      // eslint-disable-next-line functional/no-loop-statement
       while (1) { // eslint-disable-line no-constant-condition
-        const pos = this.charbuffer.indexOf('\n');
+        const pos = charbuffer.indexOf('\n');
         if (pos === -1) {
           break;
         }
 
-        const raw = this.charbuffer.substr(0, pos);
-        this.charbuffer = this.charbuffer.substr(pos + 1);
-        this.linebuffer.push(raw);
+        const raw = charbuffer.substr(0, pos);
+        charbuffer = charbuffer.substr(pos + 1);
+        // eslint-disable-next-line functional/immutable-data
+        linebuffer.push(raw);
       }
 
-      if (this.linebuffer.length > 0) {
-        if (this.currentId === undefined) {
-          this.currentId = getIdFromLine(this.linebuffer[0]);
+      if (linebuffer.length > 0) {
+        // eslint-disable-next-line functional/no-conditional-statement
+        if (currentId === undefined) {
+          currentId = getIdFromLine(linebuffer[0]);
         }
 
-        let i = 0;
-        while (i < this.linebuffer.length) {
-          if (this.linebuffer[i].length < 9) {
+        
+        let i = 0; // eslint-disable-line functional/no-let
+        
+        // eslint-disable-next-line functional/no-loop-statement
+        while (i < linebuffer.length) {
+          if (linebuffer[i].length < 9) {
             break;
           }
 
-          const lineId = getIdFromLine(this.linebuffer[i]);
+          const lineId = getIdFromLine(linebuffer[i]);
 
-          if (this.currentId !== lineId) {
-            const record = this.linebuffer.splice(0, i);
+          // eslint-disable-next-line functional/no-conditional-statement
+          if (currentId !== lineId) {
+            // eslint-disable-next-line functional/immutable-data
+            const record = linebuffer.splice(0, i);
 
-            this.count++;
+            count += 1;
 
             try {
-              this.emit('data', securef001(record));
+              emitter.emit('data', securef001(record));
             } catch (excp) {
-              this.emit('error', excp);
+              emitter.emit('error', excp);
               break;
             }
 
-            this.currentId = lineId;
+            currentId = lineId;
             i = 0;
           }
 
-          i++;
+          i += 1;
         }
       }
     });
 
     stream.on('end', () => {
-      if (this.linebuffer.length > 0) {
-        this.count++;
+      // eslint-disable-next-line functional/no-conditional-statement
+      if (linebuffer.length > 0) {
+        count += 1;
         try {
-          this.emit('data', securef001(this.linebuffer));
+          emitter.emit('data', securef001(linebuffer));
         } catch (excp) {
-          this.emit('error', excp);
+          emitter.emit('error', excp);
           return;
         }
       }
 
-      this.emit('end');
+      emitter.emit('end');
     });
 
     stream.on('error', error => {
-      this.emit('error', error);
+      emitter.emit('error', error);
     });
 
     function securef001(lineArray) {
@@ -131,9 +148,10 @@ export function to(record, useCrForContinuingResource = false) {
   const MAX_FIELD_LENGTH = 2000;
   const SPLIT_MAX_FIELD_LENGTH = 1000;
 
-  const f001 = record.get(/^001/);
+  const f001 = record.get(/^001/u);
+  const [firstF001] = f001;
   // Aleph doesn't accept new records if their id is all zeroes...
-  const id = f001.length > 0 ? formatRecordId(f001.shift().value) : formatRecordId('1');
+  const id = f001.length > 0 ? formatRecordId(firstF001.value) : formatRecordId('1');
   const staticFields = [
     {
       tag: 'FMT',
@@ -157,7 +175,7 @@ export function to(record, useCrForContinuingResource = false) {
 
     // Aleph sequential needs whitespace in control fields to be formatted as carets
     function formatControlfield(value) {
-      return value.replace(/\s/g, '^');
+      return value.replace(/\s/gu, '^');
     }
   }, '');
 
@@ -166,22 +184,24 @@ export function to(record, useCrForContinuingResource = false) {
   }
 
   function formatDatafield(field) {
-    let subfieldLines;
-    const encoder = new TextEncoder('utf-8');
-    const decoder = new TextDecoder('utf-8');
+   
+    let subfieldLines; // eslint-disable-line functional/no-let
+    //const encoder = new TextEncoder('utf-8');
+    //const decoder = new TextDecoder('utf-8');
 
     const ind1 = field.ind1 && field.ind1.length > 0 ? field.ind1 : ' ';
     const ind2 = field.ind2 && field.ind2.length > 0 ? field.ind2 : ' ';
     const header = `${id} ${field.tag}${ind1}${ind2} L `;
 
     const formattedSubfields = field.subfields.map(subfield => {
-      let content = '';
+      let content = ''; // eslint-disable-line functional/no-let
 
+      // eslint-disable-next-line functional/no-conditional-statement
       if (subfield.code.length > 0 || subfield.value.length > 0) {
         content = subfield.value === undefined ? `$$${subfield.code}` : `$$${subfield.code}${subfield.value}`;
       }
 
-      return encoder.encode(content);
+      return new Buffer.encode(content);
     });
 
     const dataLength = formattedSubfields.reduce((acc, value) => acc + value.length, 0);
