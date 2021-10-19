@@ -1,0 +1,52 @@
+LDR    00000cam a22005774i 4500
+001    000763350
+008    940407s1953    fi |||||||||||||||||fin||
+005    20200601230120.0
+015    ‡af545630‡2skl
+035    ‡a(FI-MELINDA)000763350
+040    ‡aFI-NL
+041 0  ‡afin
+042    ‡afinb
+084    ‡a07‡2ykl
+084    ‡a07.1‡2ykl
+245 00 ‡aSuomen pitäjänlehtiä.
+260    ‡aTampere :‡bSuomen pitäjänlehtien liitto,‡c1953.
+300    ‡a[2], 54 s. ;‡c8:o
+336    ‡ateksti‡btxt‡2rdacontent
+337    ‡akäytettävissä ilman laitetta‡bn‡2rdamedia
+338    ‡anide‡bnc‡2rdacarrier
+563    ‡aNidottu.
+650  7 ‡asanomalehdet‡2yso/fin‡0http://www.yso.fi/onto/yso/p2421
+650  7 ‡apaikallislehdet‡2yso/fin‡0http://www.yso.fi/onto/yso/p18996
+650  7 ‡alehdistö‡2yso/fin‡0http://www.yso.fi/onto/yso/p2422
+650  7 ‡adagstidningar‡2yso/swe‡0http://www.yso.fi/onto/yso/p2421
+650  7 ‡alokaltidningar‡2yso/swe‡0http://www.yso.fi/onto/yso/p18996
+650  7 ‡atidningspress‡2yso/swe‡0http://www.yso.fi/onto/yso/p2422
+SID    ‡c358915‡bfenni
+SID    ‡c154700‡bhelka
+SID    ‡c296028‡btamca
+SID    ‡c970219‡bvaari
+SID    ‡c506013‡bvolte
+SID    ‡c(ANDL100008)91059‡bpiki
+SID    ‡c(ANDL100020)183105‡bsata
+CAT    ‡aCONV-ISBD‡b‡c20120402‡lFIN01‡h0801
+CAT    ‡aLOAD-HELKA‡b‡c20140809‡lFIN01‡h0119
+CAT    ‡aLOAD-PIKI‡b‡c20150619‡lFIN01‡h0854
+CAT    ‡aLOAD-FIX‡b30‡c20151225‡lFIN01‡h0805
+CAT    ‡aCONV-RDA‡b‡c20160319‡lFIN01‡h0843
+CAT    ‡aLOAD-YSO‡b00‡c20190703‡lFIN01‡h2203
+CAT    ‡aLOAD-YSO‡b00‡c20190705‡lFIN01‡h1445
+CAT    ‡aLOAD-ID‡b00‡c20190712‡lFIN01‡h1634
+CAT    ‡aLOAD-ID‡b00‡c20190830‡lFIN01‡h0235
+CAT    ‡aLOAD-FIX‡b30‡c20190927‡lFIN01‡h2053
+CAT    ‡aLOAD-ID‡b00‡c20191107‡lFIN01‡h1121
+CAT    ‡aLOAD-SATA‡b20‡c20200601‡lFIN01‡h2301
+CAT    ‡aLOAD-ELAID‡b00‡c20201130‡lFIN01‡h0713
+CAT    ‡aLOAD-ELAID‡b00‡c20201130‡lFIN01‡h1155
+LOW    ‡aVOLTE
+LOW    ‡aFENNI
+LOW    ‡aPIKI
+LOW    ‡aTAMCA
+LOW    ‡aVAARI
+LOW    ‡aFIKKA
+LOW    ‡aSATA

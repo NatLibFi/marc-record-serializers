@@ -189,4 +189,36 @@ describe('aleph-sequential', () => {
       });
     });
   });
+
+  describe('#from load-test', () => {
+    it('Should convert file load-test (100 records). Check time manually!', () => new Promise((resolve, reject) => {
+      const records = [];
+      const errors = [];
+      const fromPath = path.resolve(fixturesPath, 'load-test');
+      const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'load-test-exp1'), 'utf8');
+      const reader = Converter.reader(fs.createReadStream(fromPath), undefined, true);
+      // eslint-disable-next-line functional/no-let
+      let counter = 0;
+
+      // eslint-disable-next-line functional/immutable-data
+      reader.on('error', error => errors.push(error));
+      reader.on('data', record => {
+        records.push(record); // eslint-disable-line functional/immutable-data
+        debug('...');
+        counter += 1;
+      });
+      reader.on('end', () => {
+        try {
+          debug(`Counter: ${counter}`);
+          debug(`Errors: ${errors}`);
+          expect(records).to.have.length(100);
+          const [firstRecord] = records;
+          expect(firstRecord.toString()).to.equal(expectedRecord);
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }));
+  });
 });

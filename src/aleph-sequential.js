@@ -87,6 +87,7 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
               emitter.emit('data', securef001(record));
               count += 1;
             } catch (excp) {
+              //const errorMessage = `${excp}\n${record}`;
               emitter.emit('error', excp);
               brokenCount += 1;
               //break;
