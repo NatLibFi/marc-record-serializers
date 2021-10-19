@@ -16,45 +16,59 @@
 *
 */
 
-import {Readable} from 'stream';
+import {EventEmitter} from 'events';
 import {MarcRecord} from '@natlibfi/marc-record';
+//import createDebugLogger from 'debug';
 
-export class Reader extends Readable {
-  constructor(stream, validationOptions = {}) {
-    super(stream);
-    this.charbuffer = '';
+//const debug = createDebugLogger('@natlibfi/marc-record-serializers:iso2709');
+//const debugData = debug.extend('data');
+
+export function reader(stream, validationOptions = {}) {
+
+  const emitter = new class extends EventEmitter { }();
+
+  start();
+  return emitter;
+
+  function start() {
+
+    // eslint-disable-next-line no-var
+    var charbuffer = '';
 
     stream.on('end', () => {
-      this.emit('end');
+      emitter.emit('end');
     });
 
     stream.on('error', error => {
-      this.emit('error', error);
+      emitter.emit('error', error);
     });
 
     stream.on('data', data => {
-      this.charbuffer += data;
+      charbuffer += data;
 
+      // eslint-disable-next-line functional/no-loop-statement
       while (1) { // eslint-disable-line no-constant-condition
-        const pos = this.charbuffer.indexOf('\x1D');
+        const pos = charbuffer.indexOf('\x1D');
 
         if (pos === -1) {
           break;
         }
 
-        const raw = this.charbuffer.substr(0, pos);
-        this.charbuffer = this.charbuffer.substr(pos + 1);
+        const raw = charbuffer.substr(0, pos);
+        charbuffer = charbuffer.substr(pos + 1);
 
         try {
-          this.emit('data', from(raw, validationOptions));
+          emitter.emit('data', from(raw, validationOptions));
         } catch (excp) {
-          this.emit('error', excp);
+          emitter.emit('error', excp);
         }
       }
     });
   }
 }
 
+
+// eslint-disable-next-line max-statements
 export function from(dataStr, validationOptions = {}) {
   const leader = dataStr.substring(0, 24);
   const record = {
@@ -71,8 +85,10 @@ export function from(dataStr, validationOptions = {}) {
   const dataFieldStr = dataStr.substring(dataStartPos);
 
   // Loop through directory entries to read data fields
+  // eslint-disable-next-line functional/no-let
   let i = 0;
 
+  // eslint-disable-next-line functional/no-loop-statement, no-plusplus
   for (i = 0; i < directoryEntries.length; i++) {
     const tag = dirFieldTag(directoryEntries[i]);
 
@@ -82,28 +98,36 @@ export function from(dataStr, validationOptions = {}) {
     const startCharPos = trimNumericField(dirStartingCharacterPosition(directoryEntries[i]));
 
     // Append control fields for tags 00X
+    // eslint-disable-next-line functional/no-conditional-statement
     if (tag.substring(0, 2) === '00') {
       const fieldElementStr = dataFieldStr.substring(startCharPos, parseInt(startCharPos, 10) + parseInt(fieldLength, 10) - 1);
 
+      // eslint-disable-next-line functional/immutable-data
       record.fields.push({
         tag,
         value: fieldElementStr
       });
     } else {
+      // eslint-disable-next-line functional/no-let
       let dataElementStr = utf8Substr(dataFieldStr, parseInt(startCharPos, 10), parseInt(fieldLength, 10));
 
+      // eslint-disable-next-line functional/no-conditional-statement
       if (dataElementStr[2] !== '\x1F') {
         dataElementStr = dataFieldStr[startCharPos - 1] + dataElementStr;
       }
 
       // Parse indicators and convert '\x1F' characters to spaces
       // for valid XML output
+      // eslint-disable-next-line functional/no-let
       let ind1 = dataElementStr.charAt(0);
+      // eslint-disable-next-line functional/no-conditional-statement
       if (ind1 === '\x1F') {
         ind1 = ' ';
       }
 
+      // eslint-disable-next-line functional/no-let
       let ind2 = dataElementStr.charAt(1);
+      // eslint-disable-next-line functional/no-conditional-statement
       if (ind2 === '\x1F') {
         ind2 = ' ';
       }
@@ -120,13 +144,17 @@ export function from(dataStr, validationOptions = {}) {
       // Parse all subfields
       dataElementStr = dataElementStr.substring(2);
       // Bypass indicators
+      // eslint-disable-next-line functional/no-let
       let j = 0;
+      // eslint-disable-next-line functional/no-let
       let currElementStr = '';
 
+      // eslint-disable-next-line functional/no-loop-statement, no-plusplus
       for (j = 0; j < dataElementStr.length; j++) {
         // '\x1F' begins a new subfield, '\x1E' ends all fields
         if (dataElementStr.charAt(j) === '\x1F' || dataElementStr.charAt(j) === '\x1E' || j === dataElementStr.length - 1) {
           if (currElementStr !== '') { // eslint-disable-line max-depth
+            // eslint-disable-next-line functional/no-conditional-statement
             if (j === dataElementStr.length - 1) { // eslint-disable-line max-depth
               currElementStr += dataElementStr.charAt(j);
             }
@@ -136,20 +164,24 @@ export function from(dataStr, validationOptions = {}) {
             currElementStr = currElementStr.substring(1);
 
             // Remove trailing control characters
+            // eslint-disable-next-line functional/no-conditional-statement
             if (currElementStr.charAt(currElementStr.length - 1) === '\x1F' || currElementStr.charAt(currElementStr.length - 1) === '\x1E') { // eslint-disable-line max-depth
               currElementStr = currElementStr.substring(0, currElementStr.length - 1);
             }
 
             // Create a <subfield> element
 
+            // eslint-disable-next-line functional/immutable-data
             datafield.subfields.push({code, value: currElementStr});
             currElementStr = '';
           }
+        // eslint-disable-next-line functional/no-conditional-statement
         } else {
           currElementStr += dataElementStr.charAt(j);
         }
       }
 
+      // eslint-disable-next-line functional/immutable-data
       record.fields.push(datafield);
     }
   }
@@ -159,17 +191,22 @@ export function from(dataStr, validationOptions = {}) {
   // Returns the entire directory starting at position 24.
   // Control character '\x1E' marks the end of directory.
   function parseDirectory(dataStr) {
+    // eslint-disable-next-line functional/no-let
     let currChar = '';
+    // eslint-disable-next-line functional/no-let
     let directory = '';
+    // eslint-disable-next-line functional/no-let
     let pos = 24;
 
+    // eslint-disable-next-line functional/no-loop-statement
     while (currChar !== '\x1E') {
       currChar = dataStr.charAt(pos);
+      // eslint-disable-next-line functional/no-conditional-statement
       if (currChar !== 'x1E') {
         directory += currChar;
       }
 
-      pos++;
+      pos += 1;
 
       if (pos > dataStr.length) {
         throw new Error('Invalid record');
@@ -182,13 +219,14 @@ export function from(dataStr, validationOptions = {}) {
   // Returns an array of 12-character directory entries.
   function parseDirectoryEntries(directoryStr) {
     const directoryEntries = [];
-    let pos = 0;
-    let count = 0;
+    let pos = 0; // eslint-disable-line functional/no-let
+    let count = 0; // eslint-disable-line functional/no-let
 
+    // eslint-disable-next-line functional/no-loop-statement
     while (directoryStr.length - pos >= 12) {
-      directoryEntries[count] = directoryStr.substring(pos, pos + 12);
+      directoryEntries[count] = directoryStr.substring(pos, pos + 12); // eslint-disable-line functional/immutable-data
       pos += 12;
-      count++;
+      count += 1;
     }
 
     return directoryEntries;
@@ -196,11 +234,14 @@ export function from(dataStr, validationOptions = {}) {
 
   // Removes leading zeros from a numeric data field.
   function trimNumericField(input) {
-    while (input.length > 1 && input.charAt(0) === '0') {
-      input = input.substring(1);
+    // eslint-disable-next-line functional/no-let
+    let string = input;
+    // eslint-disable-next-line functional/no-loop-statement
+    while (string.length > 1 && string.charAt(0) === '0') {
+      string = string.substring(1);
     }
 
-    return input;
+    return string;
   }
 
   // Functions return a specified field in a single 12-character
@@ -219,24 +260,27 @@ export function from(dataStr, validationOptions = {}) {
 }
 
 export function to(record) {
-  let tag;
-  let ind1;
-  let ind2;
 
-  let {leader} = record;
-  let marcStr = '';
-  let directoryStr = '';
-  let dataFieldStr = '';
-  let charPos = 0;
+  //let tag; // eslint-disable-line functional/no-let
+  //let ind1; // eslint-disable-line functional/no-let
+  //let ind2; // eslint-disable-line functional/no-let
+
+  let {leader} = record; // eslint-disable-line functional/no-let
+  let marcStr = ''; // eslint-disable-line functional/no-let
+  let directoryStr = ''; // eslint-disable-line functional/no-let
+  let dataFieldStr = ''; // eslint-disable-line functional/no-let
+  let charPos = 0; // eslint-disable-line functional/no-let
 
   record.getControlfields().forEach(field => {
     directoryStr += field.tag;
+    // eslint-disable-next-line functional/no-conditional-statement
     if (field.value === undefined || field.value === '') {
       // Special case: control field contents empty
       directoryStr += addLeadingZeros(1, 4);
       directoryStr += addLeadingZeros(charPos, 5);
-      charPos++;
+      charPos += 1;
       dataFieldStr += '\x1E';
+    // eslint-disable-next-line functional/no-conditional-statement
     } else {
       directoryStr += addLeadingZeros(field.value.length + 1, 4);
       // Add character position
@@ -249,9 +293,7 @@ export function to(record) {
   });
 
   record.getDatafields().forEach(field => {
-    tag = field.tag;
-    ind1 = field.ind1;
-    ind2 = field.ind2;
+    const {tag, ind1, ind2} = field;
 
     // Add tag to directory
     directoryStr += tag;
@@ -259,16 +301,18 @@ export function to(record) {
     // Add indicators
     dataFieldStr += `${ind1 + ind2}\x1F`;
 
-    let currDataField = '';
+    let currDataField = ''; // eslint-disable-line functional/no-let
 
     field.subfields.forEach((subfield, i) => {
-      let subFieldStr = subfield.value;
+      let subFieldStr = subfield.value; // eslint-disable-line functional/no-let
       const {code} = subfield;
       subFieldStr = code + subFieldStr;
 
       // Add terminator for subfield or data field
+      // eslint-disable-next-line functional/no-conditional-statement
       if (i === field.subfields.length - 1) {
         subFieldStr += '\x1E';
+      // eslint-disable-next-line functional/no-conditional-statement
       } else {
         subFieldStr += '\x1F';
       }
@@ -305,16 +349,19 @@ export function to(record) {
 
   // Adds leading zeros to the specified numeric field.
   function addLeadingZeros(numField, length) {
-    while (numField.toString().length < length) {
-      numField = `0${numField.toString()}`;
+
+    let newNumField = numField; // eslint-disable-line functional/no-let
+    // eslint-disable-next-line functional/no-loop-statement
+    while (newNumField.toString().length < length) {
+      newNumField = `0${newNumField.toString()}`;
     }
 
-    return numField;
+    return newNumField;
   }
 
   // Returns the length of the input string in UTF8 bytes.
   function lengthInUtf8Bytes(str) {
-    const m = encodeURIComponent(str).match(/%[89ABab]/g);
+    const m = encodeURIComponent(str).match(/%[89ABab]/gu);
     return str.length + (m ? m.length : 0);
   }
 }
@@ -323,11 +370,13 @@ export function to(record) {
 function utf8Substr(str, startInBytes, lengthInBytes) {
   const strBytes = stringToByteArray(str);
   const subStrBytes = [];
-  let count = 0;
+  let count = 0; // eslint-disable-line functional/no-let
 
-  for (let i = startInBytes; count < lengthInBytes; i++) {
+  // eslint-disable-next-line functional/no-loop-statement
+  for (let i = startInBytes; count < lengthInBytes; i++) { // eslint-disable-line functional/no-let, no-plusplus
+    // eslint-disable-next-line functional/immutable-data
     subStrBytes.push(strBytes[i]);
-    count++;
+    count += 1;
   }
 
   return byteArrayToString(subStrBytes);
@@ -335,8 +384,10 @@ function utf8Substr(str, startInBytes, lengthInBytes) {
   // Converts the byte array to a UTF-8 string.
   // From http://stackoverflow.com/questions/1240408/reading-bytes-from-a-javascript-string?lq=1
   function byteArrayToString(byteArray) {
-    let str = '';
-    for (let i = 0; i < byteArray.length; i++) {
+    let str = ''; // eslint-disable-line functional/no-let
+    // eslint-disable-next-line functional/no-loop-statement
+    for (let i = 0; i < byteArray.length; i++) { // eslint-disable-line functional/no-let, no-plusplus
+      // eslint-disable-next-line no-nested-ternary
       str += byteArray[i] <= 0x7F ? byteArray[i] === 0x25 ? '%25' // %
         : String.fromCharCode(byteArray[i]) : `%${byteArray[i].toString(16).toUpperCase()}`;
     }
@@ -349,12 +400,19 @@ function utf8Substr(str, startInBytes, lengthInBytes) {
 // From http://stackoverflow.com/questions/1240408/reading-bytes-from-a-javascript-string?lq=1
 function stringToByteArray(str) {
   const byteArray = [];
+
+  // eslint-disable-next-line functional/no-loop-statement, functional/no-let, no-plusplus
   for (let i = 0; i < str.length; i++) {
+    // eslint-disable-next-line functional/no-conditional-statement
     if (str.charCodeAt(i) <= 0x7F) {
+      // eslint-disable-next-line functional/immutable-data
       byteArray.push(str.charCodeAt(i));
+    // eslint-disable-next-line functional/no-conditional-statement
     } else {
       const h = encodeURIComponent(str.charAt(i)).substr(1).split('%');
+      // eslint-disable-next-line functional/no-loop-statement, functional/no-let, no-plusplus
       for (let j = 0; j < h.length; j++) {
+        // eslint-disable-next-line functional/immutable-data
         byteArray.push(parseInt(h[j], 16));
       }
     }

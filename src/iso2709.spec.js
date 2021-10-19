@@ -25,11 +25,11 @@ import * as Converter from './iso2709';
 
 describe('iso2709', () => {
   const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'iso2709');
-  const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from/).test(f)).length;
+  const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from/u).test(f)).length;
 
-  describe('#Reader', () => {
+  describe('#reader', () => {
     it('Should emit an error because the file does not exist', () => new Promise((resolve, reject) => {
-      const reader = new Converter.Reader(fs.createReadStream('foo'));
+      const reader = Converter.reader(fs.createReadStream('foo'));
       reader.on('data', reject);
       reader.on('end', reject);
       reader.on('error', err => {
@@ -44,7 +44,7 @@ describe('iso2709', () => {
 
     it('Should do nothing because of invalid data', () => new Promise((resolve, reject) => {
       const filePath = path.resolve(fixturesPath, 'erroneous');
-      const reader = new Converter.Reader(fs.createReadStream(filePath));
+      const reader = Converter.reader(fs.createReadStream(filePath));
 
       reader.on('end', resolve);
       reader.on('data', () => {
@@ -64,14 +64,16 @@ describe('iso2709', () => {
         const records = [];
         const fromPath = path.resolve(fixturesPath, `from${index}`);
         const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
-        const reader = new Converter.Reader(fs.createReadStream(fromPath));
+        const reader = Converter.reader(fs.createReadStream(fromPath));
 
         reader.on('error', reject);
+        // eslint-disable-next-line functional/immutable-data
         reader.on('data', record => records.push(record));
         reader.on('end', () => {
           try {
             expect(records).to.have.length(1);
-            expect(records.shift().toString()).to.equal(expectedRecord);
+            const [firstRecord] = records;
+            expect(firstRecord.toString()).to.equal(expectedRecord);
             resolve();
           } catch (err) {
             reject(err);
