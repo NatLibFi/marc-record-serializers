@@ -21,7 +21,7 @@ when using readers.
 ### NOTE: UPGRADING FROM VERSION 5 -> 6
 `MARCXML.from` is now asynchronous because the underlying XML module uses callbacks for errors.
 
-###
+---
 
 Convert records to and from different MARC formats. Deserializes MARC to [@natlibfi/marc-record](https://github.com/natlibfi/marc-record-js).
 
