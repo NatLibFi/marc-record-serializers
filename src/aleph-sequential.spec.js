@@ -34,9 +34,9 @@ describe('aleph-sequential', () => {
   const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from/u).test(f)).length;
   const fixtureCountSplitFields = fs.readdirSync(fixturesPath).filter(f => (/^splitfields-from/u).test(f)).length;
 
-  describe('#Reader', () => {
+  describe('#reader', () => {
     it('Should emit an error because the file does not exist', () => new Promise((resolve, reject) => {
-      const reader = new Converter.Reader(fs.createReadStream('foo'));
+      const reader = Converter.reader(fs.createReadStream('foo'));
       reader.on('data', reject);
       reader.on('end', reject);
       reader.on('error', err => {
@@ -51,7 +51,7 @@ describe('aleph-sequential', () => {
 
     it('Should emit an error because of invalid data', () => new Promise((resolve, reject) => {
       const filePath = path.resolve(fixturesPath, 'erroneous');
-      const reader = new Converter.Reader(fs.createReadStream(filePath));
+      const reader = Converter.reader(fs.createReadStream(filePath));
 
       reader.on('data', () => {
         reject(new Error('Emitted a data-event'));
@@ -79,7 +79,7 @@ describe('aleph-sequential', () => {
         const records = [];
         const fromPath = path.resolve(fixturesPath, `from${index}`);
         const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
-        const reader = new Converter.Reader(fs.createReadStream(fromPath));
+        const reader = Converter.reader(fs.createReadStream(fromPath));
 
         reader.on('error', reject);
         reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
@@ -102,7 +102,7 @@ describe('aleph-sequential', () => {
       const records = [];
       const fromPath = path.resolve(fixturesPath, 'noF001');
       const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'yesF001'), 'utf8');
-      const reader = new Converter.Reader(fs.createReadStream(fromPath), undefined, true);
+      const reader = Converter.reader(fs.createReadStream(fromPath), undefined, true);
 
       reader.on('error', reject);
       reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
@@ -151,7 +151,7 @@ describe('aleph-sequential', () => {
         const records = [];
         const fromPath = path.resolve(fixturesPath, `splitfields-from${index}`);
         const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `splitfields-to${index}`), 'utf8');
-        const reader = new Converter.Reader(fs.createReadStream(fromPath));
+        const reader = Converter.reader(fs.createReadStream(fromPath));
 
         reader.on('error', reject);
         reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data

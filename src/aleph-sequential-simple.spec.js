@@ -13,7 +13,7 @@ MarcRecord.setValidationOptions({subfieldValues: false});
 const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'aleph-sequential');
 const fixtureCountMultiples = fs.readdirSync(fixturesPath).filter(f => (/^multiples_from/u).test(f)).length;
 
-describe('#Reader', () => {
+describe('#reader', () => {
 
   it('Should emit an error because the file does not exist', () => new Promise((resolve, reject) => {
     const reader = Converter.reader(fs.createReadStream('foo'));
@@ -73,11 +73,12 @@ describe('#multiples_from', () => {
     const index = i + 1;
     it(`Should convert file multiple_from${index} to file multiples_to${index}`, () => new Promise((resolve, reject) => {
       const records = [];
+      const errors = [];
       const fromPath = path.resolve(fixturesPath, `multiples_from${index}`);
       const expectedRecordsString = fs.readFileSync(path.resolve(fixturesPath, `multiples_to${index}`), 'utf8');
       const reader = Converter.reader(fs.createReadStream(fromPath));
 
-      reader.on('error', reject);
+      reader.on('error', error => errors.push(error)); // eslint-disable-line functional/immutable-data
       reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
       reader.on('end', () => {
         try {
