@@ -17,6 +17,9 @@
 *
 */
 
+/* eslint-disable no-process-exit */
+/* eslint-disable no-process-env */
+/* eslint-disable no-console */
 
 import fs from 'fs';
 import path from 'path';
@@ -34,12 +37,12 @@ run();
 
 async function run() {
   const FORMAT_USAGE = `Supported formats:
-	text
-	json
-	alephseq
-	marcxml
-	oai-marcxml
-	iso2709`;
+  text
+  json
+  alephseq
+  marcxml
+  oai-marcxml
+  iso2709`;
 
   try {
     const args = yargs
@@ -60,21 +63,26 @@ async function run() {
     const reader = new Reader(fs.createReadStream(args.file));
     const spinner = ora('Converting records.\n').start();
 
+    // eslint-disable-next-line functional/no-conditional-statement
     if (!args.validate) {
       MarcRecord.setValidationOptions({fields: false, subfields: false, subfieldValues: false});
     }
 
     await new Promise((resolve, reject) => {
+      // eslint-disable-next-line functional/no-let
       let count = 0;
 
+      // eslint-disable-next-line functional/no-conditional-statement
       if (!args.outputDirectory && outputPrefix) {
         process.stdout.write(outputPrefix);
       }
 
       reader.on('error', err => {
+        // eslint-disable-next-line functional/no-conditional-statement
         if ('validationResults' in err) {
           const message = `Record is invalid: ${JSON.stringify(err.validationResults.errors, undefined, 2)}`;
           reject(new Error(message));
+        // eslint-disable-next-line functional/no-conditional-statement
         } else {
           reject(err);
         }
@@ -83,8 +91,10 @@ async function run() {
       reader.on('end', () => {
         spinner.succeed();
 
+        // eslint-disable-next-line functional/no-conditional-statement
         if (args.outputDirectory) {
           console.log(`Wrote ${count} records to ${args.outputDirectory}`);
+        // eslint-disable-next-line functional/no-conditional-statement
         } else if (outputSuffix) {
           process.stdout.write(outputSuffix);
         }
@@ -96,6 +106,7 @@ async function run() {
         if (args.outputDirectory) {
           const filename = `${String(count).padStart(5, '0')}.${fileSuffix}`;
 
+          // eslint-disable-next-line functional/no-conditional-statement
           if (!fs.existsSync(args.outputDirectory)) {
             fs.mkdirSync(args.outputDirectory);
           }
@@ -104,6 +115,7 @@ async function run() {
         } else {
           const str = serialize(record);
 
+          // eslint-disable-next-line functional/no-conditional-statement
           if (outputSeparator && count > 0) {
             process.stdout.write(outputSeparator);
           }
@@ -111,12 +123,13 @@ async function run() {
           process.stdout.write(recordCallback(str));
         }
 
-        count++;
+        count += 1;
       });
     });
 
     process.exit();
   } catch (err) {
+    // eslint-disable-next-line functional/no-conditional-statement
     if (process.env.NODE_ENV === 'debug') {
       console.error(err);
       process.exit(-1);
@@ -190,7 +203,7 @@ async function run() {
     }
 
     function removeXmlDeclaration(s) {
-      return s.replace(/^<\?xml version="1\.0" encoding="UTF-8"\?>/, '');
+      return s.replace(/^<\?xml version="1\.0" encoding="UTF-8"\?>/u, '');
     }
   }
 }
