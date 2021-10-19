@@ -1,5 +1,24 @@
 # Convert records to and from different MARC formats [![NPM Version](https://img.shields.io/npm/v/@natlibfi/marc-record-serializers.svg)](https://npmjs.org/package/@natlibfi/marc-record-serializers) [![Build Status](https://travis-ci.org/NatLibFi/marc-record-serializers.svg)](https://travis-ci.org/NatLibFi/marc-record-serializers) [![Test Coverage](https://codeclimate.com/github/NatLibFi/marc-record-serializers/badges/coverage.svg)](https://codeclimate.com/github/NatLibFi/marc-record-serializers/coverage)
 
+# NOTE: UPGRADING FROM VERSION 7 -> 8
+---
+All readers are now functions instead of classes.
+
+Replace
+```js
+const reader = new MARCXML.Reader(fs.createReadStream('marc.xml'));
+```
+with
+
+```js
+const reader = MARCXML.reader(fs.createReadStream('marc.xml'));
+```
+
+when using readers.
+
+----
+
+
 # NOTE: UPGRADING FROM VERSION 6 -> 7
 ---
 `MARCXML.to` is now asynchronous.
@@ -18,7 +37,7 @@ This a fork of the original [marc-record-serializers](https://github.com/petuomi
 ```js
 import fs from 'fs';
 import {MARCXML} from '@natlibfi/marc-record-serializers';
-const reader = new MARCXML.Reader(fs.createReadStream('marc.xml'));
+const reader = MARCXML.reader(fs.createReadStream('marc.xml'));
 
 reader.on('data', record => console.log(record));
 ```
