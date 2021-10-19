@@ -15,32 +15,40 @@
 * for the JavaScript code in this file.
 *
 */
-import {Readable} from 'stream';
 import {MarcRecord} from '@natlibfi/marc-record';
 import {Parser, Builder} from 'xml2js';
+import {EventEmitter} from 'events';
 import createDebugLogger from 'debug';
 
 const debug = createDebugLogger('@natlibfi/marc-record-serializers:marcxml');
 const debugData = debug.extend('data');
 
-export class Reader extends Readable {
-  constructor(stream, validationOptions = {}) {
-    super(stream);
-    this.charbuffer = '';
+export function reader (stream, validationOptions = {}) {
+  const emitter = new class extends EventEmitter { }();
+  MarcRecord.setValidationOptions(validationOptions);
+
+  start();
+  return emitter;
+
+  function start() {
+    // eslint-disable-next-line functional/no-let
+    let charbuffer = '';
 
     stream.on('end', () => {
-      this.emit('end');
+      emitter.emit('end');
     });
 
     stream.on('error', error => {
-      this.emit('error', error);
+      emitter.emit('error', error);
     });
 
     stream.on('data', async data => {
-      this.charbuffer += data.toString();
+      charbuffer += data.toString();
 
+      // eslint-disable-next-line functional/no-loop-statement
       while (1) { // eslint-disable-line no-constant-condition
-        let pos = this.charbuffer.indexOf('<record');
+        // eslint-disable-next-line functional/no-let
+        let pos = charbuffer.indexOf('<record');
 
         if (pos === -1) {
           return;
@@ -48,24 +56,24 @@ export class Reader extends Readable {
 
         debug(`Found record start "<record" in pos ${pos}`);
 
-        this.charbuffer = this.charbuffer.substr(pos);
-        pos = this.charbuffer.indexOf('</record>');
+        charbuffer = charbuffer.substr(pos);
+        pos = charbuffer.indexOf('</record>');
         if (pos === -1) {
           return;
         }
 
         debug(`Found record end "</record>" in pos ${pos}`);
 
-        const raw = this.charbuffer.substr(0, pos + 9);
-        this.charbuffer = this.charbuffer.substr(pos + 9);
+        const raw = charbuffer.substr(0, pos + 9);
+        charbuffer = charbuffer.substr(pos + 9);
 
         debugData(`Found record: ${raw}`);
 
         try {
           debug('Emitting record');
-          this.emit('data', await from(raw, validationOptions)); // eslint-disable-line no-await-in-loop
+          emitter.emit('data', await from(raw, validationOptions)); // eslint-disable-line no-await-in-loop
         } catch (e) {
-          this.emit('error', e);
+          emitter.emit('error', e);
         }
       }
     });
@@ -155,6 +163,7 @@ export async function from(str, validationOptions = {}) {
   const record = new MarcRecord(undefined, validationOptions);
   const obj = await toObject();
 
+  // eslint-disable-next-line functional/immutable-data
   record.leader = obj.record.leader?.[0] || '';
 
   addControlFields();
@@ -199,5 +208,6 @@ export async function from(str, validationOptions = {}) {
 }
 
 /* Function getLogger() {
-	return createDebugLogger('@natlibfi/marc-record-serializers/marcxml');
-} */
+   return createDebugLogger('@natlibfi/marc-record-serializers/marcxml');
+  }
+*/

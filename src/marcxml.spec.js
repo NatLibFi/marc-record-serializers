@@ -24,12 +24,13 @@ import * as Converter from './marcxml';
 
 describe('marcxml', () => {
   const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'marcxml');
-  const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from[0-9]+/).test(f)).length;
-  const fixtureCount2Records = fs.readdirSync(fixturesPath).filter(f => (/^2RecordsFrom[0-9]+/).test(f)).length;
+  const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from[0-9]+/u).test(f)).length;
+  const fixtureCount2Records = fs.readdirSync(fixturesPath).filter(f => (/^2RecordsFrom[0-9]+/u).test(f)).length;
 
-  describe('#Reader', () => {
+  describe('#reader', () => {
     it('Should emit an error because the file does not exist', () => new Promise((resolve, reject) => {
-      const reader = new Converter.Reader(fs.createReadStream('foo'));
+      // ValidationOptions:subfieldValues: false because test data has empty subfields
+      const reader = Converter.reader(fs.createReadStream('foo'), {subfieldValues: false});
       reader.on('data', reject);
       reader.on('end', reject);
       reader.on('error', err => {
@@ -44,7 +45,7 @@ describe('marcxml', () => {
 
     it('Should emit an error because of invalid data', () => new Promise((resolve, reject) => {
       const filePath = path.resolve(fixturesPath, 'erroneous');
-      const reader = new Converter.Reader(fs.createReadStream(filePath));
+      const reader = Converter.reader(fs.createReadStream(filePath), {subfieldValues: false});
 
       reader.on('data', () => {
         reject(new Error('Emitted a data-event'));
@@ -55,7 +56,7 @@ describe('marcxml', () => {
 
       reader.on('error', err => {
         try {
-          expect(err.message).to.match(/^Invalid tagname /);
+          expect(err.message).to.match(/^Invalid tagname /u);
           resolve();
         } catch (exp) {
           reject(exp);
@@ -72,14 +73,16 @@ describe('marcxml', () => {
         const records = [];
         const fromPath = path.resolve(fixturesPath, `from${index}`);
         const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
-        const reader = new Converter.Reader(fs.createReadStream(fromPath));
+        const reader = Converter.reader(fs.createReadStream(fromPath), {subfieldValues: false});
 
         reader.on('error', reject);
+        // eslint-disable-next-line functional/immutable-data
         reader.on('data', record => records.push(record));
         reader.on('end', () => {
           try {
             expect(records).to.have.length(1);
-            expect(records.shift().toString()).to.equal(expectedRecord);
+            const [firstRecord] = records;
+            expect(firstRecord.toString()).to.equal(expectedRecord);
             resolve();
           } catch (err) {
             reject(err);
@@ -103,14 +106,16 @@ describe('marcxml', () => {
         const records = [];
         const fromPath = path.resolve(fixturesPath, `2RecordsFrom${index}`);
         const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `2RecordsTo${index}`), 'utf8');
-        const reader = new Converter.Reader(fs.createReadStream(fromPath));
+        const reader = Converter.reader(fs.createReadStream(fromPath), {subfieldValues: false});
 
         reader.on('error', reject);
+        // eslint-disable-next-line functional/immutable-data
         reader.on('data', record => records.push(record));
         reader.on('end', () => {
           try {
             expect(records).to.have.length(2);
-            expect(`${records.shift().toString()}\n${records.shift().toString()}`).to.equal(expectedRecord);
+            const [firstRecord, secondRecord] = records;
+            expect(`${firstRecord.toString()}\n${secondRecord.toString()}`).to.equal(expectedRecord);
             resolve();
           } catch (err) {
             reject(err);
@@ -143,7 +148,7 @@ describe('marcxml', () => {
       const record = MarcRecord.fromString(sourceRecord, {fields: false, subfields: false, subfieldValues: false});
 
       // Console.log(Converter.to(record, {indent:true}));
-      expect(Converter.to(record)).to.equal(expectedRecord);
+      expect(await Converter.to(record)).to.equal(expectedRecord);
     });
 
     Array.from(Array(fixtureCount)).forEach((e, i) => {
