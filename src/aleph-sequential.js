@@ -89,7 +89,7 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
             } catch (excp) {
               emitter.emit('error', excp);
               brokenCount += 1;
-              break;
+              //break;
             }
 
             currentId = lineId;

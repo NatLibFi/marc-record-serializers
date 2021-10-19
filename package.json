@@ -101,6 +101,9 @@
 		"require": [
 			"@babel/register"
 		],
+		"exclude": [
+			"src/marcxml.js"
+		],
 		"sourceMap": false,
 		"instrument": false,
 		"lines": 80,
