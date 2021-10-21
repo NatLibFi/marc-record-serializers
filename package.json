@@ -20,13 +20,13 @@
 		"url": "git@github.com:natlibfi/marc-record-serializers.git"
 	},
 	"license": "MIT",
-	"version": "7.2.11",
+	"version": "8.0.0-alpha.1",
 	"main": "./dist/index.js",
 	"bin": {
 		"marc-record-serializers": "dist/cli.js"
 	},
 	"engines": {
-		"node": ">=12"
+		"node": ">=14"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -36,67 +36,52 @@
 		"lint:base:dev": "eslint --fix",
 		"lint:base": "eslint",
 		"lint": "npm run lint:base -- src",
-		"lint:dev": "npm run lint:base:dev -- src",
+		"lint:dev": "eslint --fix src",
 		"test:unit:base": "cross-env NODE_ENV=test nyc -x src/**/*.spec.js mocha --require @babel/register",
 		"test:unit": "npm run test:unit:base -- src/**/*.spec.js",
 		"test": "npm run lint && npm run test:unit && npm run coverage",
+		"test:nolint": "npm run test:unit && npm run coverage",
 		"test:dev": "npm run lint:dev && npm run test:unit && npm run coverage",
 		"coverage": "nyc check-coverage --per-file",
 		"build": "babel src --delete-dir-on-start --source-maps --out-dir=dist"
 	},
 	"dependencies": {
 		"@natlibfi/marc-record": "^6.1.2",
-		"ora": "^5.0.0",
-		"stream-json": "^1.7.1",
+		"ora": "^6.0.1",
+		"stream-json": "^1.7.3",
 		"text-encoding": "^0.7.0",
 		"xml2js": "^0.4.23",
-		"@xmldom/xmldom": "^0.7.2",
-		"yargs": "^15.4.1"
+		"@xmldom/xmldom": "^0.7.5",
+		"yargs": "^17.2.1"
 	},
 	"devDependencies": {
-		"@babel/cli": "^7.14.8",
-		"@babel/core": "^7.15.0",
-		"@babel/eslint-parser": "^7.15.0",
-		"@babel/preset-env": "^7.15.0",
+		"@babel/cli": "^7.15.7",
+		"@babel/core": "^7.15.8",
+		"@babel/eslint-parser": "^7.15.8",
+		"@babel/preset-env": "^7.15.8",
 		"@babel/register": "^7.15.3",
 		"babel-plugin-istanbul": "^6.0.0",
 		"chai": "^4.3.4",
 		"cross-env": "^7.0.3",
 		"debug": "^4.3.2",
 		"eslint": "^7.32.0",
-		"eslint-config-xo": "^0.32.1",
-		"eslint-plugin-import": "^2.22.0",
-		"eslint-plugin-mocha": "^8.0.0",
-		"mocha": "^8.1.1",
+		"@natlibfi/eslint-config-melinda-backend": "^1.1.1",
+		"mocha": "^9.1.2",
 		"nyc": "^15.1.0",
 		"rimraf": "^3.0.2"
 	},
 	"eslintConfig": {
 		"parser": "@babel/eslint-parser",
-		"plugins": [
-			"import"
-		],
 		"extends": [
-			"xo",
-			"plugin:import/errors"
-		],
-		"rules": {
-			"prefer-arrow-callback": [
-				"error"
-			]
-		},
-		"env": {
-			"mocha": true
-		}
+			"@natlibfi/melinda-backend"
+		]
 	},
 	"babel": {
 		"presets": [
 			[
 				"@babel/preset-env",
 				{
-					"targets": {
-						"node": "12"
-					}
+					"targets": "maintained node versions"
 				}
 			]
 		],
@@ -115,6 +100,9 @@
 		],
 		"require": [
 			"@babel/register"
+		],
+		"exclude": [
+			"src/marcxml.js"
 		],
 		"sourceMap": false,
 		"instrument": false,

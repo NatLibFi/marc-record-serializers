@@ -3,7 +3,7 @@
 * @licstart  The following is the entire license notice for the JavaScript code in this file.
 *
 * Copyright 2014-2017 Pasi Tuominen
-* Copyright 2018-2020 University Of Helsinki (The National Library Of Finland)
+* Copyright 2018-2021 University Of Helsinki (The National Library Of Finland)
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 *
@@ -15,189 +15,199 @@
 * for the JavaScript code in this file.
 *
 */
-import {Readable} from 'stream';
 import {MarcRecord} from '@natlibfi/marc-record';
 import {Parser, Builder} from 'xml2js';
+import {EventEmitter} from 'events';
 import createDebugLogger from 'debug';
 
 const debug = createDebugLogger('@natlibfi/marc-record-serializers:marcxml');
 const debugData = debug.extend('data');
 
-export class Reader extends Readable {
-	constructor(stream, validationOptions = {}) {
-		super(stream);
-		this.charbuffer = '';
+export function reader (stream, validationOptions = {}) {
+  const emitter = new class extends EventEmitter { }();
+  MarcRecord.setValidationOptions(validationOptions);
 
-		stream.on('end', () => {
-			this.emit('end');
-		});
+  start();
+  return emitter;
 
-		stream.on('error', error => {
-			this.emit('error', error);
-		});
+  function start() {
+    // eslint-disable-next-line functional/no-let
+    let charbuffer = '';
 
-		stream.on('data', async data => {
-			this.charbuffer += data.toString();
+    stream.on('end', () => {
+      emitter.emit('end');
+    });
 
-			while (1) { // eslint-disable-line no-constant-condition
-				let pos = this.charbuffer.indexOf('<record');
+    stream.on('error', error => {
+      emitter.emit('error', error);
+    });
 
-				if (pos === -1) {
-					return;
-				}
+    stream.on('data', async data => {
+      charbuffer += data.toString();
 
-				debug(`Found record start "<record" in pos ${pos}`);
+      // eslint-disable-next-line functional/no-loop-statement
+      while (1) { // eslint-disable-line no-constant-condition
+        // eslint-disable-next-line functional/no-let
+        let pos = charbuffer.indexOf('<record');
 
-				this.charbuffer = this.charbuffer.substr(pos);
-				pos = this.charbuffer.indexOf('</record>');
-				if (pos === -1) {
-					return;
-				}
+        if (pos === -1) {
+          return;
+        }
 
-				debug(`Found record end "</record>" in pos ${pos}`);
+        debug(`Found record start "<record" in pos ${pos}`);
 
-				const raw = this.charbuffer.substr(0, pos + 9);
-				this.charbuffer = this.charbuffer.substr(pos + 9);
+        charbuffer = charbuffer.substr(pos);
+        pos = charbuffer.indexOf('</record>');
+        if (pos === -1) {
+          return;
+        }
 
-				debugData(`Found record: ${raw}`);
+        debug(`Found record end "</record>" in pos ${pos}`);
 
-				try {
-					debug('Emitting record');
-					this.emit('data', await from(raw, validationOptions)); // eslint-disable-line no-await-in-loop
-				} catch (e) {
-					this.emit('error', e);
-				}
-			}
-		});
-	}
+        const raw = charbuffer.substr(0, pos + 9);
+        charbuffer = charbuffer.substr(pos + 9);
+
+        debugData(`Found record: ${raw}`);
+
+        try {
+          debug('Emitting record');
+          emitter.emit('data', await from(raw, validationOptions)); // eslint-disable-line no-await-in-loop
+        } catch (e) {
+          emitter.emit('error', e);
+        }
+      }
+    });
+  }
 }
 
 export function to(record, {omitDeclaration = false, indent = false} = {}) {
-	const obj = {
-		record: {
-			...generateFields(),
-			$: {
-				xmlns: 'http://www.loc.gov/MARC21/slim'
-			}
-		}
-	};
+  const obj = {
+    record: {
+      ...generateFields(),
+      $: {
+        xmlns: 'http://www.loc.gov/MARC21/slim'
+      }
+    }
+  };
 
-	return toXML(obj);
+  return toXML(obj);
 
-	function generateFields() {
-		return {
-			leader: [record.leader],
-			controlfield: record.getControlfields().map(({value: _, tag}) => {
-				if (_) {
-					return {_, $: {tag: [tag]}};
-				}
+  function generateFields() {
+    return {
+      leader: [record.leader],
+      controlfield: record.getControlfields().map(({value: _, tag}) => {
+        if (_) {
+          return {_, $: {tag: [tag]}};
+        }
 
-				return {$: {tag: [tag]}};
-			}),
-			datafield: record.getDatafields().map(transformDataField)
-		};
+        return {$: {tag: [tag]}};
+      }),
+      datafield: record.getDatafields().map(transformDataField)
+    };
 
-		function transformDataField({tag, ind1, ind2, subfields}) {
-			return {
-				$: {
-					tag: [tag],
-					ind1: [ind1],
-					ind2: [ind2]
-				},
-				subfield: transformSubfields()
-			};
+    function transformDataField({tag, ind1, ind2, subfields}) {
+      return {
+        $: {
+          tag: [tag],
+          ind1: [ind1],
+          ind2: [ind2]
+        },
+        subfield: transformSubfields()
+      };
 
-			function transformSubfields() {
-				return subfields.map(({code, value: _}) => {
-					if (_) {
-						return {_, $: {code: [code]}};
-					}
+      function transformSubfields() {
+        return subfields.map(({code, value: _}) => {
+          if (_) {
+            return {_, $: {code: [code]}};
+          }
 
-					return {$: {code: [code]}};
-				});
-			}
-		}
-	}
+          return {$: {code: [code]}};
+        });
+      }
+    }
+  }
 
-	function toXML() {
-		try {
-			return new Builder(generateOptions()).buildObject(obj);
-		} catch (err) {
-			/* istanbul ignore next: Too generic to test */
-			throw new Error(`XML conversion failed ${err.message} for object: ${JSON.stringify(obj)}`);
-		}
+  function toXML() {
+    try {
+      return new Builder(generateOptions()).buildObject(obj);
+    } catch (err) {
+      /* istanbul ignore next: Too generic to test */
+      throw new Error(`XML conversion failed ${err.message} for object: ${JSON.stringify(obj)}`);
+    }
 
-		function generateOptions() {
-			return {...generateDeclr(), ...generateRender()};
+    function generateOptions() {
+      return {...generateDeclr(), ...generateRender()};
 
-			function generateDeclr() {
-				return omitDeclaration ? {headless: true} : {
-					xmldec: {
-						version: '1.0',
-						encoding: 'UTF-8'
-					}
-				};
-			}
+      function generateDeclr() {
+        return omitDeclaration ? {headless: true} : {
+          xmldec: {
+            version: '1.0',
+            encoding: 'UTF-8'
+          }
+        };
+      }
 
-			function generateRender() {
-				return indent ? {
-					renderOpts: {
-						pretty: true,
-						indent: '\t'
-					}
-				} : {renderOpts: {pretty: false}};
-			}
-		}
-	}
+      function generateRender() {
+        return indent ? {
+          renderOpts: {
+            pretty: true,
+            indent: '\t'
+          }
+        } : {renderOpts: {pretty: false}};
+      }
+    }
+  }
 }
 
 export async function from(str, validationOptions = {}) {
-	const record = new MarcRecord(undefined, validationOptions);
-	const obj = await toObject();
+  const record = new MarcRecord(undefined, validationOptions);
+  const obj = await toObject();
 
-	record.leader = obj.record.leader?.[0] || '';
+  // eslint-disable-next-line functional/immutable-data
+  record.leader = obj.record.leader?.[0] || '';
 
-	addControlFields();
-	addDataFields();
+  addControlFields();
+  addDataFields();
 
-	return record;
+  return record;
 
-	function addControlFields() {
-		const fields = obj.record.controlfield || [];
+  function addControlFields() {
+    const fields = obj.record.controlfield || [];
 
-		fields.forEach(({_: value, $: {tag}}) => (record.appendField({tag, value})));
-	}
+    fields.forEach(({_: value, $: {tag}}) => record.appendField({tag, value}));
+  }
 
-	function addDataFields() {
-		const fields = obj.record.datafield || [];
+  function addDataFields() {
+    const fields = obj.record.datafield || [];
 
-		fields.forEach(({subfield, $: {tag, ind1, ind2}}) => {
-			const subfields = parseSubfields();
-			record.appendField({tag, ind1, ind2, subfields});
+    fields.forEach(({subfield, $: {tag, ind1, ind2}}) => {
+      const subfields = parseSubfields();
+      record.appendField({tag, ind1, ind2, subfields});
 
-			function parseSubfields() {
-				const subfields = subfield || [];
-				return subfields.map(({_: value, $: {code}}) => {
-					const result = value === undefined ? {code} : {code, value};
-					return result;
-				});
-			}
-		});
-	}
+      function parseSubfields() {
+        const subfields = subfield || [];
+        return subfields.map(({_: value, $: {code}}) => {
+          const result = value === undefined ? {code} : {code, value};
+          return result;
+        });
+      }
+    });
+  }
 
-	function toObject() {
-		return new Promise((resolve, reject) => {
-			new Parser().parseString(str, (err, obj) => {
-				if (err) {
-					/* istanbul ignore next: Generic error */ return reject(err);
-				}
+  function toObject() {
+    return new Promise((resolve, reject) => {
+      new Parser().parseString(str, (err, obj) => {
+        if (err) {
+          /* istanbul ignore next: Generic error */ return reject(err);
+        }
 
-				resolve(obj);
-			});
-		});
-	}
+        resolve(obj);
+      });
+    });
+  }
 }
 
 /* Function getLogger() {
-	return createDebugLogger('@natlibfi/marc-record-serializers/marcxml');
-} */
+   return createDebugLogger('@natlibfi/marc-record-serializers/marcxml');
+  }
+*/
