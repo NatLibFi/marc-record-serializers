@@ -31,7 +31,7 @@ describe('text', () => {
   const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'text');
   const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from[0-9]+/u).test(f)).length;
 
-  describe('#Reader', () => {
+  describe('#reader', () => {
     it('Should emit only an end-event because of invalid data', () => new Promise((resolve, reject) => {
       const filePath = path.resolve(fixturesPath, 'erroneous');
       const reader = Converter.reader(fs.createReadStream(filePath));

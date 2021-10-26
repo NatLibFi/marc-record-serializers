@@ -23,7 +23,6 @@
 
 import fs from 'fs';
 import path from 'path';
-import ora from 'ora';
 import yargs from 'yargs';
 import * as Text from './text';
 import * as Json from './json';
@@ -59,9 +58,10 @@ async function run() {
       .parse();
 
     const {serialize, outputPrefix, outputSuffix, outputSeparator, fileSuffix, recordCallback} = getService(args.outputFormat);
-    const {Reader} = getService(args.inputFormat);
-    const reader = new Reader(fs.createReadStream(args.file));
-    const spinner = ora('Converting records.\n').start();
+    const {reader} = getService(args.inputFormat);
+    const readerFromFile = reader(fs.createReadStream(args.file));
+
+    //console.log('Converting records.');
 
     // eslint-disable-next-line functional/no-conditional-statement
     if (!args.validate) {
@@ -77,7 +77,7 @@ async function run() {
         process.stdout.write(outputPrefix);
       }
 
-      reader.on('error', err => {
+      readerFromFile.on('error', err => {
         // eslint-disable-next-line functional/no-conditional-statement
         if ('validationResults' in err) {
           const message = `Record is invalid: ${JSON.stringify(err.validationResults.errors, undefined, 2)}`;
@@ -88,8 +88,8 @@ async function run() {
         }
       });
 
-      reader.on('end', () => {
-        spinner.succeed();
+      readerFromFile.on('end', () => {
+        //console.log('Done');
 
         // eslint-disable-next-line functional/no-conditional-statement
         if (args.outputDirectory) {
@@ -102,7 +102,7 @@ async function run() {
         resolve();
       });
 
-      reader.on('data', record => {
+      readerFromFile.on('data', record => {
         if (args.outputDirectory) {
           const filename = `${String(count).padStart(5, '0')}.${fileSuffix}`;
 
@@ -143,14 +143,14 @@ async function run() {
     switch (type) {
     case 'text':
       return {
-        Reader: Text.Reader,
+        reader: Text.reader,
         serialize: Text.to,
         fileSuffix: 'txt',
         recordCallback: ensureLineBreak
       };
     case 'json':
       return {
-        Reader: Json.Reader,
+        reader: Json.reader,
         serialize: Json.to,
         outputPrefix: '[',
         outputSuffix: ']',
@@ -160,14 +160,14 @@ async function run() {
       };
     case 'alephseq':
       return {
-        Reader: AlephSequential.Reader,
+        reader: AlephSequential.reader,
         serialize: AlephSequential.to,
         fileSuffix: 'seq',
         recordCallback: ensureLineBreak
       };
     case 'marcxml':
       return {
-        Reader: MARCXML.Reader,
+        reader: MARCXML.reader,
         serialize: MARCXML.to,
         outputPrefix: '<?xml version="1.0" encoding="UTF-8"?><records>',
         outputSuffix: '</records>',
@@ -176,7 +176,7 @@ async function run() {
       };
     case 'oai-marcxml':
       return {
-        Reader: OAI_MARCXML.Reader,
+        reader: OAI_MARCXML.reader,
         serialize: OAI_MARCXML.to,
         outputPrefix: '<?xml version="1.0" encoding="UTF-8"?><records>',
         outputSuffix: '</records>',
@@ -185,7 +185,7 @@ async function run() {
       };
     case 'iso2709':
       return {
-        Reader: ISO2709.Reader,
+        reader: ISO2709.reader,
         serialize: ISO2709.to,
         fileSuffix: 'marc',
         recordCallback: defaultRecordCallback

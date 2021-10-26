@@ -47,7 +47,6 @@
 	},
 	"dependencies": {
 		"@natlibfi/marc-record": "^6.1.2",
-		"ora": "^6.0.1",
 		"stream-json": "^1.7.3",
 		"text-encoding": "^0.7.0",
 		"xml2js": "^0.4.23",
