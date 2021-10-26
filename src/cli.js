@@ -23,7 +23,6 @@
 
 import fs from 'fs';
 import path from 'path';
-import ora from 'ora';
 import yargs from 'yargs';
 import * as Text from './text';
 import * as Json from './json';
@@ -61,7 +60,7 @@ async function run() {
     const {serialize, outputPrefix, outputSuffix, outputSeparator, fileSuffix, recordCallback} = getService(args.outputFormat);
     const {Reader} = getService(args.inputFormat);
     const reader = new Reader(fs.createReadStream(args.file));
-    const spinner = ora('Converting records.\n').start();
+    console.log('Converting records.');
 
     // eslint-disable-next-line functional/no-conditional-statement
     if (!args.validate) {
@@ -89,7 +88,7 @@ async function run() {
       });
 
       reader.on('end', () => {
-        spinner.succeed();
+        console.log('Done');
 
         // eslint-disable-next-line functional/no-conditional-statement
         if (args.outputDirectory) {
