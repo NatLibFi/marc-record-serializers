@@ -59,7 +59,7 @@ async function run() {
 
     const {serialize, outputPrefix, outputSuffix, outputSeparator, fileSuffix, recordCallback} = getService(args.outputFormat);
     const {reader} = getService(args.inputFormat);
-    const reader1 = reader(fs.createReadStream(args.file));
+    const readerFromFile = reader(fs.createReadStream(args.file));
 
     //console.log('Converting records.');
 
@@ -77,7 +77,7 @@ async function run() {
         process.stdout.write(outputPrefix);
       }
 
-      reader1.on('error', err => {
+      readerFromFile.on('error', err => {
         // eslint-disable-next-line functional/no-conditional-statement
         if ('validationResults' in err) {
           const message = `Record is invalid: ${JSON.stringify(err.validationResults.errors, undefined, 2)}`;
@@ -88,7 +88,7 @@ async function run() {
         }
       });
 
-      reader1.on('end', () => {
+      readerFromFile.on('end', () => {
         //console.log('Done');
 
         // eslint-disable-next-line functional/no-conditional-statement
@@ -102,7 +102,7 @@ async function run() {
         resolve();
       });
 
-      reader1.on('data', record => {
+      readerFromFile.on('data', record => {
         if (args.outputDirectory) {
           const filename = `${String(count).padStart(5, '0')}.${fileSuffix}`;
 
