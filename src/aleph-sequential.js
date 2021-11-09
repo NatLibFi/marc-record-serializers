@@ -18,8 +18,8 @@
 */
 
 import {MarcRecord} from '@natlibfi/marc-record';
+import {Buffer} from 'buffer';
 // Node polyfill
-import {TextEncoder, TextDecoder} from 'text-encoding';
 import {EventEmitter} from 'events';
 import createDebugLogger from 'debug';
 
@@ -193,9 +193,6 @@ export function to(record, useCrForContinuingResource = false) {
   function formatDatafield(field) {
 
     let subfieldLines; // eslint-disable-line functional/no-let
-    const encoder = new TextEncoder('utf-8');
-    const decoder = new TextDecoder('utf-8');
-
     const ind1 = field.ind1 && field.ind1.length > 0 ? field.ind1 : ' ';
     const ind2 = field.ind2 && field.ind2.length > 0 ? field.ind2 : ' ';
     const header = `${id} ${field.tag}${ind1}${ind2} L `;
@@ -208,7 +205,7 @@ export function to(record, useCrForContinuingResource = false) {
         content = subfield.value === undefined ? `$$${subfield.code}` : `$$${subfield.code}${subfield.value}`;
       }
 
-      return encoder.encode(content);
+      return Buffer.from(content); // eslint-disable-line
     });
 
     const dataLength = formattedSubfields.reduce((acc, value) => acc + value.length, 0);
@@ -224,7 +221,7 @@ export function to(record, useCrForContinuingResource = false) {
     return `${header + decode(formattedSubfields).join('')}\n`;
 
     function decode(subfields) {
-      return subfields.map(value => decoder.decode(value));
+      return subfields.map(value => Buffer.from(value)); // eslint-disable-line
     }
 
     /**
@@ -245,7 +242,7 @@ export function to(record, useCrForContinuingResource = false) {
         if (tempLength) {
           // eslint-disable-next-line functional/immutable-data
           result.temp = concatByteArrays(result.temp, subfield);
-        // eslint-disable-next-line functional/no-conditional-statement
+          // eslint-disable-next-line functional/no-conditional-statement
         } else {
           // eslint-disable-next-line functional/immutable-data
           result.temp = subfield;
@@ -259,7 +256,7 @@ export function to(record, useCrForContinuingResource = false) {
           delete result.temp;
         }
 
-        code = decoder.decode(subfield.slice(2, 3));
+        code = Buffer.from(subfield.slice(2, 3)); // eslint-disable-line
         iterate(subfield, index === 0);
       }
 
@@ -300,7 +297,7 @@ export function to(record, useCrForContinuingResource = false) {
         if (segment.length <= SPLIT_MAX_FIELD_LENGTH) {
           // eslint-disable-next-line functional/immutable-data
           result.temp = segment;
-        // eslint-disable-next-line functional/no-conditional-statement
+          // eslint-disable-next-line functional/no-conditional-statement
         } else {
           sliceOffset = getSliceOffset(segment);
           slicedSegment = sliceSegment(segment, sliceOffset);
@@ -316,12 +313,12 @@ export function to(record, useCrForContinuingResource = false) {
           // eslint-disable-next-line functional/no-conditional-statement
           if (arr.slice(0, 2).every(value => value === DOLLAR)) {
             prefix = '$$9^';
-          // eslint-disable-next-line functional/no-conditional-statement
+            // eslint-disable-next-line functional/no-conditional-statement
           } else {
             prefix = `$$9^^$$${code}`;
           }
 
-          return concatByteArrays(encoder.encode(prefix), arr);
+          return concatByteArrays(Buffer.from(prefix), arr); // eslint-disable-line
         }
 
         function getSliceOffset(arr) {
@@ -353,10 +350,10 @@ export function to(record, useCrForContinuingResource = false) {
                 // eslint-disable-next-line functional/no-conditional-statement
                 if (foundCount === 0 && arr[i] === SPACE) {
                   foundCount += 1;
-                // eslint-disable-next-line functional/no-conditional-statement
+                  // eslint-disable-next-line functional/no-conditional-statement
                 } else if (foundCount > 0 && arr[i] === HYPHEN) {
                   foundCount += 1;
-                // eslint-disable-next-line functional/no-conditional-statement
+                  // eslint-disable-next-line functional/no-conditional-statement
                 } else {
                   foundCount = 0;
                 }
@@ -393,10 +390,10 @@ export function to(record, useCrForContinuingResource = false) {
                 // eslint-disable-next-line functional/no-conditional-statement
                 if (foundCount === 0 && arr[i] === SPACE) {
                   foundCount += 1;
-                // eslint-disable-next-line functional/no-conditional-statement
+                  // eslint-disable-next-line functional/no-conditional-statement
                 } else if (foundCount > 0 && arr[i] === PERIOD) {
                   foundCount += 1;
-                // eslint-disable-next-line functional/no-conditional-statement
+                  // eslint-disable-next-line functional/no-conditional-statement
                 } else {
                   foundCount = 0;
                 }
@@ -519,7 +516,7 @@ export function from(data, validationOptions = {}) {
     if (field.tag === 'LDR') {
       // eslint-disable-next-line functional/immutable-data
       record.leader = field.value;
-    // eslint-disable-next-line functional/no-conditional-statement
+      // eslint-disable-next-line functional/no-conditional-statement
     } else {
       // eslint-disable-next-line functional/immutable-data
       record.fields.push(field);
