@@ -205,7 +205,7 @@ export function to(record, useCrForContinuingResource = false) {
         content = subfield.value === undefined ? `$$${subfield.code}` : `$$${subfield.code}${subfield.value}`;
       }
 
-      return Buffer.from(content); // eslint-disable-line
+      return Buffer.from(content);
     });
 
     const dataLength = formattedSubfields.reduce((acc, value) => acc + value.length, 0);
@@ -221,7 +221,7 @@ export function to(record, useCrForContinuingResource = false) {
     return `${header + decode(formattedSubfields).join('')}\n`;
 
     function decode(subfields) {
-      return subfields.map(value => Buffer.from(value)); // eslint-disable-line
+      return subfields.map(value => Buffer.from(value));
     }
 
     /**
@@ -256,7 +256,7 @@ export function to(record, useCrForContinuingResource = false) {
           delete result.temp;
         }
 
-        code = Buffer.from(subfield.slice(2, 3)); // eslint-disable-line
+        code = Buffer.from(subfield.slice(2, 3));
         iterate(subfield, index === 0);
       }
 
@@ -318,7 +318,7 @@ export function to(record, useCrForContinuingResource = false) {
             prefix = `$$9^^$$${code}`;
           }
 
-          return concatByteArrays(Buffer.from(prefix), arr); // eslint-disable-line
+          return concatByteArrays(Buffer.from(prefix), arr);
         }
 
         function getSliceOffset(arr) {
