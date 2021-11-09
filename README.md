@@ -1,6 +1,6 @@
 # Convert records to and from different MARC formats 
 [![NPM Version](https://img.shields.io/npm/v/@natlibfi/marc-record-serializers.svg)](https://npmjs.org/package/@natlibfi/marc-record-serializers)
-[![Node Version](https://img.shields.io/node/v/@natlibfi/marc-record-serializers.svg)]
+[![Node Version](https://img.shields.io/node/v/@natlibfi/marc-record-serializers.svg)]()
 [![Build Status](https://travis-ci.org/NatLibFi/marc-record-serializers.svg)](https://travis-ci.org/NatLibFi/marc-record-serializers)
 [![Test Coverage](https://codeclimate.com/github/NatLibFi/marc-record-serializers/badges/coverage.svg)](https://codeclimate.com/github/NatLibFi/marc-record-serializers/coverage)
 
