@@ -37,19 +37,19 @@
 		"lint:base": "eslint",
 		"lint": "npm run lint:base -- src",
 		"lint:dev": "eslint --fix src",
-		"test:unit:base": "cross-env NODE_ENV=test nyc -x src/**/*.spec.js mocha --require @babel/register",
-		"test:unit": "npm run test:unit:base -- src/**/*.spec.js",
-		"test": "npm run lint && npm run test:unit && npm run coverage",
-		"test:nolint": "npm run test:unit && npm run coverage",
-		"test:dev": "npm run lint:dev && npm run test:unit && npm run coverage",
-		"coverage": "nyc check-coverage --per-file",
+		"test:base": "cross-env NODE_ENV=test mocha --require=@babel/register src/*.spec.js",
+		"test": "npm run lint && npm run test:base",
+		"test:dev": "npm run lint:dev && npm run coverage",
+		"coverage": "npm run coverage:unit && npm run coverage:report",
+		"coverage:unit": "nyc --silent npm run test:base",
+		"coverage:report": "nyc report --reporter=text",
 		"build": "babel src --delete-dir-on-start --source-maps --out-dir=dist"
 	},
 	"dependencies": {
 		"@natlibfi/marc-record": "^6.1.2",
-		"stream-json": "^1.7.3",
-		"xml2js": "^0.4.23",
 		"@xmldom/xmldom": "^0.7.5",
+		"stream-json": "^1.7.3",
+		"xml2js": ">=0.4.23 <1.0.0",
 		"yargs": "^17.2.1"
 	},
 	"devDependencies": {
@@ -58,13 +58,13 @@
 		"@babel/eslint-parser": "^7.15.8",
 		"@babel/preset-env": "^7.15.8",
 		"@babel/register": "^7.15.3",
-		"babel-plugin-istanbul": "^6.0.0",
+		"@natlibfi/eslint-config-melinda-backend": "^1.1.1",
+		"babel-plugin-istanbul": "^6.1.1",
 		"chai": "^4.3.4",
 		"cross-env": "^7.0.3",
 		"debug": "^4.3.2",
 		"eslint": "^7.32.0",
-		"@natlibfi/eslint-config-melinda-backend": "^1.1.1",
-		"mocha": "^9.1.2",
+		"mocha": "^9.1.3",
 		"nyc": "^15.1.0",
 		"rimraf": "^3.0.2"
 	},
@@ -92,15 +92,19 @@
 		}
 	},
 	"nyc": {
+		"include": [
+			"src/*.js"
+		],
+		"exclude": [
+			"*/*.spec.js",
+			"*/**/*.spec.js"
+		],
 		"reporter": [
 			"lcov",
 			"html"
 		],
 		"require": [
 			"@babel/register"
-		],
-		"exclude": [
-			"src/marcxml.js"
 		],
 		"sourceMap": false,
 		"instrument": false,

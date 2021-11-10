@@ -191,7 +191,6 @@ export function to(record, useCrForContinuingResource = false) {
   }
 
   function formatDatafield(field) {
-
     let subfieldLines; // eslint-disable-line functional/no-let
     const ind1 = field.ind1 && field.ind1.length > 0 ? field.ind1 : ' ';
     const ind2 = field.ind2 && field.ind2.length > 0 ? field.ind2 : ' ';
@@ -599,12 +598,20 @@ export function from(data, validationOptions = {}) {
 
     const subfieldData = lineStr.substr(18);
 
+    if (subfieldData === '') {
+      throw new Error(`Could not parse subfields from line: ${lineStr}`);
+    }
+
     const subfields = subfieldData.split('$$')
       .filter(sf => sf.length !== 0)
       .map(subfield => {
         const code = subfield.substr(0, 1);
         const value = subfield.substr(1);
-        return {code, value};
+        if (value.length > 0) {
+          return {code, value};
+        }
+
+        return {code};
       });
 
     return {
