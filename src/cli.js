@@ -30,43 +30,40 @@ import * as AlephSequential from './aleph-sequential';
 import * as ISO2709 from './iso2709';
 import * as MARCXML from './marcxml';
 import * as OAI_MARCXML from './oai-marcxml';
-import {MarcRecord} from '@natlibfi/marc-record';
 
 run();
 
 async function run() {
+  const VALIDATION_OPTIONS_USAGE = `Validation options:
+  111 => {fields: true, subfields: true, subfieldValues: true}
+  010 => {fields: false, subfields: true, subfieldValues: false}
+  000 => {fields: false, subfields: false, subfieldValues: false}`;
   const FORMAT_USAGE = `Supported formats:
-  text
-  json
-  alephseq
-  marcxml
-  oai-marcxml
-  iso2709`;
+  text, json, alephseq, marcxml, oai-marcxml, iso2709`;
 
   try {
     const args = yargs
       .scriptName('marc-record-serializers')
-      .command('$0 <inputFormat> <outputFormat> <file>', '', yargs => {
+      .usage('$0 <inputFormat> <outputFormat> <file>', '', yargs => {
         yargs
           .positional('inputFormat', {type: 'string', describe: 'Input format'})
           .positional('outputFormat', {type: 'string', describe: 'Output format'})
-          .positional('file', {type: 'string', describe: 'File to read'})
-          .epilog(FORMAT_USAGE);
+          .positional('file', {describe: 'File to read', type: 'string'});
       })
       .option('v', {alias: 'validate', default: true, type: 'boolean', describe: 'Validate MARC record structure'})
+      .option('o', {alias: 'validationOptions', default: '111', type: 'string', describe: 'Boolean numbers declaring validation options'})
       .option('d', {alias: 'outputDirectory', type: 'string', describe: 'Write records to individual files in DIRECTORY'})
+      .epilogue(VALIDATION_OPTIONS_USAGE)
+      .epilogue(FORMAT_USAGE)
       .parse();
 
     const {serialize, outputPrefix, outputSuffix, outputSeparator, fileSuffix, recordCallback} = getService(args.outputFormat);
     const {reader} = getService(args.inputFormat);
-    const readerFromFile = reader(fs.createReadStream(args.file));
+    const validationOptions = args.validate ? handleValidationOptions(args.validationOptions) : {fields: false, subfields: false, subfieldValues: false};
+    const readerFromFile = reader(fs.createReadStream(args.file), validationOptions);
 
     //console.log('Converting records.');
-
-    // eslint-disable-next-line functional/no-conditional-statement
-    if (!args.validate) {
-      MarcRecord.setValidationOptions({fields: false, subfields: false, subfieldValues: false});
-    }
+    //console.log(validationOptions);
 
     await new Promise((resolve, reject) => {
       // eslint-disable-next-line functional/no-let
@@ -82,7 +79,7 @@ async function run() {
         if ('validationResults' in err) {
           const message = `Record is invalid: ${JSON.stringify(err.validationResults.errors, undefined, 2)}`;
           reject(new Error(message));
-        // eslint-disable-next-line functional/no-conditional-statement
+          // eslint-disable-next-line functional/no-conditional-statement
         } else {
           reject(err);
         }
@@ -94,7 +91,7 @@ async function run() {
         // eslint-disable-next-line functional/no-conditional-statement
         if (args.outputDirectory) {
           console.log(`Wrote ${count} records to ${args.outputDirectory}`);
-        // eslint-disable-next-line functional/no-conditional-statement
+          // eslint-disable-next-line functional/no-conditional-statement
         } else if (outputSuffix) {
           process.stdout.write(outputSuffix);
         }
@@ -111,9 +108,9 @@ async function run() {
             fs.mkdirSync(args.outputDirectory);
           }
 
-          fs.writeFileSync(path.join(args.outputDirectory, filename), serialize(record));
+          fs.writeFileSync(path.join(args.outputDirectory, filename), serialize(record, validationOptions));
         } else {
-          const str = serialize(record);
+          const str = serialize(record, validationOptions);
 
           // eslint-disable-next-line functional/no-conditional-statement
           if (outputSeparator && count > 0) {
@@ -140,15 +137,15 @@ async function run() {
   }
 
   function getService(type) {
-    switch (type) {
-    case 'text':
+    if (type === 'text') {
       return {
         reader: Text.reader,
         serialize: Text.to,
         fileSuffix: 'txt',
         recordCallback: ensureLineBreak
       };
-    case 'json':
+    }
+    if (type === 'json') {
       return {
         reader: Json.reader,
         serialize: Json.to,
@@ -158,14 +155,16 @@ async function run() {
         fileSuffix: 'json',
         recordCallback: defaultRecordCallback
       };
-    case 'alephseq':
+    }
+    if (type === 'alephseq') {
       return {
         reader: AlephSequential.reader,
         serialize: AlephSequential.to,
         fileSuffix: 'seq',
         recordCallback: ensureLineBreak
       };
-    case 'marcxml':
+    }
+    if (type === 'marcxml') {
       return {
         reader: MARCXML.reader,
         serialize: MARCXML.to,
@@ -174,7 +173,8 @@ async function run() {
         fileSuffix: 'xml',
         recordCallback: removeXmlDeclaration
       };
-    case 'oai-marcxml':
+    }
+    if (type === 'oai-marcxml') {
       return {
         reader: OAI_MARCXML.reader,
         serialize: OAI_MARCXML.to,
@@ -183,27 +183,39 @@ async function run() {
         fileSuffix: 'xml',
         recordCallback: removeXmlDeclaration
       };
-    case 'iso2709':
+    }
+    if (type === 'iso2709') {
       return {
         reader: ISO2709.reader,
         serialize: ISO2709.to,
         fileSuffix: 'marc',
         recordCallback: defaultRecordCallback
       };
-    default:
-      throw new Error(`Unsupported format ${type}`);
     }
+    throw new Error(`Unsupported format ${type}`);
+  }
 
-    function defaultRecordCallback(s) {
-      return s;
-    }
+  function defaultRecordCallback(s) {
+    return s;
+  }
 
-    function ensureLineBreak(s) {
-      return s.endsWith('\n') ? s : `${s}\n`;
-    }
+  function ensureLineBreak(s) {
+    return s.endsWith('\n') ? s : `${s}\n`;
+  }
 
-    function removeXmlDeclaration(s) {
-      return s.replace(/^<\?xml version="1\.0" encoding="UTF-8"\?>/u, '');
+  function removeXmlDeclaration(s) {
+    return s.replace(/^<\?xml version="1\.0" encoding="UTF-8"\?>/u, '');
+  }
+
+  function handleValidationOptions(value) {
+    if (value.length === 3) {
+      const [fields, subfields, subfieldValues] = value;
+      return {
+        fields: fields === '1',
+        subfields: subfields === '1',
+        subfieldValues: subfieldValues === '1'
+      };
     }
+    throw new Error('Invalid validation options value!');
   }
 }

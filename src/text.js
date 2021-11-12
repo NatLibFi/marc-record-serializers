@@ -49,7 +49,6 @@ export function reader(stream, validationOptions = {}) {
 
     stream.on('error', error => {
       debug(`streamEvent: error`);
-      /* istanbul ignore next: Only occurs on I/O errors */
       emitter.emit('error', error);
     });
 

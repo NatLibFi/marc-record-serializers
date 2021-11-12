@@ -58,6 +58,7 @@ export function reader (stream, validationOptions = {}) {
 
         charbuffer = charbuffer.substr(pos);
         pos = charbuffer.indexOf('</record>');
+        /* istanbul ignore if */
         if (pos === -1) {
           return;
         }
@@ -127,11 +128,10 @@ export function to(record, {omitDeclaration = false, indent = false} = {}) {
     }
   }
 
-  function toXML() {
+  function toXML(obj) {
     try {
       return new Builder(generateOptions()).buildObject(obj);
     } catch (err) {
-      /* istanbul ignore next: Too generic to test */
       throw new Error(`XML conversion failed ${err.message} for object: ${JSON.stringify(obj)}`);
     }
 
@@ -198,7 +198,7 @@ export async function from(str, validationOptions = {}) {
     return new Promise((resolve, reject) => {
       new Parser().parseString(str, (err, obj) => {
         if (err) {
-          /* istanbul ignore next: Generic error */ return reject(err);
+          return reject(err);
         }
 
         resolve(obj);
