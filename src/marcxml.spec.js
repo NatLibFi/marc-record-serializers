@@ -125,6 +125,37 @@ describe('marcxml', () => {
     });
   });
 
+  const fixtureCountNamespace = fs.readdirSync(fixturesPath).filter(f => (/^from-namespace-xml[0-9]+/u).test(f)).length;
+  describe('#namespace-xml', () => {
+    Array.from(Array(fixtureCountNamespace)).forEach((e, i) => {
+      const index = i + 1;
+      it(`Should convert file from-namepace-xml${index} to file to-namespace-xml${index}`, () => new Promise((resolve, reject) => {
+        const records = [];
+        const fromPath = path.resolve(fixturesPath, `from-namespace-xml${index}`);
+        const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, `to-namespace-xml${index}`), 'utf8');
+        // eslint-disable-next-line no-console
+        console.log(expectedRecord);
+        const reader = Converter.reader(fs.createReadStream(fromPath), {subfieldValues: false}, 'marc:');
+
+        reader.on('error', reject);
+        // eslint-disable-next-line functional/immutable-data
+        reader.on('data', record => records.push(record));
+        reader.on('end', () => {
+          try {
+            expect(records).to.have.length(1);
+            const [firstRecord] = records;
+            // eslint-disable-next-line no-console
+            console.log(firstRecord.toString());
+            expect(firstRecord.toString()).to.equal(expectedRecord);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        });
+      }));
+    });
+  });
+
   describe('#to', () => {
     it('Should serialize the record without XML declaration', () => {
       const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'to-no-xml-decl'), 'utf8');

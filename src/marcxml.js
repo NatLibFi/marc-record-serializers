@@ -19,11 +19,12 @@ import {MarcRecord} from '@natlibfi/marc-record';
 import {Parser, Builder} from 'xml2js';
 import {EventEmitter} from 'events';
 import createDebugLogger from 'debug';
+import {stripPrefix} from 'xml2js/lib/processors';
 
 const debug = createDebugLogger('@natlibfi/marc-record-serializers:marcxml');
 const debugData = debug.extend('data');
 
-export function reader (stream, validationOptions = {}) {
+export function reader (stream, validationOptions = {}, nameSpace = '') {
   const emitter = new class extends EventEmitter { }();
   MarcRecord.setValidationOptions(validationOptions);
 
@@ -48,25 +49,26 @@ export function reader (stream, validationOptions = {}) {
       // eslint-disable-next-line functional/no-loop-statement
       while (1) { // eslint-disable-line no-constant-condition
         // eslint-disable-next-line functional/no-let
-        let pos = charbuffer.indexOf('<record');
+        let pos = charbuffer.indexOf(`<${nameSpace}record`);
 
         if (pos === -1) {
           return;
         }
 
-        debug(`Found record start "<record" in pos ${pos}`);
+        debug(`Found record start "<${nameSpace}record" in pos ${pos}`);
 
         charbuffer = charbuffer.substr(pos);
-        pos = charbuffer.indexOf('</record>');
+        pos = charbuffer.indexOf(`</${nameSpace}record>`);
         /* istanbul ignore if */
         if (pos === -1) {
           return;
         }
 
-        debug(`Found record end "</record>" in pos ${pos}`);
+        debug(`Found record end "</${nameSpace}record>" in pos ${pos}`);
 
-        const raw = charbuffer.substr(0, pos + 9);
-        charbuffer = charbuffer.substr(pos + 9);
+        const endTagLength = nameSpace.length + 9;
+        const raw = charbuffer.substr(0, pos + endTagLength);
+        charbuffer = charbuffer.substr(pos + endTagLength);
 
         debugData(`Found record: ${raw}`);
 
@@ -196,11 +198,12 @@ export async function from(str, validationOptions = {}) {
 
   function toObject() {
     return new Promise((resolve, reject) => {
-      new Parser().parseString(str, (err, obj) => {
+      new Parser({tagNameProcessors: [stripPrefix]}).parseString(str, (err, obj) => {
         if (err) {
+          debug(err);
           return reject(err);
         }
-
+        debug(obj);
         resolve(obj);
       });
     });

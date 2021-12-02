@@ -53,6 +53,7 @@ async function run() {
       .option('v', {alias: 'validate', default: true, type: 'boolean', describe: 'Validate MARC record structure'})
       .option('o', {alias: 'validationOptions', default: '111', type: 'string', describe: 'Boolean numbers declaring validation options'})
       .option('d', {alias: 'outputDirectory', type: 'string', describe: 'Write records to individual files in DIRECTORY'})
+      .option('n', {alias: 'marcXmlNameSpace', type: 'string', describe: 'Namespace prefix used for marcxml reader'})
       .epilogue(VALIDATION_OPTIONS_USAGE)
       .epilogue(FORMAT_USAGE)
       .parse();
@@ -60,7 +61,8 @@ async function run() {
     const {serialize, outputPrefix, outputSuffix, outputSeparator, fileSuffix, recordCallback} = getService(args.outputFormat);
     const {reader} = getService(args.inputFormat);
     const validationOptions = args.validate ? handleValidationOptions(args.validationOptions) : {fields: false, subfields: false, subfieldValues: false};
-    const readerFromFile = reader(fs.createReadStream(args.file), validationOptions);
+    const marcXmlNameSpace = args.marcXmlNameSpace || '';
+    const readerFromFile = reader(fs.createReadStream(args.file), validationOptions, marcXmlNameSpace);
 
     //console.log('Converting records.');
     //console.log(validationOptions);
