@@ -42,7 +42,8 @@ reader.on('data', record => console.log(record));
 ```
 ### Serializers
 #### MARCXML
-- **from**: The seconds argument is a validation options object (See [@natlibfi/marc-record](https://www.npmjs.com/package/@natlibfi/marc-record))
+- **reader**: The third argument is a XML namespace prefix string (colon included) used in marcxml (fe. 'marc:'). Defaults to no prefix.
+- **from**: The second argument is a validation options object (See [@natlibfi/marc-record](https://www.npmjs.com/package/@natlibfi/marc-record))
 - **to**: An object can be passed in as the second argument. It supports the following properties:
   - **omitDeclaration**: Whether to omit XML declaration. Defaults to *false*.
   - **indent**: Whether to indent te XML. Defaults to *false*.
