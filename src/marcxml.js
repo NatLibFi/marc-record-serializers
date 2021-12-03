@@ -26,6 +26,8 @@ const debugData = debug.extend('data');
 
 export function reader (stream, validationOptions = {}, nameSpace = '') {
   const emitter = new class extends EventEmitter { }();
+  const nameSpacePrefix = nameSpace === '' ? nameSpace : `${nameSpace}:`;
+
   MarcRecord.setValidationOptions(validationOptions);
 
   start();
@@ -49,24 +51,24 @@ export function reader (stream, validationOptions = {}, nameSpace = '') {
       // eslint-disable-next-line functional/no-loop-statement
       while (1) { // eslint-disable-line no-constant-condition
         // eslint-disable-next-line functional/no-let
-        let pos = charbuffer.indexOf(`<${nameSpace}record`);
+        let pos = charbuffer.indexOf(`<${nameSpacePrefix}record`);
 
         if (pos === -1) {
           return;
         }
 
-        debug(`Found record start "<${nameSpace}record" in pos ${pos}`);
+        debug(`Found record start "<${nameSpacePrefix}record" in pos ${pos}`);
 
         charbuffer = charbuffer.substr(pos);
-        pos = charbuffer.indexOf(`</${nameSpace}record>`);
+        pos = charbuffer.indexOf(`</${nameSpacePrefix}record>`);
         /* istanbul ignore if */
         if (pos === -1) {
           return;
         }
 
-        debug(`Found record end "</${nameSpace}record>" in pos ${pos}`);
+        debug(`Found record end "</${nameSpacePrefix}record>" in pos ${pos}`);
 
-        const endTagLength = nameSpace.length + 9;
+        const endTagLength = nameSpacePrefix.length + 9;
         const raw = charbuffer.substr(0, pos + endTagLength);
         charbuffer = charbuffer.substr(pos + endTagLength);
 
