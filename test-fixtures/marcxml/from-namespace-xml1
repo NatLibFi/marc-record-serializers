@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<marc:record xmlns:marc="http://www.loc.gov/MARC21/slim">
+  <marc:leader>     nam a22     4i 4500</marc:leader>
+  <marc:controlfield tag="001">017379727</marc:controlfield>
+  <marc:controlfield tag="003">DLC</marc:controlfield>
+  <marc:controlfield tag="005">20201115152306.0</marc:controlfield>
+  <marc:controlfield tag="008">200807s2020    xxk           00| f eng |</marc:controlfield>
+  <marc:datafield tag="020" ind1=" " ind2=" ">
+    <marc:subfield code="a">978-0-00-837611-6</marc:subfield>
+    <marc:subfield code="q">sidottu</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="035" ind1=" " ind2=" ">
+    <marc:subfield code="a">017379727</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="041" ind1=" " ind2=" ">
+    <marc:subfield code="a">eng</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="084" ind1=" " ind2=" ">
+    <marc:subfield code="a">84.5</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="084" ind1=" " ind2=" ">
+    <marc:subfield code="a">Fantasia</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="100" ind1="1" ind2=" ">
+    <marc:subfield code="a">Tolkien, J. R. R., 1892-1973</marc:subfield>
+    <marc:subfield code="e">kirjoittaja</marc:subfield>
+    <marc:subfield code="0">000147928</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="245" ind1="1" ind2="0">
+    <marc:subfield code="a">The hobbit or There and back again</marc:subfield>
+    <marc:subfield code="c">by J.R.R. Tolkien ; illustrated by Alan Lee</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="250" ind1=" " ind2=" ">
+    <marc:subfield code="a">Illustrated hardback edition</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="264" ind1=" " ind2="1">
+    <marc:subfield code="a">http://id.loc.gov/vocabulary/countries/xxk</marc:subfield>
+    <marc:subfield code="c">2020</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="264" ind1=" " ind2="1">
+    <marc:subfield code="a">London</marc:subfield>
+    <marc:subfield code="b">HarperCollinsPublishers</marc:subfield>
+    <marc:subfield code="c">2020</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="300" ind1=" " ind2=" ">
+    <marc:subfield code="a">viii, 307 sivua</marc:subfield>
+    <marc:subfield code="c">23 cm</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="336" ind1=" " ind2=" ">
+    <marc:subfield code="a">text</marc:subfield>
+    <marc:subfield code="0">http://id.loc.gov/vocabulary/contentTypes/txt</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="336" ind1=" " ind2=" ">
+    <marc:subfield code="a">teksti</marc:subfield>
+    <marc:subfield code="0">http://id.loc.gov/vocabulary/contentTypes/txt</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="337" ind1=" " ind2=" ">
+    <marc:subfield code="a">käytettävissä ilman laitetta</marc:subfield>
+    <marc:subfield code="0">http://id.loc.gov/vocabulary/mediaTypes/n</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="338" ind1=" " ind2=" ">
+    <marc:subfield code="a">nide</marc:subfield>
+    <marc:subfield code="0">http://id.loc.gov/vocabulary/carriers/nc</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="500" ind1=" " ind2=" ">
+    <marc:subfield code="a">kuvitettu, karttoja</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="520" ind1=" " ind2=" ">
+    <marc:subfield code="a">Whisked away from his comfortable, unambitious life in his hobbit-hole in Bag End by Gandalf the wizard and a band of dwarves, Bilbo Baggins finds himself caught up in a plot to raid the treasure hoard of Smaug the Magnificent, a large and very dangerous dragon. Although quite reluctant to take part in this quest, Bilbo surprises even himself by his resourcefulness and his skill as a burglar. The text of this edition has been fully corrected and revised in collaboration with Christopher Tolkien and is accompanied by a wealth of beautiful watercolour paintings and delicate pencil drawings from Alan Lee.</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="546" ind1=" " ind2=" ">
+    <marc:subfield code="a">englanti.</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="600" ind1="1" ind2="4">
+    <marc:subfield code="a">Gandalf (fiktiivinen hahmo)</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="600" ind1="1" ind2="4">
+    <marc:subfield code="a">Baggins, Bilbo (fiktiivinen hahmo)</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="650" ind1=" " ind2="7">
+    <marc:subfield code="a">seikkailu</marc:subfield>
+    <marc:subfield code="0">http://www.yso.fi/onto/kauno/p2904</marc:subfield>
+    <marc:subfield code="2">kauno/fin</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="650" ind1=" " ind2="7">
+    <marc:subfield code="a">matkat</marc:subfield>
+    <marc:subfield code="0">http://www.yso.fi/onto/kauno/p3013</marc:subfield>
+    <marc:subfield code="2">kauno/fin</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="650" ind1=" " ind2="7">
+    <marc:subfield code="a">aarteenetsintä</marc:subfield>
+    <marc:subfield code="0">http://www.yso.fi/onto/kauno/p4310</marc:subfield>
+    <marc:subfield code="2">kauno/fin</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="650" ind1=" " ind2="7">
+    <marc:subfield code="a">sormukset</marc:subfield>
+    <marc:subfield code="0">http://www.yso.fi/onto/kauno/p3678</marc:subfield>
+    <marc:subfield code="2">kauno/fin</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="650" ind1=" " ind2="7">
+    <marc:subfield code="a">velhot</marc:subfield>
+    <marc:subfield code="0">http://www.yso.fi/onto/kauno/p4407</marc:subfield>
+    <marc:subfield code="2">kauno/fin</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="650" ind1=" " ind2="7">
+    <marc:subfield code="a">kääpiöt</marc:subfield>
+    <marc:subfield code="0">http://www.yso.fi/onto/kauno/p738</marc:subfield>
+    <marc:subfield code="2">kauno/fin</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="651" ind1=" " ind2="4">
+    <marc:subfield code="a">Middle-earth (fiktiivinen paikka)</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="655" ind1=" " ind2="7">
+    <marc:subfield code="a">novels</marc:subfield>
+    <marc:subfield code="0">http://id.loc.gov/authorities/genreForms/gf2015026020</marc:subfield>
+    <marc:subfield code="2">lcgft</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="655" ind1=" " ind2="7">
+    <marc:subfield code="a">fantasiakirjallisuus</marc:subfield>
+    <marc:subfield code="0">http://urn.fi/URN:NBN:fi:au:slm:s1140</marc:subfield>
+    <marc:subfield code="2">slm/fin</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="655" ind1=" " ind2="7">
+    <marc:subfield code="a">romaanit</marc:subfield>
+    <marc:subfield code="0">http://urn.fi/URN:NBN:fi:au:slm:s518</marc:subfield>
+    <marc:subfield code="2">slm/fin</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="655" ind1=" " ind2="7">
+    <marc:subfield code="a">kaunokirjallisuus</marc:subfield>
+    <marc:subfield code="0">http://urn.fi/URN:NBN:fi:au:slm:s975</marc:subfield>
+    <marc:subfield code="2">slm/fin</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="655" ind1=" " ind2="7">
+    <marc:subfield code="a">fantasylitteratur</marc:subfield>
+    <marc:subfield code="0">http://urn.fi/URN:NBN:fi:au:slm:s1140</marc:subfield>
+    <marc:subfield code="2">slm/swe</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="655" ind1=" " ind2="7">
+    <marc:subfield code="a">romaner</marc:subfield>
+    <marc:subfield code="0">http://urn.fi/URN:NBN:fi:au:slm:s518</marc:subfield>
+    <marc:subfield code="2">slm/swe</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="655" ind1=" " ind2="7">
+    <marc:subfield code="a">skönlitteratur</marc:subfield>
+    <marc:subfield code="0">http://urn.fi/URN:NBN:fi:au:slm:s975</marc:subfield>
+    <marc:subfield code="2">slm/swe</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="700" ind1="1" ind2=" ">
+    <marc:subfield code="a">Lee, Alan</marc:subfield>
+    <marc:subfield code="e">kuvittaja</marc:subfield>
+  </marc:datafield>
+  <marc:datafield tag="884" ind1=" " ind2=" ">
+    <marc:subfield code="a">DLC bibframe2marc v1.1.0-SNAPSHOT</marc:subfield>
+    <marc:subfield code="g">20211123170406.0</marc:subfield>
+    <marc:subfield code="q">DLC</marc:subfield>
+    <marc:subfield code="u">https://github.com/lcnetdev/bibframe2marc</marc:subfield>
+  </marc:datafield>
+</marc:record>

@@ -1,0 +1,41 @@
+LDR         nam a22     4i 4500
+001    017379727
+003    DLC
+005    20201115152306.0
+008    200807s2020    xxk           00| f eng |
+020    ‡a978-0-00-837611-6‡qsidottu
+035    ‡a017379727
+041    ‡aeng
+084    ‡a84.5
+084    ‡aFantasia
+100 1  ‡aTolkien, J. R. R., 1892-1973‡ekirjoittaja‡0000147928
+245 10 ‡aThe hobbit or There and back again‡cby J.R.R. Tolkien ; illustrated by Alan Lee
+250    ‡aIllustrated hardback edition
+264  1 ‡ahttp://id.loc.gov/vocabulary/countries/xxk‡c2020
+264  1 ‡aLondon‡bHarperCollinsPublishers‡c2020
+300    ‡aviii, 307 sivua‡c23 cm
+336    ‡atext‡0http://id.loc.gov/vocabulary/contentTypes/txt
+336    ‡ateksti‡0http://id.loc.gov/vocabulary/contentTypes/txt
+337    ‡akäytettävissä ilman laitetta‡0http://id.loc.gov/vocabulary/mediaTypes/n
+338    ‡anide‡0http://id.loc.gov/vocabulary/carriers/nc
+500    ‡akuvitettu, karttoja
+520    ‡aWhisked away from his comfortable, unambitious life in his hobbit-hole in Bag End by Gandalf the wizard and a band of dwarves, Bilbo Baggins finds himself caught up in a plot to raid the treasure hoard of Smaug the Magnificent, a large and very dangerous dragon. Although quite reluctant to take part in this quest, Bilbo surprises even himself by his resourcefulness and his skill as a burglar. The text of this edition has been fully corrected and revised in collaboration with Christopher Tolkien and is accompanied by a wealth of beautiful watercolour paintings and delicate pencil drawings from Alan Lee.
+546    ‡aenglanti.
+600 14 ‡aGandalf (fiktiivinen hahmo)
+600 14 ‡aBaggins, Bilbo (fiktiivinen hahmo)
+650  7 ‡aseikkailu‡0http://www.yso.fi/onto/kauno/p2904‡2kauno/fin
+650  7 ‡amatkat‡0http://www.yso.fi/onto/kauno/p3013‡2kauno/fin
+650  7 ‡aaarteenetsintä‡0http://www.yso.fi/onto/kauno/p4310‡2kauno/fin
+650  7 ‡asormukset‡0http://www.yso.fi/onto/kauno/p3678‡2kauno/fin
+650  7 ‡avelhot‡0http://www.yso.fi/onto/kauno/p4407‡2kauno/fin
+650  7 ‡akääpiöt‡0http://www.yso.fi/onto/kauno/p738‡2kauno/fin
+651  4 ‡aMiddle-earth (fiktiivinen paikka)
+655  7 ‡anovels‡0http://id.loc.gov/authorities/genreForms/gf2015026020‡2lcgft
+655  7 ‡afantasiakirjallisuus‡0http://urn.fi/URN:NBN:fi:au:slm:s1140‡2slm/fin
+655  7 ‡aromaanit‡0http://urn.fi/URN:NBN:fi:au:slm:s518‡2slm/fin
+655  7 ‡akaunokirjallisuus‡0http://urn.fi/URN:NBN:fi:au:slm:s975‡2slm/fin
+655  7 ‡afantasylitteratur‡0http://urn.fi/URN:NBN:fi:au:slm:s1140‡2slm/swe
+655  7 ‡aromaner‡0http://urn.fi/URN:NBN:fi:au:slm:s518‡2slm/swe
+655  7 ‡askönlitteratur‡0http://urn.fi/URN:NBN:fi:au:slm:s975‡2slm/swe
+700 1  ‡aLee, Alan‡ekuvittaja
+884    ‡aDLC bibframe2marc v1.1.0-SNAPSHOT‡g20211123170406.0‡qDLC‡uhttps://github.com/lcnetdev/bibframe2marc
