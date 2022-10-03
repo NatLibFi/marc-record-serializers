@@ -46,27 +46,26 @@
 		"build": "babel src --delete-dir-on-start --source-maps --out-dir=dist"
 	},
 	"dependencies": {
-		"@natlibfi/marc-record": "^7.2.0-alpha.1",
-		"@xmldom/xmldom": "^0.8.2",
+		"@natlibfi/marc-record": "^7.2.1",
+		"@xmldom/xmldom": ">=0.8.2 <1.0.0",
 		"stream-json": "^1.7.4",
 		"xml2js": ">=0.4.23 <1.0.0",
-		"yargs": "^17.5.1"
+		"yargs": "^17.6.0"
 	},
 	"devDependencies": {
-		"@babel/cli": "^7.18.10",
-		"@babel/core": "^7.18.13",
-		"@babel/eslint-parser": "^7.18.9",
-		"@babel/preset-env": "^7.18.10",
+		"@babel/cli": "^7.19.3",
+		"@babel/core": "^7.19.3",
+		"@babel/eslint-parser": "^7.19.1",
+		"@babel/preset-env": "^7.19.3",
 		"@babel/register": "^7.18.9",
-		"@natlibfi/eslint-config-melinda-backend": "^2.0.0",
+		"@natlibfi/eslint-config-melinda-backend": "^2.0.1",
 		"babel-plugin-istanbul": "^6.1.1",
 		"chai": "^4.3.6",
 		"cross-env": "^7.0.3",
 		"debug": "^4.3.4",
-		"eslint": "^8.23.0",
+		"eslint": "^8.24.0",
 		"mocha": "^10.0.0",
-		"nyc": "^15.1.0",
-		"rimraf": "^3.0.2"
+		"nyc": "^15.1.0"
 	},
 	"eslintConfig": {
 		"parser": "@babel/eslint-parser",
