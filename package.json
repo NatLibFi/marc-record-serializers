@@ -26,7 +26,7 @@
 		"marc-record-serializers": "dist/cli.js"
 	},
 	"engines": {
-		"node": ">=14"
+		"node": ">=18"
 	},
 	"publishConfig": {
 		"access": "public"
