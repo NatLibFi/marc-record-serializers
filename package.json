@@ -50,21 +50,21 @@
 		"@xmldom/xmldom": "^0.8.6",
 		"stream-json": "^1.7.5",
 		"xml2js": ">=0.4.23 <1.0.0",
-		"yargs": "^17.6.2"
+		"yargs": "^17.7.1"
 	},
 	"devDependencies": {
-		"@babel/cli": "^7.19.3",
-		"@babel/core": "^7.20.2",
+		"@babel/cli": "^7.21.0",
+		"@babel/core": "^7.21.0",
 		"@babel/eslint-parser": "^7.19.1",
 		"@babel/preset-env": "^7.20.2",
-		"@babel/register": "^7.18.9",
+		"@babel/register": "^7.21.0",
 		"@natlibfi/eslint-config-melinda-backend": "^2.0.2",
 		"babel-plugin-istanbul": "^6.1.1",
 		"chai": "^4.3.7",
 		"cross-env": "^7.0.3",
 		"debug": "^4.3.4",
-		"eslint": "^8.28.0",
-		"mocha": "^10.1.0",
+		"eslint": "^8.35.0",
+		"mocha": "^10.2.0",
 		"nyc": "^15.1.0"
 	},
 	"eslintConfig": {
