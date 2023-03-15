@@ -321,7 +321,7 @@ export function to(record, useCrForContinuingResource = false) {
         }
 
         function getSliceOffset(arr) {
-          const offset = findSeparatorOffset(arr) || findPeriodOffset(arr) || SPLIT_MAX_FIELD_LENGTH;
+          const offset = findSeparatorOffset(arr) || findPeriodOffset(arr) || findSpaceOffset(arr) || SPLIT_MAX_FIELD_LENGTH;
 
           return offset;
 
@@ -400,6 +400,35 @@ export function to(record, useCrForContinuingResource = false) {
                 if (foundCount === 2) {
                   index = i;
                   break;
+                }
+              }
+
+              return index;
+            }
+          }
+
+          function findSpaceOffset(arr) {
+            let offset = find(); // eslint-disable-line functional/no-let
+
+            if (offset !== undefined) {
+              // Append the number of chars in separator
+              offset += 1;
+              if (offset <= SPLIT_MAX_FIELD_LENGTH) {
+                return offset;
+              }
+
+              return findSpaceOffset(arr.slice(0, offset - 1));
+            }
+
+            function find() {
+              let index; // eslint-disable-line functional/no-let
+              const foundCount = 0; // eslint-disable-line functional/no-let
+
+              // eslint-disable-next-line functional/no-loop-statement, functional/no-let, no-plusplus
+              for (let i = arr.length - 1; i--; i >= 0) {
+                // eslint-disable-next-line functional/no-conditional-statement
+                if (foundCount === 0 && arr[i] === SPACE) {
+                  return i;
                 }
               }
 
