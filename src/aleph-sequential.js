@@ -53,8 +53,8 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
           break;
         }
 
-        const raw = charbuffer.substr(0, pos);
-        charbuffer = charbuffer.substr(pos + 1);
+        const raw = charbuffer.substring(0, pos);
+        charbuffer = charbuffer.substring(pos + 1);
         // eslint-disable-next-line functional/immutable-data
         linebuffer.push(raw);
       }
@@ -479,9 +479,9 @@ export function from(data, validationOptions = {}) {
 
     if (nextLine !== undefined && isContinueFieldLine(nextLine, currentLine)) {
       // eslint-disable-next-line functional/no-conditional-statement
-      if (lines[i].substr(-1) === '^') {
+      if (lines[i].slice(-1) === '^') {
         // eslint-disable-next-line functional/immutable-data
-        lines[i] = lines[i].substr(0, lines[i].length - 1);
+        lines[i] = lines[i].substring(0, lines[i].length - 1);
       }
 
       // eslint-disable-next-line functional/immutable-data
@@ -529,12 +529,13 @@ export function from(data, validationOptions = {}) {
     const field = parseFieldFromLine(lineStr);
     const [firstSubfield] = field.subfields;
 
-    if (firstSubfield.value === '^') {
-      return lineStr.substr(22);
+    if (firstSubfield.value === '^') { // Same subfield continues ("123456789 12345 L $$1^"):
+      return lineStr.substring(22);
     }
 
-    if (firstSubfield.value === '^^') {
-      return ` ${lineStr.substr(26, lineStr.length - 1)}`;
+    if (firstSubfield.value === '^^') { // New subfield starts ("123456789 12345 L $$1^^$$6"):
+      // return ` ${lineStr.substr(26, lineStr.length - 1)}`; // This did not omit the last char!
+      return ` ${lineStr.substring(26)}`;
     }
 
     throw new Error('Could not parse Aleph Sequential subfield 9-continued line.');
@@ -581,22 +582,22 @@ export function from(data, validationOptions = {}) {
   }
 
   function parseFieldFromLine(lineStr) {
-    const tag = lineStr.substr(10, 3);
+    const tag = lineStr.substring(10, 13);
 
     if (tag === undefined || tag.length !== 3) {
       throw new Error(`Could not parse tag from line: ${lineStr}`);
     }
 
     if (isFixFieldTag(tag) || tag === 'LDR') {
-      const data = formatControlField(lineStr.substr(18));
+      const data = formatControlField(lineStr.substring(18));
       return {tag, value: data};
     }
 
     // Varfield
-    const ind1 = lineStr.substr(13, 1);
-    const ind2 = lineStr.substr(14, 1);
+    const ind1 = lineStr.substring(13, 14);
+    const ind2 = lineStr.substring(14, 15);
 
-    const subfieldData = lineStr.substr(18);
+    const subfieldData = lineStr.substring(18);
 
     if (subfieldData === '') {
       throw new Error(`Could not parse subfields from line: ${lineStr}`);
@@ -605,8 +606,8 @@ export function from(data, validationOptions = {}) {
     const subfields = subfieldData.split('$$')
       .filter(sf => sf.length !== 0)
       .map(subfield => {
-        const code = subfield.substr(0, 1);
-        const value = subfield.substr(1);
+        const code = subfield.substring(0, 1);
+        const value = subfield.substring(1);
         if (value.length > 0) {
           return {code, value};
         }
