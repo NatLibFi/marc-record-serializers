@@ -4,7 +4,7 @@
 * @licstart  The following is the entire license notice for the JavaScript code in this file.
 *
 * Copyright 2014-2017 Pasi Tuominen
-* Copyright 2018-2020 University Of Helsinki (The National Library Of Finland)
+* Copyright 2018-2023 University Of Helsinki (The National Library Of Finland)
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 *
@@ -53,8 +53,8 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
           break;
         }
 
-        const raw = charbuffer.substr(0, pos);
-        charbuffer = charbuffer.substr(pos + 1);
+        const raw = charbuffer.substring(0, pos);
+        charbuffer = charbuffer.substring(pos + 1);
         // eslint-disable-next-line functional/immutable-data
         linebuffer.push(raw);
       }
@@ -321,7 +321,7 @@ export function to(record, useCrForContinuingResource = false) {
         }
 
         function getSliceOffset(arr) {
-          const offset = findSeparatorOffset(arr) || findPeriodOffset(arr) || SPLIT_MAX_FIELD_LENGTH;
+          const offset = findSeparatorOffset(arr) || findPeriodOffset(arr) || findSpaceOffset(arr) || SPLIT_MAX_FIELD_LENGTH;
 
           return offset;
 
@@ -406,6 +406,35 @@ export function to(record, useCrForContinuingResource = false) {
               return index;
             }
           }
+
+          function findSpaceOffset(arr) {
+            let offset = find(); // eslint-disable-line functional/no-let
+
+            if (offset !== undefined) {
+              // Append the number of chars in separator
+              offset += 1;
+              if (offset <= SPLIT_MAX_FIELD_LENGTH) {
+                return offset;
+              }
+
+              return findSpaceOffset(arr.slice(0, offset - 1));
+            }
+
+            function find() {
+              let index; // eslint-disable-line functional/no-let
+              const foundCount = 0; // eslint-disable-line functional/no-let
+
+              // eslint-disable-next-line functional/no-loop-statement, functional/no-let, no-plusplus
+              for (let i = arr.length - 1; i--; i >= 0) {
+                // eslint-disable-next-line functional/no-conditional-statement
+                if (foundCount === 0 && arr[i] === SPACE) {
+                  return i;
+                }
+              }
+
+              return index;
+            }
+          }
         }
 
         function sliceSegment(arr, offset) {
@@ -479,9 +508,9 @@ export function from(data, validationOptions = {}) {
 
     if (nextLine !== undefined && isContinueFieldLine(nextLine, currentLine)) {
       // eslint-disable-next-line functional/no-conditional-statement
-      if (lines[i].substr(-1) === '^') {
+      if (lines[i].slice(-1) === '^') {
         // eslint-disable-next-line functional/immutable-data
-        lines[i] = lines[i].substr(0, lines[i].length - 1);
+        lines[i] = lines[i].substring(0, lines[i].length - 1);
       }
 
       // eslint-disable-next-line functional/immutable-data
@@ -529,12 +558,13 @@ export function from(data, validationOptions = {}) {
     const field = parseFieldFromLine(lineStr);
     const [firstSubfield] = field.subfields;
 
-    if (firstSubfield.value === '^') {
-      return lineStr.substr(22);
+    if (firstSubfield.value === '^') { // Same subfield continues ("123456789 12345 L $$1^"):
+      return lineStr.substring(22);
     }
 
-    if (firstSubfield.value === '^^') {
-      return ` ${lineStr.substr(26, lineStr.length - 1)}`;
+    if (firstSubfield.value === '^^') { // New subfield starts ("123456789 12345 L $$1^^$$6"):
+      // return ` ${lineStr.substr(26, lineStr.length - 1)}`; // This did not omit the last char!
+      return ` ${lineStr.substring(26)}`;
     }
 
     throw new Error('Could not parse Aleph Sequential subfield 9-continued line.');
@@ -581,22 +611,22 @@ export function from(data, validationOptions = {}) {
   }
 
   function parseFieldFromLine(lineStr) {
-    const tag = lineStr.substr(10, 3);
+    const tag = lineStr.substring(10, 13);
 
     if (tag === undefined || tag.length !== 3) {
       throw new Error(`Could not parse tag from line: ${lineStr}`);
     }
 
     if (isFixFieldTag(tag) || tag === 'LDR') {
-      const data = formatControlField(lineStr.substr(18));
+      const data = formatControlField(lineStr.substring(18));
       return {tag, value: data};
     }
 
     // Varfield
-    const ind1 = lineStr.substr(13, 1);
-    const ind2 = lineStr.substr(14, 1);
+    const ind1 = lineStr.substring(13, 14);
+    const ind2 = lineStr.substring(14, 15);
 
-    const subfieldData = lineStr.substr(18);
+    const subfieldData = lineStr.substring(18);
 
     if (subfieldData === '') {
       throw new Error(`Could not parse subfields from line: ${lineStr}`);
@@ -605,8 +635,8 @@ export function from(data, validationOptions = {}) {
     const subfields = subfieldData.split('$$')
       .filter(sf => sf.length !== 0)
       .map(subfield => {
-        const code = subfield.substr(0, 1);
-        const value = subfield.substr(1);
+        const code = subfield.substring(0, 1);
+        const value = subfield.substring(1);
         if (value.length > 0) {
           return {code, value};
         }
