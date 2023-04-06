@@ -1,0 +1,15 @@
+LDR         cz  a2200145n  4500
+001    000012345
+005    20181018232816.0
+008    001123| |az|||aabn           | ana      
+UPD    ‡aY
+035    ‡a(FI-ASTERI-N)000012345
+040    ‡aFI-NL‡bfin‡erda
+110 2  ‡aIF Minken‡0(FIN11)000012345
+368    ‡aurheiluseura‡2mts
+410 2  ‡aIdrottsföreningen Minken
+410 2  ‡aMinken (urheiluseura)
+SID    ‡c59440‡bfenau
+SID    ‡c99342‡bvioau
+CAT    ‡aLOAD-FENAU‡b‡c20130503‡lFIN11‡h1717
+CAT    ‡aKVP-FIX‡b‡c20130806‡lFIN11‡h1329
