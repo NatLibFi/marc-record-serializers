@@ -188,6 +188,7 @@ describe('aleph-sequential', () => {
         expect(result).to.equal(expectedRecord);
       });
     });
+
   });
 
   describe('#from load-test', () => {

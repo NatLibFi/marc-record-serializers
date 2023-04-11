@@ -459,10 +459,24 @@ export function to(record, useCrForContinuingResource = false) {
   * Determine the record format for the FMT field.
   * Uses FMT SE (instead of CR) for continuing resource, because Aleph does that
   */
+  // eslint-disable-next-line max-statements
   function recordFormat(record, useCrForContinuingResource) {
     const {leader} = record;
     const l6 = leader.slice(6, 7);
     const l7 = leader.slice(7, 8);
+
+
+    // Add guesswork holdings record FMT HO
+    // We do not currently know the correct FMT for holdings records
+    if (['u', 'v', 'x', 'y'].includes(l6)) {
+      return 'HO';
+    }
+
+    // Add authority record FMT AU
+    if (l6 === 'z') {
+      return 'AU';
+    }
+
     if (l6 === 'm') {
       return 'CF';
     }
