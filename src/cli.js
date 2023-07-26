@@ -71,17 +71,17 @@ async function run() {
       // eslint-disable-next-line functional/no-let
       let count = 0;
 
-      // eslint-disable-next-line functional/no-conditional-statement
+      // eslint-disable-next-line functional/no-conditional-statements
       if (!args.outputDirectory && outputPrefix) {
         process.stdout.write(outputPrefix);
       }
 
       readerFromFile.on('error', err => {
-        // eslint-disable-next-line functional/no-conditional-statement
+        // eslint-disable-next-line functional/no-conditional-statements
         if ('validationResults' in err) {
           const message = `Record is invalid: ${JSON.stringify(err.validationResults.errors, undefined, 2)}`;
           reject(new Error(message));
-          // eslint-disable-next-line functional/no-conditional-statement
+          // eslint-disable-next-line functional/no-conditional-statements
         } else {
           reject(err);
         }
@@ -90,10 +90,10 @@ async function run() {
       readerFromFile.on('end', () => {
         //console.log('Done');
 
-        // eslint-disable-next-line functional/no-conditional-statement
+        // eslint-disable-next-line functional/no-conditional-statements
         if (args.outputDirectory) {
           console.log(`Wrote ${count} records to ${args.outputDirectory}`);
-          // eslint-disable-next-line functional/no-conditional-statement
+          // eslint-disable-next-line functional/no-conditional-statements
         } else if (outputSuffix) {
           process.stdout.write(outputSuffix);
         }
@@ -105,7 +105,7 @@ async function run() {
         if (args.outputDirectory) {
           const filename = `${String(count).padStart(5, '0')}.${fileSuffix}`;
 
-          // eslint-disable-next-line functional/no-conditional-statement
+          // eslint-disable-next-line functional/no-conditional-statements
           if (!fs.existsSync(args.outputDirectory)) {
             fs.mkdirSync(args.outputDirectory);
           }
@@ -114,7 +114,7 @@ async function run() {
         } else {
           const str = serialize(record, validationOptions);
 
-          // eslint-disable-next-line functional/no-conditional-statement
+          // eslint-disable-next-line functional/no-conditional-statements
           if (outputSeparator && count > 0) {
             process.stdout.write(outputSeparator);
           }
@@ -128,7 +128,7 @@ async function run() {
 
     process.exit();
   } catch (err) {
-    // eslint-disable-next-line functional/no-conditional-statement
+    // eslint-disable-next-line functional/no-conditional-statements
     if (process.env.NODE_ENV === 'debug') {
       console.error(err);
       process.exit(-1);

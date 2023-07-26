@@ -46,7 +46,7 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
     stream.on('data', data => {
       charbuffer += data.toString();
 
-      // eslint-disable-next-line functional/no-loop-statement
+      // eslint-disable-next-line functional/no-loop-statements
       while (1) { // eslint-disable-line no-constant-condition
         const pos = charbuffer.indexOf('\n');
         if (pos === -1) {
@@ -60,7 +60,7 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
       }
 
       if (linebuffer.length > 0) {
-        // eslint-disable-next-line functional/no-conditional-statement
+        // eslint-disable-next-line functional/no-conditional-statements
         if (currentId === undefined) {
           currentId = getIdFromLine(linebuffer[0]);
         }
@@ -68,9 +68,9 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
 
         let i = 0; // eslint-disable-line functional/no-let
 
-        // eslint-disable-next-line functional/no-loop-statement
+        // eslint-disable-next-line functional/no-loop-statements
         while (i < linebuffer.length) {
-          // eslint-disable-next-line functional/no-conditional-statement
+          // eslint-disable-next-line functional/no-conditional-statements
           if (linebuffer[i].length < 9) {
             debug(`Broken line (${i}): ${linebuffer[i]}`);
             //break;
@@ -78,7 +78,7 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
 
           const lineId = getIdFromLine(linebuffer[i]);
 
-          // eslint-disable-next-line functional/no-conditional-statement
+          // eslint-disable-next-line functional/no-conditional-statements
           if (currentId !== lineId) {
             // eslint-disable-next-line functional/immutable-data
             const record = linebuffer.splice(0, i);
@@ -103,7 +103,7 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
     });
 
     stream.on('end', () => {
-      // eslint-disable-next-line functional/no-conditional-statement
+      // eslint-disable-next-line functional/no-conditional-statements
       if (linebuffer.length > 0) {
         debug(`Convert lines (${linebuffer.length}) to record`);
         try {
@@ -199,7 +199,7 @@ export function to(record, useCrForContinuingResource = false) {
     const formattedSubfields = field.subfields.map(subfield => {
       let content = ''; // eslint-disable-line functional/no-let
 
-      // eslint-disable-next-line functional/no-conditional-statement
+      // eslint-disable-next-line functional/no-conditional-statements
       if (subfield.code.length > 0 || subfield.value.length > 0) {
         content = subfield.value === undefined ? `$$${subfield.code}` : `$$${subfield.code}${subfield.value}`;
       }
@@ -237,17 +237,17 @@ export function to(record, useCrForContinuingResource = false) {
       const tempLength = result.temp ? result.temp.length : 0;
 
       if (tempLength + subfield.length <= MAX_FIELD_LENGTH) {
-        // eslint-disable-next-line functional/no-conditional-statement
+        // eslint-disable-next-line functional/no-conditional-statements
         if (tempLength) {
           // eslint-disable-next-line functional/immutable-data
           result.temp = concatByteArrays(result.temp, subfield);
-          // eslint-disable-next-line functional/no-conditional-statement
+          // eslint-disable-next-line functional/no-conditional-statements
         } else {
           // eslint-disable-next-line functional/immutable-data
           result.temp = subfield;
         }
       } else {
-        // eslint-disable-next-line functional/no-conditional-statement
+        // eslint-disable-next-line functional/no-conditional-statements
         if (tempLength) {
           // eslint-disable-next-line functional/immutable-data
           result.lines.push(result.temp);
@@ -260,7 +260,7 @@ export function to(record, useCrForContinuingResource = false) {
       }
 
       // Flush
-      // eslint-disable-next-line functional/no-conditional-statement
+      // eslint-disable-next-line functional/no-conditional-statements
       if (index === arr.length - 1) {
         // eslint-disable-next-line no-param-reassign
         result = result.lines.concat(result.temp);
@@ -292,11 +292,11 @@ export function to(record, useCrForContinuingResource = false) {
         // eslint-disable-next-line no-param-reassign
         segment = firstCall ? segment : addPrefix(segment); // eslint-disable-line functional/no-let
 
-        // eslint-disable-next-line functional/no-conditional-statement
+        // eslint-disable-next-line functional/no-conditional-statements
         if (segment.length <= SPLIT_MAX_FIELD_LENGTH) {
           // eslint-disable-next-line functional/immutable-data
           result.temp = segment;
-          // eslint-disable-next-line functional/no-conditional-statement
+          // eslint-disable-next-line functional/no-conditional-statements
         } else {
           sliceOffset = getSliceOffset(segment);
           slicedSegment = sliceSegment(segment, sliceOffset);
@@ -309,10 +309,10 @@ export function to(record, useCrForContinuingResource = false) {
         function addPrefix(arr) {
           let prefix; // eslint-disable-line functional/no-let
 
-          // eslint-disable-next-line functional/no-conditional-statement
+          // eslint-disable-next-line functional/no-conditional-statements
           if (arr.slice(0, 2).every(value => value === DOLLAR)) {
             prefix = '$$9^';
-            // eslint-disable-next-line functional/no-conditional-statement
+            // eslint-disable-next-line functional/no-conditional-statements
           } else {
             prefix = `$$9^^$$${code}`;
           }
@@ -344,15 +344,15 @@ export function to(record, useCrForContinuingResource = false) {
               let index; // eslint-disable-line functional/no-let
               let foundCount = 0; // eslint-disable-line functional/no-let
 
-              // eslint-disable-next-line functional/no-loop-statement, functional/no-let, no-plusplus
+              // eslint-disable-next-line functional/no-loop-statements, functional/no-let, no-plusplus
               for (let i = arr.length - 1; i--; i >= 0) {
-                // eslint-disable-next-line functional/no-conditional-statement
+                // eslint-disable-next-line functional/no-conditional-statements
                 if (foundCount === 0 && arr[i] === SPACE) {
                   foundCount += 1;
-                  // eslint-disable-next-line functional/no-conditional-statement
+                  // eslint-disable-next-line functional/no-conditional-statements
                 } else if (foundCount > 0 && arr[i] === HYPHEN) {
                   foundCount += 1;
-                  // eslint-disable-next-line functional/no-conditional-statement
+                  // eslint-disable-next-line functional/no-conditional-statements
                 } else {
                   foundCount = 0;
                 }
@@ -384,15 +384,15 @@ export function to(record, useCrForContinuingResource = false) {
               let index; // eslint-disable-line functional/no-let
               let foundCount = 0; // eslint-disable-line functional/no-let
 
-              // eslint-disable-next-line functional/no-loop-statement, functional/no-let, no-plusplus
+              // eslint-disable-next-line functional/no-loop-statements, functional/no-let, no-plusplus
               for (let i = arr.length - 1; i--; i >= 0) {
-                // eslint-disable-next-line functional/no-conditional-statement
+                // eslint-disable-next-line functional/no-conditional-statements
                 if (foundCount === 0 && arr[i] === SPACE) {
                   foundCount += 1;
-                  // eslint-disable-next-line functional/no-conditional-statement
+                  // eslint-disable-next-line functional/no-conditional-statements
                 } else if (foundCount > 0 && arr[i] === PERIOD) {
                   foundCount += 1;
-                  // eslint-disable-next-line functional/no-conditional-statement
+                  // eslint-disable-next-line functional/no-conditional-statements
                 } else {
                   foundCount = 0;
                 }
@@ -424,9 +424,9 @@ export function to(record, useCrForContinuingResource = false) {
               let index; // eslint-disable-line functional/no-let
               const foundCount = 0; // eslint-disable-line functional/no-let
 
-              // eslint-disable-next-line functional/no-loop-statement, functional/no-let, no-plusplus
+              // eslint-disable-next-line functional/no-loop-statements, functional/no-let, no-plusplus
               for (let i = arr.length - 1; i--; i >= 0) {
-                // eslint-disable-next-line functional/no-conditional-statement
+                // eslint-disable-next-line functional/no-conditional-statements
                 if (foundCount === 0 && arr[i] === SPACE) {
                   return i;
                 }
@@ -440,7 +440,7 @@ export function to(record, useCrForContinuingResource = false) {
         function sliceSegment(arr, offset) {
           const sliced = segment.slice(0, offset);
 
-          // eslint-disable-next-line functional/no-conditional-statement
+          // eslint-disable-next-line functional/no-conditional-statements
           if (sliced.slice(-1)[0] === SPACE) {
             // eslint-disable-next-line functional/immutable-data
             sliced[sliced.length - 1] = CARET;
@@ -514,14 +514,14 @@ export function from(data, validationOptions = {}) {
   let i = 0; // eslint-disable-line functional/no-let
   const lines = data.split('\n').filter(l => l.length > 0);
 
-  // eslint-disable-next-line functional/no-loop-statement
+  // eslint-disable-next-line functional/no-loop-statements
   while (i < lines.length) {
     const nextLine = lines[i + 1];
     const currentLine = lines[i];
     debugData(`Handling inputline: ${currentLine}`);
 
     if (nextLine !== undefined && isContinueFieldLine(nextLine, currentLine)) {
-      // eslint-disable-next-line functional/no-conditional-statement
+      // eslint-disable-next-line functional/no-conditional-statements
       if (lines[i].slice(-1) === '^') {
         // eslint-disable-next-line functional/immutable-data
         lines[i] = lines[i].substring(0, lines[i].length - 1);
@@ -554,11 +554,11 @@ export function from(data, validationOptions = {}) {
       return;
     }
 
-    // eslint-disable-next-line functional/no-conditional-statement
+    // eslint-disable-next-line functional/no-conditional-statements
     if (field.tag === 'LDR') {
       // eslint-disable-next-line functional/immutable-data
       record.leader = field.value;
-      // eslint-disable-next-line functional/no-conditional-statement
+      // eslint-disable-next-line functional/no-conditional-statements
     } else {
       // eslint-disable-next-line functional/immutable-data
       record.fields.push(field);

@@ -52,7 +52,7 @@ export function reader(stream, validationOptions = {}) {
       charbuffer += data.toString();
 
       debugData(charbuffer);
-      // eslint-disable-next-line functional/no-loop-statement
+      // eslint-disable-next-line functional/no-loop-statements
       while (1) { // eslint-disable-line no-constant-condition
 
         let pos = charbuffer.indexOf('<oai_marc'); // eslint-disable-line functional/no-let
@@ -155,11 +155,11 @@ export function from(xmlString, validationOptions = {}) {
   const childNodes = recordNode === undefined ? [] : Array.prototype.slice.call(recordNode.childNodes);
   childNodes.filter(notTextNode).forEach(node => {
     switch (node.tagName) {
-    // eslint-disable-next-line functional/no-conditional-statement
+    // eslint-disable-next-line functional/no-conditional-statements
     case 'fixfield':
       handleControlfieldNode(node);
       break;
-    // eslint-disable-next-line functional/no-conditional-statement
+    // eslint-disable-next-line functional/no-conditional-statements
     case 'varfield':
       handleDatafieldNode(node);
       break;
@@ -173,10 +173,10 @@ export function from(xmlString, validationOptions = {}) {
       if (node.childNodes[0] !== undefined && node.childNodes[0].nodeType === NODE_TYPE.TEXT_NODE) {
         const value = node.childNodes[0].data;
 
-        // eslint-disable-next-line functional/no-conditional-statement
+        // eslint-disable-next-line functional/no-conditional-statements
         if (tag === 'LDR') {
           record.leader = value; // eslint-disable-line functional/immutable-data
-        // eslint-disable-next-line functional/no-conditional-statement
+        // eslint-disable-next-line functional/no-conditional-statements
         } else {
           record.appendField({tag, value}); // eslint-disable-line functional/immutable-data
         }
