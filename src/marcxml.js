@@ -48,7 +48,7 @@ export function reader (stream, validationOptions = {}, nameSpace = '') {
     stream.on('data', async data => {
       charbuffer += data.toString();
 
-      // eslint-disable-next-line functional/no-loop-statement
+      // eslint-disable-next-line functional/no-loop-statements
       while (1) { // eslint-disable-line no-constant-condition
         // eslint-disable-next-line functional/no-let
         let pos = charbuffer.indexOf(`<${nameSpacePrefix}record`);
