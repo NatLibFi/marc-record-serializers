@@ -152,25 +152,31 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
 * Also, javascript strings are UTF-16 so conversion to bytes is necessary to cut the text at correct offsets
 */
 export function to(record, useCrForContinuingResource = false) {
+
+  // We'll need to check that record has no controlCharacters (most critically newlines)
+  // in field/subfield values
+
+  const validatedRecord = new MarcRecord(record, {noControlCharacters: true});
+
   const MAX_FIELD_LENGTH = 2000;
   const SPLIT_MAX_FIELD_LENGTH = 1000;
 
-  const f001 = record.get(/^001/u);
+  const f001 = validatedRecord.get(/^001/u);
   const [firstF001] = f001;
   // Aleph doesn't accept new records if their id is all zeroes...
   const id = f001.length > 0 ? formatRecordId(firstF001.value) : formatRecordId('1');
   const staticFields = [
     {
       tag: 'FMT',
-      value: recordFormat(record, useCrForContinuingResource)
+      value: recordFormat(validatedRecord, useCrForContinuingResource)
     },
     {
       tag: 'LDR',
-      value: record.leader
+      value: validatedRecord.leader
     }
   ];
 
-  return staticFields.concat(record.fields).reduce((acc, field) => {
+  return staticFields.concat(validatedRecord.fields).reduce((acc, field) => {
     // Controlfield
     if ('value' in field) {
       const formattedField = `${id} ${field.tag}   L ${formatControlfield(field.value)}`;

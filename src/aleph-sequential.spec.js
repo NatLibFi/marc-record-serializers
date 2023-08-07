@@ -222,4 +222,7 @@ describe('aleph-sequential', () => {
       });
     }));
   });
+
+  // Add here test for failing converting records that have controlCharacters in field/subfield values
+
 });
