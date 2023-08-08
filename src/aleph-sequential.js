@@ -24,8 +24,16 @@ import {EventEmitter} from 'events';
 import createDebugLogger from 'debug';
 
 const FIXED_FIELD_TAGS = ['FMT', '001', '002', '003', '004', '005', '006', '007', '008', '009'];
+
+// DEVELOP: We'll want aleph-sequential.js to error, if record breaks Aleph constraints for
+// * record length
+// * field amount
+// * newlines in subfield values
+// * newlines in controlField values are errored by updated marc-record-js
+
 const debug = createDebugLogger('@natlibfi/marc-record-serializers:aleph-sequential');
 const debugData = debug.extend('data');
+const debugDev = debug.extend('dev');
 
 export function reader(stream, validationOptions = {}, genF001fromSysNo = false) {
 
@@ -155,6 +163,8 @@ export function to(record, useCrForContinuingResource = false) {
 
   // We'll need to check that record has no controlCharacters (most critically newlines)
   // in field/subfield values
+
+  debugDev(JSON.stringify(record));
 
   const validatedRecord = new MarcRecord(record, {noControlCharacters: true});
 

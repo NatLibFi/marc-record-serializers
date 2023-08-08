@@ -3,7 +3,7 @@
 * @licstart  The following is the entire license notice for the JavaScript code in this file.
 *
 * Copyright 2014-2017 Pasi Tuominen
-* Copyright 2018-2021 University Of Helsinki (The National Library Of Finland)
+* Copyright 2018-2023 University Of Helsinki (The National Library Of Finland)
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 *
@@ -223,6 +223,22 @@ describe('aleph-sequential', () => {
     }));
   });
 
-  // Add here test for failing converting records that have controlCharacters in field/subfield values
+  // Test for failing converting records that have controlCharacters in field/subfield values
+  describe('#to - newlines in field values', () => {
+    it('should throw if record has control characters in field/subfield values', () => {
+      const inputRecordJSON = fs.readFileSync(path.resolve(fixturesPath, 'recordWithNewline'), 'utf8');
+      const record = new MarcRecord(JSON.parse(inputRecordJSON));
+      try {
+        Converter.to(record);
+      } catch (err) {
+        debug(err);
+        expect(err.message).to.match(/^Record is invalid:/u);
+        //`Record is invalid: instance.fields[4] is not any of [subschema 0],[subschema 1]`;
+        return;
+      }
+      throw new Error('Should throw');
+    });
+
+  });
 
 });
