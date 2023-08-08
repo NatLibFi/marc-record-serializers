@@ -26,10 +26,21 @@ import createDebugLogger from 'debug';
 const FIXED_FIELD_TAGS = ['FMT', '001', '002', '003', '004', '005', '006', '007', '008', '009'];
 
 // DEVELOP: We'll want aleph-sequential.js to error, if record breaks Aleph constraints for
-// * record length
-// * field amount
+// * record length (45000 bytes)
+// * field amount - no limits
+// * subfield amount - 5000 (in total or per field?)
+// * field length - handled by splitting fields
 // * newlines in subfield values
 // * newlines in controlField values are errored by updated marc-record-js
+
+// https://knowledge.exlibrisgroup.com/Aleph/Knowledge_Articles/Maximum_record_length%2C_maximum_number_of_subfields%2C_maximum_field_length
+// Record length:    ALEPH limits a DOC record (BIB, HLD, ADM, authority, course reading, or ILL) to 45,000 characters text. This can be seen in the alephm/source/copy definition of the Z00:
+// 02 Z00-DATA PICTURE X(45000).
+// Note that characters with diacritics take up two bytes each and that Cyrillic, Hebrew, Arabic, Greek, and CJK characters are all double-byte in ALEPH's unicode implementation. Since ALEPH uses utf-8; English a-z are stored as single-byte characters.)
+// Field length: ALEPH limits a DOC field to 2000 characters; you cannot enter more than 2000 characters in the Cataloging interface.
+// Number of fields:  Limited only by how many can fit in the 45,000 character-limit for the record.
+// Number of subfields: 5,000.
+//
 
 const debug = createDebugLogger('@natlibfi/marc-record-serializers:aleph-sequential');
 const debugData = debug.extend('data');
@@ -165,7 +176,6 @@ export function to(record, useCrForContinuingResource = false) {
   // in field/subfield values
 
   debugDev(JSON.stringify(record));
-
   const validatedRecord = new MarcRecord(record, {noControlCharacters: true});
 
   const MAX_FIELD_LENGTH = 2000;
