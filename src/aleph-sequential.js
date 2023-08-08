@@ -196,7 +196,7 @@ export function to(record, useCrForContinuingResource = false) {
     }
   ];
 
-  return staticFields.concat(validatedRecord.fields).reduce((acc, field) => {
+  const alephSequential = staticFields.concat(validatedRecord.fields).reduce((acc, field) => {
     // Controlfield
     if ('value' in field) {
       const formattedField = `${id} ${field.tag}   L ${formatControlfield(field.value)}`;
@@ -211,6 +211,58 @@ export function to(record, useCrForContinuingResource = false) {
       return value.replace(/\s/gu, '^');
     }
   }, '');
+
+  debugDev('FOO');
+  countAndCheckAlephDataLength(alephSequential);
+  return alephSequential;
+
+  // Aleph cannot handle records that are longer than 45000 bytes in dataLength
+  // Should we have this check as optional?
+  function countAndCheckAlephDataLength(alephSequential) {
+
+    // const MAX_DATA_LENGTH = 44999;
+    const MAX_DATA_LENGTH = 2999;
+    // this needs to be reduced due to differences between AlephSequential
+    // and Aleph database data (-9 chars per line)
+
+    // Aleph sequential (31):
+    // 19 chars + field content
+    // 000123456 XXXII L FIELDCONTENT\n
+    // NNNNXXXIILFIELDCONTENT
+    // Aleph database data (22):
+    // 10 chars + field content
+    // NNNNXXXIILFIELDCONTENT
+
+    const fieldCount = (alephSequential.match(/\n/gu) || '').length + 1;
+    debugDev(`fieldCount: ${fieldCount}`);
+    const seqDataLength = Buffer.byteLength(alephSequential, 'utf8');
+    debugDev(`seqDataLength: ${seqDataLength}`);
+    const extraChars = fieldCount * 9;
+    const alephDataLength = seqDataLength - extraChars;
+    debugDev(`alephDataLength: ${alephDataLength}`);
+
+    /*
+      const leaderLength = record.leader ? record.leader.length + 10 : 0;
+      const controlFields = record.getControlFields();
+      const dataFields = record.getDatafields();
+
+      const controlFieldsLength = controlFields.reduce();
+      // 10 (field length + tag+ind+charcode) + field.value.length
+
+      const dataFieldsLength = dataFields.reduce();
+      // 10 +
+
+      // subfields.reduce()
+      // 3 + Buffer.byteLength(subfield.value, 'utf8')
+
+      const dataLength = leaderLength + controlFieldsLength + dataFieldsLength;
+      */
+
+    if (alephDataLength > MAX_DATA_LENGTH) {
+      throw new Error(`Record is too long to be converted to Aleph Sequential.`);
+    }
+    return;
+  }
 
   function formatRecordId(id) {
     return id.padStart(9, '0');
