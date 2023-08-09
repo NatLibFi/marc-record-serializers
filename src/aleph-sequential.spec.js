@@ -241,4 +241,21 @@ describe('aleph-sequential', () => {
 
   });
 
+  // Test for failing converting records that are too long (> 49999 bytes) for Aleph
+  describe('#to - too long record', () => {
+    it('should throw if record is too long for use in Aleph', () => {
+      const inputRecordJSON = fs.readFileSync(path.resolve(fixturesPath, 'tooLongRecord'), 'utf8');
+      const record = new MarcRecord(JSON.parse(inputRecordJSON));
+      try {
+        Converter.to(record);
+      } catch (err) {
+        debug(err);
+        expect(err.message).to.match(/^Record is invalid: Record is too long to be converted to Aleph Sequential./u);
+        return;
+      }
+      throw new Error('Should throw');
+    });
+
+  });
+
 });

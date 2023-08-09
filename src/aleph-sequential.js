@@ -172,7 +172,7 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
 */
 export function to(record, useCrForContinuingResource = false) {
 
-  // We'll need to check that record has no controlCharacters (most critically newlines)
+  // We'll need to check that record has no ASCII control characters (most critically newlines)
   // in field/subfield values
 
   debugDev(JSON.stringify(record));
@@ -212,7 +212,7 @@ export function to(record, useCrForContinuingResource = false) {
     }
   }, '');
 
-  debugDev('FOO');
+  //debugDev('FOO');
   countAndCheckAlephDataLength(alephSequential);
   return alephSequential;
 
@@ -243,7 +243,7 @@ export function to(record, useCrForContinuingResource = false) {
     // character count for CAT-field that loading record tries to create?
 
     if (alephDataLength > MAX_DATA_LENGTH) {
-      throw new Error(`Record is too long to be converted to Aleph Sequential.`);
+      throw new Error(`Record is invalid: Record is too long to be converted to Aleph Sequential. Data length: ${alephDataLength}`);
     }
     return;
   }
