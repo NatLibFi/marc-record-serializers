@@ -220,17 +220,15 @@ export function to(record, useCrForContinuingResource = false) {
   // Should we have this check as optional?
   function countAndCheckAlephDataLength(alephSequential) {
 
-    // const MAX_DATA_LENGTH = 44999;
-    const MAX_DATA_LENGTH = 2999;
+    const MAX_DATA_LENGTH = 44999;
+    // for test: const MAX_DATA_LENGTH = 2999;
+
     // this needs to be reduced due to differences between AlephSequential
     // and Aleph database data (-9 chars per line)
 
-    // Aleph sequential (31):
-    // 19 chars + field content
+    // Aleph sequential: 19 chars (18 as prefix + newline as suffix) + field content
     // 000123456 XXXII L FIELDCONTENT\n
-    // NNNNXXXIILFIELDCONTENT
-    // Aleph database data (22):
-    // 10 chars + field content
+    // Aleph database data: 10 chars (pefix) + field content
     // NNNNXXXIILFIELDCONTENT
 
     const fieldCount = (alephSequential.match(/\n/gu) || '').length + 1;
@@ -241,22 +239,8 @@ export function to(record, useCrForContinuingResource = false) {
     const alephDataLength = seqDataLength - extraChars;
     debugDev(`alephDataLength: ${alephDataLength}`);
 
-    /*
-      const leaderLength = record.leader ? record.leader.length + 10 : 0;
-      const controlFields = record.getControlFields();
-      const dataFields = record.getDatafields();
-
-      const controlFieldsLength = controlFields.reduce();
-      // 10 (field length + tag+ind+charcode) + field.value.length
-
-      const dataFieldsLength = dataFields.reduce();
-      // 10 +
-
-      // subfields.reduce()
-      // 3 + Buffer.byteLength(subfield.value, 'utf8')
-
-      const dataLength = leaderLength + controlFieldsLength + dataFieldsLength;
-      */
+    // for use with record-load-api / manage-18 we'd probably want to subtract also
+    // character count for CAT-field that loading record tries to create?
 
     if (alephDataLength > MAX_DATA_LENGTH) {
       throw new Error(`Record is too long to be converted to Aleph Sequential.`);
