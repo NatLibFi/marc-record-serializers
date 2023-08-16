@@ -3,7 +3,7 @@
 * @licstart  The following is the entire license notice for the JavaScript code in this file.
 *
 * Copyright 2014-2017 Pasi Tuominen
-* Copyright 2018-2021 University Of Helsinki (The National Library Of Finland)
+* Copyright 2018-2021, 2023 University Of Helsinki (The National Library Of Finland)
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 *
@@ -164,24 +164,53 @@ export function to(record, {omitDeclaration = false, indent = false} = {}) {
 }
 
 export async function from(str, validationOptions = {}) {
-  const record = new MarcRecord(undefined, validationOptions);
+  // trimFields would trim fieldContents
+  // this causes problems with controlFields that could start with/end with blanks
+  // we should trim just non-blanks from controlFields?
+  // we could find if there's a consistent starting and ending whitespace in leader+controlfield values
+  // and datafieldsubfield values and trim those away
+  // non-blanks (and ending blanks after a non-blank whitespace) are trimmable anyways
+  const trimFields = false;
+  // Use validationOption noControlCharacters: true to avoid getting messed up records from prettyprinted XML
+  const record = new MarcRecord(undefined, {noControlCharacters: true, ...validationOptions});
   const obj = await toObject();
 
+  debug(JSON.stringify(obj));
+
   // eslint-disable-next-line functional/immutable-data
-  record.leader = obj.record.leader?.[0] || '';
+  record.leader = trimFields ? trimNonBlanks(obj.record.leader?.[0] || '') : obj.record.leader?.[0] || '';
 
-  addControlFields();
-  addDataFields();
+  addControlFields(trimFields);
+  addDataFields(trimFields);
 
-  return record;
+  debug(`Record: ${record}`);
+  return new MarcRecord(record, validationOptions);
 
-  function addControlFields() {
-    const fields = obj.record.controlfield || [];
+  /*
+  function findPrettyPrefixAndSuffix(obj){
+    return obj;
+  };
+  */
 
-    fields.forEach(({_: value, $: {tag}}) => record.appendField({tag, value}));
+  // trims currently also blanks
+  function trimNonBlanks(str) {
+    debug(`Orig: ${str.replace(/ /gu, '^')}`);
+    //const trimmed2 = str.trim();
+    const trimmed1 = str.replace(/^[\t\n\r ]*/u, '');
+    debug(`Trimmed1: ${trimmed1.replace(/ /gu, '^')}`);
+    const trimmed2 = trimmed1.replace(/[\t\n\r ]*$/u, '');
+    debug(`Trimmed2: ${trimmed2.replace(/ /gu, '^')}`);
+    return trimmed2;
   }
 
-  function addDataFields() {
+  function addControlFields(trimFields) {
+    const fields = obj.record.controlfield || [];
+    debug(fields);
+    fields.forEach(({_: origValue, $: {tag}}) => record.appendField({tag, value: trimFields ? trimNonBlanks(origValue) : origValue}));
+  }
+
+  function addDataFields(trimFields) {
+
     const fields = obj.record.datafield || [];
 
     fields.forEach(({subfield, $: {tag, ind1, ind2}}) => {
@@ -190,8 +219,8 @@ export async function from(str, validationOptions = {}) {
 
       function parseSubfields() {
         const subfields = subfield || [];
-        return subfields.map(({_: value, $: {code}}) => {
-          const result = value === undefined ? {code} : {code, value};
+        return subfields.map(({_: origValue, $: {code}}) => {
+          const result = origValue === undefined ? {code} : {code, value: trimFields ? origValue.trim() : origValue};
           return result;
         });
       }

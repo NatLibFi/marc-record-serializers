@@ -1,0 +1,83 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<record xmlns="http://www.loc.gov/MARC21/slim">
+    <leader>
+        00349cam a22001337i 4500
+    </leader>
+    <controlfield tag="001">
+        000000001
+    </controlfield>
+    <controlfield tag="003">
+        FI-MELINDA
+    </controlfield>
+    <controlfield tag="005">
+        20210826113814.0
+    </controlfield>
+    <datafield tag="DEL" ind1=" " ind2=" ">
+        <subfield code="a">
+            Y
+        </subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+        <subfield code="a">
+            (FI-MELINDA)000000001
+        </subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="7">
+        <subfield code="a">
+            asiasana
+        </subfield>
+        <subfield code="2">
+            é
+        </subfield>
+    </datafield>
+    <datafield tag="CAT" ind1=" " ind2=" ">
+        <subfield code="a">
+            CONV-ISBD
+        </subfield>
+        <subfield code="b">
+            undefined
+        </subfield>
+        <subfield code="c">
+            20120401
+        </subfield>
+        <subfield code="l">
+            FIN01
+        </subfield>
+        <subfield code="h">
+            2007
+        </subfield>
+    </datafield>
+    <datafield tag="CAT" ind1=" " ind2=" ">
+        <subfield code="a">
+            ABO4052
+        </subfield>
+        <subfield code="b">
+            30
+        </subfield>
+        <subfield code="c">
+            20121113
+        </subfield>
+        <subfield code="l">
+            FIN01
+        </subfield>
+        <subfield code="h">
+            1202
+        </subfield>
+    </datafield>
+    <datafield tag="CAT" ind1=" " ind2=" ">
+        <subfield code="a">
+            LOAD-ALINK
+        </subfield>
+        <subfield code="b"/>
+        <subfield code="c">
+            20210826
+        </subfield>
+        <subfield code="l">
+            FIN01
+        </subfield>
+        <subfield code="h">
+            1138
+        </subfield>
+    </datafield>
+</record>

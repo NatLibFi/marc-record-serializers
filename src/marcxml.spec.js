@@ -3,7 +3,7 @@
 * @licstart  The following is the entire license notice for the JavaScript code in this file.
 *
 * Copyright 2014-2017 Pasi Tuominen
-* Copyright 2018-2021 University Of Helsinki (The National Library Of Finland)
+* Copyright 2018-2021, 2023 University Of Helsinki (The National Library Of Finland)
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 *
@@ -21,6 +21,10 @@ import path from 'path';
 import {expect} from 'chai';
 import {MarcRecord} from '@natlibfi/marc-record';
 import * as Converter from './marcxml';
+import createDebugLogger from 'debug';
+
+const debug = createDebugLogger('@natlibfi/marc-record-serializers:marcxml:test');
+// NOT USED const debugData = debug.extend('data');
 
 describe('marcxml', () => {
   const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'marcxml');
@@ -149,6 +153,21 @@ describe('marcxml', () => {
           }
         });
       }));
+    });
+  });
+
+  describe('#from prettyprinted XML', () => {
+    it('Should handle prettyprinted XML', async () => {
+      const inputXML = fs.readFileSync(path.resolve(fixturesPath, 'prettyPrintedXML'), 'utf8');
+      try {
+        const record = await Converter.from(inputXML);
+        debug(`Record in test: ${record}`);
+      } catch (err) {
+        debug(err);
+        expect(err.message).to.match(/^Record is invalid: Record is too long to be converted to Aleph Sequential./u);
+        return;
+      }
+      throw new Error('Should throw');
     });
   });
 
