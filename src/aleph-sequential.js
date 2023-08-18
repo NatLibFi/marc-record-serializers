@@ -186,6 +186,8 @@ export function to(record, useCrForContinuingResource = false) {
   const f001 = validatedRecord.get(/^001/u);
   const [firstF001] = f001;
   // Aleph doesn't accept new records if their id is all zeroes...
+  // DEVELOP: Aleph might have problems with records having id 999999999
+
   const id = f001.length > 0 ? formatRecordId(firstF001.value) : formatRecordId('1');
   const staticFields = [
     {
@@ -494,7 +496,6 @@ export function to(record, useCrForContinuingResource = false) {
 
               // eslint-disable-next-line functional/no-loop-statements, functional/no-let, no-plusplus
               for (let i = arr.length - 1; i--; i >= 0) {
-                // eslint-disable-next-line functional/no-conditional-statements
                 if (foundCount === 0 && arr[i] === SPACE) {
                   return i;
                 }
@@ -624,6 +625,7 @@ export function from(data, validationOptions = {}) {
 
     // eslint-disable-next-line functional/no-conditional-statements
     if (field.tag === 'LDR') {
+      // DEVELOP: we should check here that leader is empty?
       // eslint-disable-next-line functional/immutable-data
       record.leader = field.value;
       // eslint-disable-next-line functional/no-conditional-statements
@@ -633,7 +635,7 @@ export function from(data, validationOptions = {}) {
     }
   });
 
-  /* Validates the record */
+  /* Creates and validates the record */
   return new MarcRecord(record, validationOptions);
 
   function parseContinueLineData(lineStr) {
