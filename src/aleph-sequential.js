@@ -25,10 +25,10 @@ import createDebugLogger from 'debug';
 
 const FIXED_FIELD_TAGS = ['FMT', '001', '002', '003', '004', '005', '006', '007', '008', '009'];
 
-// DEVELOP: We'll want aleph-sequential.js to error, if record breaks Aleph constraints for
-// * record length (45000 bytes)
+// We'll want aleph-sequential.js to error, if record breaks Aleph constraints for
+// * record length (45000 bytes) - handled by countAndCheckAlephDataLength()
 // * field amount - no limits
-// * subfield amount - 5000 (in total or per field?)
+// DEVELOP: * subfield amount - 5000 (in total or per field?)
 // * field length - handled by splitting fields
 // * newlines in subfield values
 // * newlines in controlField values are errored by updated marc-record-js
@@ -40,7 +40,9 @@ const FIXED_FIELD_TAGS = ['FMT', '001', '002', '003', '004', '005', '006', '007'
 // Field length: ALEPH limits a DOC field to 2000 characters; you cannot enter more than 2000 characters in the Cataloging interface.
 // Number of fields:  Limited only by how many can fit in the 45,000 character-limit for the record.
 // Number of subfields: 5,000.
-//
+
+// DEVELOP: alephSequential uses $$ as subfield separator - string $$ in subfieldValue will be wrongly interpreted
+//          subfield separator - we'd like to error and/or warn and/or escape these cases somehow
 
 const debug = createDebugLogger('@natlibfi/marc-record-serializers:aleph-sequential');
 const debugData = debug.extend('data');
@@ -217,14 +219,15 @@ export function to(record, useCrForContinuingResource = false) {
   return alephSequential;
 
   // Aleph cannot handle records that are longer than 45000 bytes in dataLength
-  // Should we have this check as optional?
+  // DEVELOP: Should we have this check as optional?
   function countAndCheckAlephDataLength(alephSequential) {
 
     const MAX_DATA_LENGTH = 44999;
     // for test: const MAX_DATA_LENGTH = 2999;
 
-    // this needs to be reduced due to differences between AlephSequential
-    // and Aleph database data (-9 chars per line)
+    // We need to reduce the length here due to differences between AlephSequential
+    // and Aleph database data (Aleph database data has 9 less chars per line/field
+    // than alephSequential)
 
     // Aleph sequential: 19 chars (18 as prefix + newline as suffix) + field content
     // 000123456 XXXII L FIELDCONTENT\n
@@ -239,10 +242,13 @@ export function to(record, useCrForContinuingResource = false) {
     const alephDataLength = seqDataLength - extraChars;
     debugDev(`alephDataLength: ${alephDataLength}`);
 
-    // for use with record-load-api / manage-18 we'd probably want to subtract also
+    // For use with record-load-api / manage-18 we'd probably want to subtract also
     // character count for CAT-field that loading record tries to create?
+    // 000000004 CAT   L $$aKVPXX1003X$$bXX$$c20090820$$lFIN01$$h0949
+    // CAT-field length: 63, converted to alephData: 54 characters
+    const CAT_FIELD_LENGTH = 54;
 
-    if (alephDataLength > MAX_DATA_LENGTH) {
+    if (alephDataLength + CAT_FIELD_LENGTH > MAX_DATA_LENGTH) {
       throw new Error(`Record is invalid: Record is too long to be converted to Aleph Sequential. Data length: ${alephDataLength}`);
     }
     return;
