@@ -24,8 +24,29 @@ import {EventEmitter} from 'events';
 import createDebugLogger from 'debug';
 
 const FIXED_FIELD_TAGS = ['FMT', '001', '002', '003', '004', '005', '006', '007', '008', '009'];
+
+// We'll want aleph-sequential.js to error, if record breaks Aleph constraints for
+// * record length (45000 bytes) - handled by countAndCheckAlephDataLength()
+// * field amount - no limits
+// DEVELOP: * subfield amount - 5000 (in total or per field?)
+// * field length - handled by splitting fields
+// * newlines in subfield values
+// * newlines in controlField values are errored by updated marc-record-js
+
+// https://knowledge.exlibrisgroup.com/Aleph/Knowledge_Articles/Maximum_record_length%2C_maximum_number_of_subfields%2C_maximum_field_length
+// Record length:    ALEPH limits a DOC record (BIB, HLD, ADM, authority, course reading, or ILL) to 45,000 characters text. This can be seen in the alephm/source/copy definition of the Z00:
+// 02 Z00-DATA PICTURE X(45000).
+// Note that characters with diacritics take up two bytes each and that Cyrillic, Hebrew, Arabic, Greek, and CJK characters are all double-byte in ALEPH's unicode implementation. Since ALEPH uses utf-8; English a-z are stored as single-byte characters.)
+// Field length: ALEPH limits a DOC field to 2000 characters; you cannot enter more than 2000 characters in the Cataloging interface.
+// Number of fields:  Limited only by how many can fit in the 45,000 character-limit for the record.
+// Number of subfields: 5,000.
+
+// DEVELOP: alephSequential uses $$ as subfield separator - string $$ in subfieldValue will be wrongly interpreted
+//          subfield separator - we'd like to error and/or warn and/or escape these cases somehow
+
 const debug = createDebugLogger('@natlibfi/marc-record-serializers:aleph-sequential');
 const debugData = debug.extend('data');
+const debugDev = debug.extend('dev');
 
 export function reader(stream, validationOptions = {}, genF001fromSysNo = false) {
 
@@ -152,25 +173,34 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
 * Also, javascript strings are UTF-16 so conversion to bytes is necessary to cut the text at correct offsets
 */
 export function to(record, useCrForContinuingResource = false) {
+
+  // We'll need to check that record has no ASCII control characters (most critically newlines)
+  // in field/subfield values
+
+  debugDev(JSON.stringify(record));
+  const validatedRecord = new MarcRecord(record, {noControlCharacters: true});
+
   const MAX_FIELD_LENGTH = 2000;
   const SPLIT_MAX_FIELD_LENGTH = 1000;
 
-  const f001 = record.get(/^001/u);
+  const f001 = validatedRecord.get(/^001/u);
   const [firstF001] = f001;
   // Aleph doesn't accept new records if their id is all zeroes...
+  // DEVELOP: Aleph might have problems with records having id 999999999
+
   const id = f001.length > 0 ? formatRecordId(firstF001.value) : formatRecordId('1');
   const staticFields = [
     {
       tag: 'FMT',
-      value: recordFormat(record, useCrForContinuingResource)
+      value: recordFormat(validatedRecord, useCrForContinuingResource)
     },
     {
       tag: 'LDR',
-      value: record.leader
+      value: validatedRecord.leader
     }
   ];
 
-  return staticFields.concat(record.fields).reduce((acc, field) => {
+  const alephSequential = staticFields.concat(validatedRecord.fields).reduce((acc, field) => {
     // Controlfield
     if ('value' in field) {
       const formattedField = `${id} ${field.tag}   L ${formatControlfield(field.value)}`;
@@ -185,6 +215,46 @@ export function to(record, useCrForContinuingResource = false) {
       return value.replace(/\s/gu, '^');
     }
   }, '');
+
+  //debugDev('FOO');
+  countAndCheckAlephDataLength(alephSequential);
+  return alephSequential;
+
+  // Aleph cannot handle records that are longer than 45000 bytes in dataLength
+  // DEVELOP: Should we have this check as optional?
+  function countAndCheckAlephDataLength(alephSequential) {
+
+    const MAX_DATA_LENGTH = 44999;
+    // for test: const MAX_DATA_LENGTH = 2999;
+
+    // We need to reduce the length here due to differences between AlephSequential
+    // and Aleph database data (Aleph database data has 9 less chars per line/field
+    // than alephSequential)
+
+    // Aleph sequential: 19 chars (18 as prefix + newline as suffix) + field content
+    // 000123456 XXXII L FIELDCONTENT\n
+    // Aleph database data: 10 chars (pefix) + field content
+    // NNNNXXXIILFIELDCONTENT
+
+    const fieldCount = (alephSequential.match(/\n/gu) || '').length + 1;
+    debugDev(`fieldCount: ${fieldCount}`);
+    const seqDataLength = Buffer.byteLength(alephSequential, 'utf8');
+    debugDev(`seqDataLength: ${seqDataLength}`);
+    const extraChars = fieldCount * 9;
+    const alephDataLength = seqDataLength - extraChars;
+    debugDev(`alephDataLength: ${alephDataLength}`);
+
+    // For use with record-load-api / manage-18 we'd probably want to subtract also
+    // character count for CAT-field that loading record tries to create?
+    // 000000004 CAT   L $$aKVPXX1003X$$bXX$$c20090820$$lFIN01$$h0949
+    // CAT-field length: 63, converted to alephData: 54 characters
+    const CAT_FIELD_LENGTH = 54;
+
+    if (alephDataLength + CAT_FIELD_LENGTH > MAX_DATA_LENGTH) {
+      throw new Error(`Record is invalid: Record is too long to be converted to Aleph Sequential. Data length: ${alephDataLength}`);
+    }
+    return;
+  }
 
   function formatRecordId(id) {
     return id.padStart(9, '0');
@@ -426,7 +496,6 @@ export function to(record, useCrForContinuingResource = false) {
 
               // eslint-disable-next-line functional/no-loop-statements, functional/no-let, no-plusplus
               for (let i = arr.length - 1; i--; i >= 0) {
-                // eslint-disable-next-line functional/no-conditional-statements
                 if (foundCount === 0 && arr[i] === SPACE) {
                   return i;
                 }
@@ -556,6 +625,7 @@ export function from(data, validationOptions = {}) {
 
     // eslint-disable-next-line functional/no-conditional-statements
     if (field.tag === 'LDR') {
+      // DEVELOP: we should check here that leader is empty?
       // eslint-disable-next-line functional/immutable-data
       record.leader = field.value;
       // eslint-disable-next-line functional/no-conditional-statements
@@ -565,7 +635,7 @@ export function from(data, validationOptions = {}) {
     }
   });
 
-  /* Validates the record */
+  /* Creates and validates the record */
   return new MarcRecord(record, validationOptions);
 
   function parseContinueLineData(lineStr) {
