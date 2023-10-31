@@ -258,4 +258,49 @@ describe('aleph-sequential', () => {
 
   });
 
+  // Tests for different types of empty subfields
+  describe('#to - empty subfield value', () => {
+    it(`should not throw even if there's a subfield with empty value`, () => {
+      const inputRecordJSON = fs.readFileSync(path.resolve(fixturesPath, 'emptySubfield'), 'utf8');
+      debug(inputRecordJSON);
+      // eslint-disable-next-line no-console
+      console.log(inputRecordJSON);
+      const record = new MarcRecord(JSON.parse(inputRecordJSON));
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(record));
+      const alephSeq = Converter.to(record);
+      // eslint-disable-next-line no-console
+      console.log(alephSeq);
+    });
+  });
+  describe('#to - empty subfield', () => {
+    it(`should not throw even if there's a subfield with a space as value`, () => {
+      const inputRecordJSON = fs.readFileSync(path.resolve(fixturesPath, 'justSpaceSubfield'), 'utf8');
+      debug(inputRecordJSON);
+      // eslint-disable-next-line no-console
+      console.log(inputRecordJSON);
+      const record = new MarcRecord(JSON.parse(inputRecordJSON));
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(record));
+      const alephSeq = Converter.to(record);
+      // eslint-disable-next-line no-console
+      console.log(alephSeq);
+    });
+  });
+  describe('#to - empty subfield', () => {
+    it(`should not throw even if there's a subfield no value`, () => {
+      const inputRecordJSON = fs.readFileSync(path.resolve(fixturesPath, 'valuelessSubfield'), 'utf8');
+      debug(inputRecordJSON);
+      // eslint-disable-next-line no-console
+      console.log(inputRecordJSON);
+      const record = new MarcRecord(JSON.parse(inputRecordJSON));
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(record));
+      const alephSeq = Converter.to(record);
+      // eslint-disable-next-line no-console
+      console.log(alephSeq);
+    });
+  });
+
+
 });

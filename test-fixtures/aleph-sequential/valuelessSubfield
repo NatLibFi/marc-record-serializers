@@ -1,0 +1,9 @@
+{
+  "leader": "12345cam a22002417i 4500",
+  "fields": [
+    {"tag": "001", "value": "000123456"},
+    {"tag": "003", "value": "(FI-MELINDA)"},
+    {"tag": "005", "value": "20210730133112.0"},
+    {"tag": "500", "ind1": " ", "ind2": " ", "subfields": [{"code": "a"}]}
+  ]
+}

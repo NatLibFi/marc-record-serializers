@@ -179,7 +179,7 @@ export function to(record, useCrForContinuingResource = false) {
 
   debugDev(JSON.stringify(record));
 
-  // we do not need to other validations here
+  // we do not need to other validations here (use marcRecord v8.0.0)
   const tempValidationOptions = {
     strict: false,
     fields: false, // allow records without fields
@@ -192,6 +192,10 @@ export function to(record, useCrForContinuingResource = false) {
     noAdditionalProperties: false
   };
 
+  //const tempValidationOptions2 = {noControlCharacters: true};
+
+  debugDev(tempValidationOptions);
+  //const validatedRecord = new MarcRecord(record, tempValidationOptions);
   const validatedRecord = new MarcRecord(record, tempValidationOptions);
 
   const MAX_FIELD_LENGTH = 2000;
@@ -734,6 +738,7 @@ export function from(data, validationOptions = {}) {
       .filter(sf => sf.length !== 0)
       .map(subfield => {
         const code = subfield.substring(0, 1);
+        // do we lose empty subfields here?
         const value = subfield.substring(1);
         if (value.length > 0) {
           return {code, value};
