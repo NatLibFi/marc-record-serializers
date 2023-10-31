@@ -174,34 +174,15 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
 */
 export function to(record, useCrForContinuingResource = false) {
 
-  // We'll need to check that record has no ASCII control characters (most critically newlines)
-  // in field/subfield values
-
-  debugDev(JSON.stringify(record));
-
-  // we do not need to other validations here (use marcRecord v8.0.0)
-  const tempValidationOptions = {
-    strict: false,
-    fields: false, // allow records without fields
-    subfields: false, // allow empty subfields
-    subfieldValues: false, // allow subfields without value
-    controlFieldValues: false, // allow weird controlField values
-    leader: false,
-    characters: false,
-    noControlCharacters: true, // DO NOT ALLOW controlCharacters in field/subfield values
-    noAdditionalProperties: false
-  };
-
-  //const tempValidationOptions2 = {noControlCharacters: true};
-
-  debugDev(tempValidationOptions);
-  //const validatedRecord = new MarcRecord(record, tempValidationOptions);
-  const validatedRecord = new MarcRecord(record, tempValidationOptions);
-
   const MAX_FIELD_LENGTH = 2000;
   const SPLIT_MAX_FIELD_LENGTH = 1000;
 
-  const f001 = validatedRecord.get(/^001/u);
+  // We'll need to check that record has no ASCII control characters (most critically newlines)
+  // in field/subfield values
+  debugDev(JSON.stringify(record));
+  validateNoControlCharacters(record);
+
+  const f001 = record.get(/^001/u);
   const [firstF001] = f001;
   // Aleph doesn't accept new records if their id is all zeroes...
   // DEVELOP: Aleph might have problems with records having id 999999999
@@ -210,15 +191,15 @@ export function to(record, useCrForContinuingResource = false) {
   const staticFields = [
     {
       tag: 'FMT',
-      value: recordFormat(validatedRecord, useCrForContinuingResource)
+      value: recordFormat(record, useCrForContinuingResource)
     },
     {
       tag: 'LDR',
-      value: validatedRecord.leader
+      value: record.leader
     }
   ];
 
-  const alephSequential = staticFields.concat(validatedRecord.fields).reduce((acc, field) => {
+  const alephSequential = staticFields.concat(record.fields).reduce((acc, field) => {
     // Controlfield
     if ('value' in field) {
       const formattedField = `${id} ${field.tag}   L ${formatControlfield(field.value)}`;
@@ -237,6 +218,15 @@ export function to(record, useCrForContinuingResource = false) {
   //debugDev('FOO');
   countAndCheckAlephDataLength(alephSequential);
   return alephSequential;
+
+  function validateNoControlCharacters(record) {
+    const tempValidationOptions = {noControlCharacters: true};
+    const combinedTempValidationOptions = {...record._validationOptions, ...tempValidationOptions};
+    const validatedRecord = new MarcRecord(record, combinedTempValidationOptions);
+    if (validatedRecord) {
+      return true;
+    }
+  }
 
   // Aleph cannot handle records that are longer than 45000 bytes in dataLength
   // DEVELOP: Should we have this check as optional?
