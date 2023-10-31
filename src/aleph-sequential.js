@@ -188,6 +188,11 @@ export function to(record, useCrForContinuingResource = false) {
   // DEVELOP: Aleph might have problems with records having id 999999999
 
   const id = f001.length > 0 ? formatRecordId(firstF001.value) : formatRecordId('1');
+
+  // Delete FMT - we'll create a new one anyways
+  const fFMTs = record.get('FMT');
+  record.removeFields(fFMTs);
+
   const staticFields = [
     {
       tag: 'FMT',
