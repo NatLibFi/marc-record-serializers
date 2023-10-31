@@ -178,7 +178,21 @@ export function to(record, useCrForContinuingResource = false) {
   // in field/subfield values
 
   debugDev(JSON.stringify(record));
-  const validatedRecord = new MarcRecord(record, {noControlCharacters: true});
+
+  // we do not need to other validations here
+  const tempValidationOptions = {
+    strict: false,
+    fields: false, // allow records without fields
+    subfields: false, // allow empty subfields
+    subfieldValues: false, // allow subfields without value
+    controlFieldValues: false, // allow weird controlField values
+    leader: false,
+    characters: false,
+    noControlCharacters: true, // DO NOT ALLOW controlCharacters in field/subfield values
+    noAdditionalProperties: false
+  };
+
+  const validatedRecord = new MarcRecord(record, tempValidationOptions);
 
   const MAX_FIELD_LENGTH = 2000;
   const SPLIT_MAX_FIELD_LENGTH = 1000;
