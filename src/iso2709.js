@@ -98,6 +98,8 @@ export function from(dataStr, validationOptions = {}) {
     const startCharPos = trimNumericField(dirStartingCharacterPosition(directoryEntries[i]));
 
     // Append control fields for tags 00X
+    // Note: this cannot handle controlFields that have other tags
+    //       Alephs FMT will cause problems! (Of course, non-numeric fields are not standard MARC21 anyways)
     // eslint-disable-next-line functional/no-conditional-statements
     if (tag.substring(0, 2) === '00') {
       const fieldElementStr = dataFieldStr.substring(startCharPos, parseInt(startCharPos, 10) + parseInt(fieldLength, 10) - 1);
