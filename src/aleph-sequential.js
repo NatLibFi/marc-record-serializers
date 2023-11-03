@@ -231,6 +231,7 @@ export function to(record, useCrForContinuingResource = false) {
     if (validatedRecord) {
       return true;
     }
+    return false;
   }
 
   // Aleph cannot handle records that are longer than 45000 bytes in dataLength
