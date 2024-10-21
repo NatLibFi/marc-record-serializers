@@ -46,7 +46,7 @@
 		"build": "babel src --delete-dir-on-start --source-maps --out-dir=dist"
 	},
 	"dependencies": {
-		"@natlibfi/marc-record": "^8.0.0",
+		"@natlibfi/marc-record": "^9.0.2",
 		"@xmldom/xmldom": "^0.8.10",
 		"stream-json": "^1.8.0",
 		"xml2js": "^0.6.2",
@@ -58,13 +58,13 @@
 		"@babel/preset-env": "^7.23.2",
 		"@babel/register": "^7.22.15",
 		"@natlibfi/eslint-config-melinda-backend": "^3.0.3",
-		"babel-plugin-istanbul": "^6.1.1",
+		"babel-plugin-istanbul": "^7.0.0",
 		"chai": "^4.3.10",
 		"cross-env": "^7.0.3",
 		"debug": "^4.3.4",
 		"eslint": "^8.52.0",
 		"mocha": "^10.2.0",
-		"nyc": "^15.1.0"
+		"nyc": "^17.1.0"
 	},
 	"eslintConfig": {
 		"extends": [
