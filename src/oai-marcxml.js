@@ -148,7 +148,7 @@ export function from(xmlString, validationOptions = {}) {
   const record = new MarcRecord();
 
   debug(`Parsing from xmlstring`);
-  const doc = parser.parseFromString(xmlString);
+  const doc = parser.parseFromString(xmlString, 'text/xml');
   // This cannot be simply destructured or everything errors
   // eslint-disable-next-line prefer-destructuring
   const recordNode = doc.getElementsByTagName('oai_marc')[0];

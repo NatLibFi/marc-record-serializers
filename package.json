@@ -47,7 +47,7 @@
 	},
 	"dependencies": {
 		"@natlibfi/marc-record": "^9.1.1",
-		"@xmldom/xmldom": "^0.8.10",
+		"@xmldom/xmldom": "^0.9.5",
 		"stream-json": "^1.8.0",
 		"xml2js": "^0.6.2",
 		"yargs": "^17.7.2"
