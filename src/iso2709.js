@@ -306,7 +306,7 @@ export function to(record) {
     let currDataField = ''; // eslint-disable-line functional/no-let
 
     field.subfields.forEach((subfield, i) => {
-      let subFieldStr = subfield.value; // eslint-disable-line functional/no-let
+      let subFieldStr = subfield.value || ''; // eslint-disable-line functional/no-let
       const {code} = subfield;
       subFieldStr = code + subFieldStr;
 
