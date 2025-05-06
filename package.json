@@ -46,6 +46,7 @@
 		"build": "babel src --delete-dir-on-start --source-maps --out-dir=dist"
 	},
 	"dependencies": {
+		"@babel/runtime": "^7.27.1",
 		"@natlibfi/marc-record": "^9.1.2",
 		"@xmldom/xmldom": "^0.9.6",
 		"stream-json": "^1.9.1",
