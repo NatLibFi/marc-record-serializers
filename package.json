@@ -20,7 +20,7 @@
 		"url": "git@github.com:natlibfi/marc-record-serializers.git"
 	},
 	"license": "MIT",
-	"version": "10.1.5",
+	"version": "10.1.6-alpha.1",
 	"main": "./dist/index.js",
 	"bin": {
 		"marc-record-serializers": "dist/cli.js"
@@ -46,24 +46,25 @@
 		"build": "babel src --delete-dir-on-start --source-maps --out-dir=dist"
 	},
 	"dependencies": {
-		"@natlibfi/marc-record": "^9.1.2",
-		"@xmldom/xmldom": "^0.9.6",
+		"@natlibfi/marc-record": "^9.1.4",
+		"@xmldom/xmldom": "^0.9.8",
 		"stream-json": "^1.9.1",
 		"xml2js": "^0.6.2",
 		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
-		"@babel/cli": "^7.26.4",
-		"@babel/core": "^7.26.0",
-		"@babel/preset-env": "^7.26.0",
-		"@babel/register": "^7.25.9",
+		"@babel/cli": "^7.27.1",
+		"@babel/core": "^7.27.1",
+		"@babel/preset-env": "^7.27.1",
+		"@babel/register": "^7.27.1",
+		"@babel/runtime": "^7.27.1",
 		"@natlibfi/eslint-config-melinda-backend": "^3.0.5",
 		"babel-plugin-istanbul": "^7.0.0",
 		"chai": "^4.5.0",
 		"cross-env": "^7.0.3",
 		"debug": "^4.4.0",
 		"eslint": "^8.57.1",
-		"mocha": "^11.0.1",
+		"mocha": "^11.2.2",
 		"nyc": "^17.1.0"
 	},
 	"eslintConfig": {
