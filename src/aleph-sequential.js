@@ -1,22 +1,3 @@
-/* eslint-disable max-lines */
-/**
-*
-* @licstart  The following is the entire license notice for the JavaScript code in this file.
-*
-* Copyright 2014-2017 Pasi Tuominen
-* Copyright 2018-2023 University Of Helsinki (The National Library Of Finland)
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*
-* @licend  The above is the entire license notice
-* for the JavaScript code in this file.
-*
-*/
-
 import {MarcRecord} from '@natlibfi/marc-record';
 import {Buffer} from 'buffer';
 // Node polyfill
@@ -56,19 +37,18 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
 
   function start() {
 
-    let charbuffer = ''; // eslint-disable-line functional/no-let
-    const linebuffer = []; // eslint-disable-line functional/no-let
-    let count = 0; // eslint-disable-line functional/no-let
-    let brokenCount = 0; // eslint-disable-line functional/no-let
-    let currentId; // eslint-disable-line functional/no-let
+    let charbuffer = '';
+    const linebuffer = [];
+    let count = 0;
+    let brokenCount = 0;
+    let currentId;
 
 
     // eslint-disable-next-line max-statements
     stream.on('data', data => {
       charbuffer += data.toString();
 
-      // eslint-disable-next-line functional/no-loop-statements
-      while (1) { // eslint-disable-line no-constant-condition
+      while (1) {
         const pos = charbuffer.indexOf('\n');
         if (pos === -1) {
           break;
@@ -76,22 +56,20 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
 
         const raw = charbuffer.substring(0, pos);
         charbuffer = charbuffer.substring(pos + 1);
-        // eslint-disable-next-line functional/immutable-data
         linebuffer.push(raw);
       }
 
       if (linebuffer.length > 0) {
-        // eslint-disable-next-line functional/no-conditional-statements
+
         if (currentId === undefined) {
           currentId = getIdFromLine(linebuffer[0]);
         }
 
 
-        let i = 0; // eslint-disable-line functional/no-let
+        let i = 0;
 
-        // eslint-disable-next-line functional/no-loop-statements
         while (i < linebuffer.length) {
-          // eslint-disable-next-line functional/no-conditional-statements
+
           if (linebuffer[i].length < 9) {
             debug(`Broken line (${i}): ${linebuffer[i]}`);
             //break;
@@ -99,9 +77,8 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
 
           const lineId = getIdFromLine(linebuffer[i]);
 
-          // eslint-disable-next-line functional/no-conditional-statements
+
           if (currentId !== lineId) {
-            // eslint-disable-next-line functional/immutable-data
             const record = linebuffer.splice(0, i);
             debug(`Convert lines (${record.length}) to record`);
             try {
@@ -124,7 +101,7 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
     });
 
     stream.on('end', () => {
-      // eslint-disable-next-line functional/no-conditional-statements
+
       if (linebuffer.length > 0) {
         debug(`Convert lines (${linebuffer.length}) to record`);
         try {
@@ -275,15 +252,15 @@ export function to(record, useCrForContinuingResource = false) {
   }
 
   function formatDatafield(field) {
-    let subfieldLines; // eslint-disable-line functional/no-let
+    let subfieldLines;
     const ind1 = field.ind1 && field.ind1.length > 0 ? field.ind1 : ' ';
     const ind2 = field.ind2 && field.ind2.length > 0 ? field.ind2 : ' ';
     const header = `${id} ${field.tag}${ind1}${ind2} L `;
 
     const formattedSubfields = field.subfields.map(subfield => {
-      let content = ''; // eslint-disable-line functional/no-let
+      let content = '';
 
-      // eslint-disable-next-line functional/no-conditional-statements
+
       if (subfield.code.length > 0 || subfield.value.length > 0) {
         content = subfield.value === undefined ? `$$${subfield.code}` : `$$${subfield.code}${subfield.value}`;
       }
@@ -315,27 +292,23 @@ export function to(record, useCrForContinuingResource = false) {
     * 4. Repeat step 3 for the rest of the subfields
     **/
     function reduceToLines(result, subfield, index, arr) {
-      let code; // eslint-disable-line functional/no-let
-      let sliceOffset; // eslint-disable-line functional/no-let
-      let slicedSegment; // eslint-disable-line functional/no-let
+      let code;
+      let sliceOffset;
+      let slicedSegment;
       const tempLength = result.temp ? result.temp.length : 0;
 
       if (tempLength + subfield.length <= MAX_FIELD_LENGTH) {
-        // eslint-disable-next-line functional/no-conditional-statements
+
         if (tempLength) {
-          // eslint-disable-next-line functional/immutable-data
           result.temp = concatByteArrays(result.temp, subfield);
-          // eslint-disable-next-line functional/no-conditional-statements
+
         } else {
-          // eslint-disable-next-line functional/immutable-data
           result.temp = subfield;
         }
       } else {
-        // eslint-disable-next-line functional/no-conditional-statements
+
         if (tempLength) {
-          // eslint-disable-next-line functional/immutable-data
           result.lines.push(result.temp);
-          // eslint-disable-next-line functional/immutable-data
           delete result.temp;
         }
 
@@ -344,9 +317,8 @@ export function to(record, useCrForContinuingResource = false) {
       }
 
       // Flush
-      // eslint-disable-next-line functional/no-conditional-statements
+
       if (index === arr.length - 1) {
-        // eslint-disable-next-line no-param-reassign
         result = result.lines.concat(result.temp);
       }
 
@@ -358,7 +330,6 @@ export function to(record, useCrForContinuingResource = false) {
 
         [a, b].concat(args).reduce((acc, value) => {
           arr.set(value, acc);
-          // eslint-disable-next-line no-param-reassign
           acc += value.length;
           return acc;
         }, 0);
@@ -373,30 +344,27 @@ export function to(record, useCrForContinuingResource = false) {
         const DOLLAR = 36;
         const PERIOD = 46;
 
-        // eslint-disable-next-line no-param-reassign
-        segment = firstCall ? segment : addPrefix(segment); // eslint-disable-line functional/no-let
+        segment = firstCall ? segment : addPrefix(segment);
 
-        // eslint-disable-next-line functional/no-conditional-statements
+
         if (segment.length <= SPLIT_MAX_FIELD_LENGTH) {
-          // eslint-disable-next-line functional/immutable-data
           result.temp = segment;
-          // eslint-disable-next-line functional/no-conditional-statements
+
         } else {
           sliceOffset = getSliceOffset(segment);
           slicedSegment = sliceSegment(segment, sliceOffset);
 
-          // eslint-disable-next-line functional/immutable-data
           result.lines.push(slicedSegment);
           iterate(segment.slice(sliceOffset));
         }
 
         function addPrefix(arr) {
-          let prefix; // eslint-disable-line functional/no-let
+          let prefix;
 
-          // eslint-disable-next-line functional/no-conditional-statements
+
           if (arr.slice(0, 2).every(value => value === DOLLAR)) {
             prefix = '$$9^';
-            // eslint-disable-next-line functional/no-conditional-statements
+
           } else {
             prefix = `$$9^^$$${code}`;
           }
@@ -411,7 +379,7 @@ export function to(record, useCrForContinuingResource = false) {
 
           function findSeparatorOffset(arr) {
 
-            let offset = find(); // eslint-disable-line functional/no-let
+            let offset = find();
 
             if (offset !== undefined) {
               // Append the number of chars in separator
@@ -425,18 +393,17 @@ export function to(record, useCrForContinuingResource = false) {
             }
 
             function find() {
-              let index; // eslint-disable-line functional/no-let
-              let foundCount = 0; // eslint-disable-line functional/no-let
+              let index;
+              let foundCount = 0;
 
-              // eslint-disable-next-line functional/no-loop-statements, functional/no-let, no-plusplus
-              for (let i = arr.length - 1; i--; i >= 0) {
-                // eslint-disable-next-line functional/no-conditional-statements
+              for (let i = arr.length - 1; i--; i >= 0) { // eslint-disable-line no-plusplus
+
                 if (foundCount === 0 && arr[i] === SPACE) {
                   foundCount += 1;
-                  // eslint-disable-next-line functional/no-conditional-statements
+
                 } else if (foundCount > 0 && arr[i] === HYPHEN) {
                   foundCount += 1;
-                  // eslint-disable-next-line functional/no-conditional-statements
+
                 } else {
                   foundCount = 0;
                 }
@@ -452,7 +419,7 @@ export function to(record, useCrForContinuingResource = false) {
           }
 
           function findPeriodOffset(arr) {
-            let offset = find(); // eslint-disable-line functional/no-let
+            let offset = find();
 
             if (offset !== undefined) {
               // Append the number of chars in separator
@@ -465,18 +432,17 @@ export function to(record, useCrForContinuingResource = false) {
             }
 
             function find() {
-              let index; // eslint-disable-line functional/no-let
-              let foundCount = 0; // eslint-disable-line functional/no-let
+              let index;
+              let foundCount = 0;
 
-              // eslint-disable-next-line functional/no-loop-statements, functional/no-let, no-plusplus
-              for (let i = arr.length - 1; i--; i >= 0) {
-                // eslint-disable-next-line functional/no-conditional-statements
+              for (let i = arr.length - 1; i--; i >= 0) { // eslint-disable-line no-plusplus
+
                 if (foundCount === 0 && arr[i] === SPACE) {
                   foundCount += 1;
-                  // eslint-disable-next-line functional/no-conditional-statements
+
                 } else if (foundCount > 0 && arr[i] === PERIOD) {
                   foundCount += 1;
-                  // eslint-disable-next-line functional/no-conditional-statements
+
                 } else {
                   foundCount = 0;
                 }
@@ -492,7 +458,7 @@ export function to(record, useCrForContinuingResource = false) {
           }
 
           function findSpaceOffset(arr) {
-            let offset = find(); // eslint-disable-line functional/no-let
+            let offset = find();
 
             if (offset !== undefined) {
               // Append the number of chars in separator
@@ -505,11 +471,10 @@ export function to(record, useCrForContinuingResource = false) {
             }
 
             function find() {
-              let index; // eslint-disable-line functional/no-let
-              const foundCount = 0; // eslint-disable-line functional/no-let
+              let index;
+              const foundCount = 0;
 
-              // eslint-disable-next-line functional/no-loop-statements, functional/no-let, no-plusplus
-              for (let i = arr.length - 1; i--; i >= 0) {
+              for (let i = arr.length - 1; i--; i >= 0) { // eslint-disable-line no-plusplus
                 if (foundCount === 0 && arr[i] === SPACE) {
                   return i;
                 }
@@ -523,9 +488,8 @@ export function to(record, useCrForContinuingResource = false) {
         function sliceSegment(arr, offset) {
           const sliced = segment.slice(0, offset);
 
-          // eslint-disable-next-line functional/no-conditional-statements
+
           if (sliced.slice(-1)[0] === SPACE) {
-            // eslint-disable-next-line functional/immutable-data
             sliced[sliced.length - 1] = CARET;
           }
 
@@ -594,29 +558,24 @@ export function to(record, useCrForContinuingResource = false) {
 
 // eslint-disable-next-line max-statements
 export function from(data, validationOptions = {}) {
-  let i = 0; // eslint-disable-line functional/no-let
+  let i = 0;
   const lines = data.split('\n').filter(l => l.length > 0);
 
-  // eslint-disable-next-line functional/no-loop-statements
   while (i < lines.length) {
     const nextLine = lines[i + 1];
     const currentLine = lines[i];
     debugData(`Handling inputline: ${currentLine}`);
 
     if (nextLine !== undefined && isContinueFieldLine(nextLine, currentLine)) {
-      // eslint-disable-next-line functional/no-conditional-statements
+
       if (lines[i].slice(-1) === '^') {
-        // eslint-disable-next-line functional/immutable-data
         lines[i] = lines[i].substring(0, lines[i].length - 1);
       }
 
-      // eslint-disable-next-line functional/immutable-data
       lines[i] += parseContinueLineData(nextLine);
       debug('Adding next line to current line');
       debugData(`${lines[i]}`);
-      // eslint-disable-next-line functional/immutable-data
       lines.splice(i + 1, 1);
-      // eslint-disable-next-line no-continue
       continue;
     }
 
@@ -624,7 +583,6 @@ export function from(data, validationOptions = {}) {
   }
 
   const record = new MarcRecord();
-  // eslint-disable-next-line functional/immutable-data
   record.fields = [];
 
   lines.forEach(line => {
@@ -637,14 +595,12 @@ export function from(data, validationOptions = {}) {
       return;
     }
 
-    // eslint-disable-next-line functional/no-conditional-statements
+
     if (field.tag === 'LDR') {
       // DEVELOP: we should check here that leader is empty?
-      // eslint-disable-next-line functional/immutable-data
       record.leader = field.value;
-      // eslint-disable-next-line functional/no-conditional-statements
+
     } else {
-      // eslint-disable-next-line functional/immutable-data
       record.fields.push(field);
     }
   });

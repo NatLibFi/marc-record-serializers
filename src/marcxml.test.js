@@ -1,29 +1,12 @@
-/**
-*
-* @licstart  The following is the entire license notice for the JavaScript code in this file.
-*
-* Copyright 2014-2017 Pasi Tuominen
-* Copyright 2018-2021 University Of Helsinki (The National Library Of Finland)
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*
-* @licend  The above is the entire license notice
-* for the JavaScript code in this file.
-*
-*/
-
 import fs from 'fs';
 import path from 'path';
-import {expect} from 'chai';
+import {describe, it} from 'node:test';
+import assert from 'node:assert';
 import {MarcRecord} from '@natlibfi/marc-record';
-import * as Converter from './marcxml';
+import * as Converter from './marcxml.js';
 
 describe('marcxml', () => {
-  const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'marcxml');
+  const fixturesPath = path.resolve(import.meta.dirname, '..', 'test-fixtures', 'marcxml');
   const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from[0-9]+/u).test(f)).length;
   const fixtureCount2Records = fs.readdirSync(fixturesPath).filter(f => (/^2RecordsFrom[0-9]+/u).test(f)).length;
 
@@ -35,7 +18,7 @@ describe('marcxml', () => {
       reader.on('end', reject);
       reader.on('error', err => {
         try {
-          expect(err.code).to.equal('ENOENT');
+          assert(err.code, 'ENOENT');
           resolve();
         } catch (exp) {
           reject(exp);
@@ -56,7 +39,7 @@ describe('marcxml', () => {
 
       reader.on('error', err => {
         try {
-          expect(err.message).to.match(/^Invalid tagname /u);
+          assert.match(err.message, /^Invalid tagname /u);
           resolve();
         } catch (exp) {
           reject(exp);
@@ -76,13 +59,12 @@ describe('marcxml', () => {
         const reader = Converter.reader(fs.createReadStream(fromPath), {subfieldValues: false});
 
         reader.on('error', reject);
-        // eslint-disable-next-line functional/immutable-data
         reader.on('data', record => records.push(record));
         reader.on('end', () => {
           try {
-            expect(records).to.have.length(1);
+            assert.equal(records.length, 1);
             const [firstRecord] = records;
-            expect(firstRecord.toString()).to.equal(expectedRecord);
+            assert.deepEqual(firstRecord.toString(), expectedRecord);
             resolve();
           } catch (err) {
             reject(err);
@@ -95,7 +77,7 @@ describe('marcxml', () => {
       const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'out-custom-validators'), 'utf8');
       const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'in-custom-validators'), 'utf8');
       const record = await Converter.from(sourceRecord);
-      expect(JSON.stringify(record)).to.equal(expectedRecord);
+      assert.deepEqual(JSON.stringify(record), expectedRecord);
     });
   });
 
@@ -109,13 +91,12 @@ describe('marcxml', () => {
         const reader = Converter.reader(fs.createReadStream(fromPath), {subfieldValues: false});
 
         reader.on('error', reject);
-        // eslint-disable-next-line functional/immutable-data
         reader.on('data', record => records.push(record));
         reader.on('end', () => {
           try {
-            expect(records).to.have.length(2);
+            assert.equal(records.length, 2);
             const [firstRecord, secondRecord] = records;
-            expect(`${firstRecord.toString()}\n${secondRecord.toString()}`).to.equal(expectedRecord);
+            assert.deepEqual(`${firstRecord.toString()}\n${secondRecord.toString()}`, expectedRecord);
             resolve();
           } catch (err) {
             reject(err);
@@ -136,13 +117,12 @@ describe('marcxml', () => {
         const reader = Converter.reader(fs.createReadStream(fromPath), {subfieldValues: false}, 'marc');
 
         reader.on('error', reject);
-        // eslint-disable-next-line functional/immutable-data
         reader.on('data', record => records.push(record));
         reader.on('end', () => {
           try {
-            expect(records).to.have.length(1);
+            assert.equal(records.length, 1);
             const [firstRecord] = records;
-            expect(firstRecord.toString()).to.equal(expectedRecord);
+            assert.deepEqual(firstRecord.toString(), expectedRecord);
             resolve();
           } catch (err) {
             reject(err);
@@ -158,7 +138,7 @@ describe('marcxml', () => {
       const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'from-no-xml-decl'), 'utf8');
       const record = MarcRecord.fromString(sourceRecord);
 
-      expect(Converter.to(record, {omitDeclaration: true})).to.equal(expectedRecord);
+      assert.deepEqual(Converter.to(record, {omitDeclaration: true}), expectedRecord);
     });
 
     it('Should indent the XML', () => {
@@ -166,7 +146,7 @@ describe('marcxml', () => {
       const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'from-indent'), 'utf8');
       const record = MarcRecord.fromString(sourceRecord);
 
-      expect(Converter.to(record, {indent: true})).to.equal(expectedRecord);
+      assert.deepEqual(Converter.to(record, {indent: true}), expectedRecord);
     });
 
     it('Should convert from XML with custom validation', async () => {
@@ -175,7 +155,7 @@ describe('marcxml', () => {
       const record = MarcRecord.fromString(sourceRecord, {fields: false, subfields: false, subfieldValues: false});
 
       // Console.log(Converter.to(record, {indent:true}));
-      expect(await Converter.to(record)).to.equal(expectedRecord);
+      assert.deepEqual(await Converter.to(record), expectedRecord);
     });
 
     Array.from(Array(fixtureCount)).forEach((e, i) => {
@@ -186,7 +166,7 @@ describe('marcxml', () => {
         const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
         const record = MarcRecord.fromString(sourceRecord);
 
-        expect(Converter.to(record)).to.equal(expectedRecord);
+        assert.deepEqual(Converter.to(record), expectedRecord);
       });
     });
   });

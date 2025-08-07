@@ -1,27 +1,9 @@
-/**
-*
-* @licstart  The following is the entire license notice for the JavaScript code in this file.
-*
-* Copyright 2014-2017 Pasi Tuominen
-* Copyright 2018-2023 University Of Helsinki (The National Library Of Finland)
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*
-* @licend  The above is the entire license notice
-* for the JavaScript code in this file.
-*
-*/
-
-
 import fs from 'fs';
 import path from 'path';
-import {expect} from 'chai';
+import {describe, it} from 'node:test';
+import assert from 'node:assert';
 import {MarcRecord} from '@natlibfi/marc-record';
-import * as Converter from './aleph-sequential';
+import * as Converter from './aleph-sequential.js';
 import createDebugLogger from 'debug';
 
 const debug = createDebugLogger('@natlibfi/marc-record-serializers:aleph-sequential:test');
@@ -30,7 +12,7 @@ const debug = createDebugLogger('@natlibfi/marc-record-serializers:aleph-sequent
 MarcRecord.setValidationOptions({subfieldValues: false});
 
 describe('aleph-sequential', () => {
-  const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'aleph-sequential');
+  const fixturesPath = path.resolve(import.meta.dirname, '..', 'test-fixtures', 'aleph-sequential');
   const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from/u).test(f)).length;
   const fixtureCountSplitFields = fs.readdirSync(fixturesPath).filter(f => (/^splitfields-from/u).test(f)).length;
 
@@ -41,7 +23,7 @@ describe('aleph-sequential', () => {
       reader.on('end', reject);
       reader.on('error', err => {
         try {
-          expect(err.code).to.equal('ENOENT');
+          assert(err.code, 'ENOENT');
           resolve();
         } catch (exp) {
           reject(exp);
@@ -62,7 +44,7 @@ describe('aleph-sequential', () => {
 
       reader.on('error', err => {
         try {
-          expect(err.message).to.match(/^Could not parse/u);
+          assert.match(err.message, /^Could not parse/u);
           resolve();
         } catch (exp) {
           reject(exp);
@@ -82,12 +64,12 @@ describe('aleph-sequential', () => {
         const reader = Converter.reader(fs.createReadStream(fromPath));
 
         reader.on('error', reject);
-        reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
+        reader.on('data', record => records.push(record));
         reader.on('end', () => {
           try {
-            expect(records).to.have.length(1);
+            assert.equal(records.length, 1);
             const [firstRecord] = records;
-            expect(firstRecord.toString()).to.equal(expectedRecord);
+            assert.deepEqual(firstRecord.toString(), expectedRecord);
             resolve();
           } catch (err) {
             reject(err);
@@ -105,12 +87,12 @@ describe('aleph-sequential', () => {
       const reader = Converter.reader(fs.createReadStream(fromPath), undefined, true);
 
       reader.on('error', reject);
-      reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
+      reader.on('data', record => records.push(record));
       reader.on('end', () => {
         try {
-          expect(records).to.have.length(1);
+          assert.equal(records.length, 1);
           const [firstRecord] = records;
-          expect(firstRecord.toString()).to.equal(expectedRecord);
+          assert.deepEqual(firstRecord.toString(), expectedRecord);
           resolve();
         } catch (err) {
           reject(err);
@@ -128,7 +110,7 @@ describe('aleph-sequential', () => {
         const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, `to${index}`), 'utf8');
         const record = MarcRecord.fromString(sourceRecord);
 
-        expect(Converter.to(record)).to.equal(expectedRecord);
+        assert.deepEqual(Converter.to(record), expectedRecord);
       });
     });
   });
@@ -139,7 +121,7 @@ describe('aleph-sequential', () => {
       const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, 'to7'), 'utf8');
       const record = MarcRecord.fromString(sourceRecord);
 
-      expect(Converter.to(record, {useCrForContinuingResources: false})).to.equal(expectedRecord);
+      assert.deepEqual(Converter.to(record, {useCrForContinuingResources: false}), expectedRecord);
     });
   });
 
@@ -154,12 +136,12 @@ describe('aleph-sequential', () => {
         const reader = Converter.reader(fs.createReadStream(fromPath));
 
         reader.on('error', reject);
-        reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
+        reader.on('data', record => records.push(record));
         reader.on('end', () => {
           try {
-            expect(records).to.have.length(1);
+            assert.equal(records.length, 1);
             const [resultRecord] = records;
-            expect(resultRecord.toString()).to.equal(expectedRecord);
+            assert.deepEqual(resultRecord.toString(), expectedRecord);
             resolve();
           } catch (err) {
             reject(err);
@@ -185,7 +167,7 @@ describe('aleph-sequential', () => {
         const sourceRecord = fs.readFileSync(path.resolve(fixturesPath, `splitfields-to${index}`), 'utf8');
         const record = MarcRecord.fromString(sourceRecord);
         const result = Converter.to(record);
-        expect(result).to.equal(expectedRecord);
+        assert.deepEqual(result, expectedRecord);
       });
     });
 
@@ -198,13 +180,11 @@ describe('aleph-sequential', () => {
       const fromPath = path.resolve(fixturesPath, 'load-test');
       const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'load-test-exp1'), 'utf8');
       const reader = Converter.reader(fs.createReadStream(fromPath), undefined, true);
-      // eslint-disable-next-line functional/no-let
       let counter = 0;
 
-      // eslint-disable-next-line functional/immutable-data
       reader.on('error', error => errors.push(error));
       reader.on('data', record => {
-        records.push(record); // eslint-disable-line functional/immutable-data
+        records.push(record);
         debug('...');
         counter += 1;
       });
@@ -212,9 +192,9 @@ describe('aleph-sequential', () => {
         try {
           debug(`Counter: ${counter}`);
           debug(`Errors: ${errors}`);
-          expect(records).to.have.length(100);
+          assert.equal(records.length, 100);
           const [firstRecord] = records;
-          expect(firstRecord.toString()).to.equal(expectedRecord);
+          assert.deepEqual(firstRecord.toString(), expectedRecord);
           resolve();
         } catch (err) {
           reject(err);
@@ -232,7 +212,7 @@ describe('aleph-sequential', () => {
         Converter.to(record);
       } catch (err) {
         debug(err);
-        expect(err.message).to.match(/^Record is invalid:/u);
+        assert.match(err.message, /^Record is invalid:/u);
         //`Record is invalid: instance.fields[4] is not any of [subschema 0],[subschema 1]`;
         return;
       }
@@ -250,7 +230,7 @@ describe('aleph-sequential', () => {
         Converter.to(record);
       } catch (err) {
         debug(err);
-        expect(err.message).to.match(/^Record is invalid: Record is too long to be converted to Aleph Sequential./u);
+        assert.match(err.message, /^Record is invalid: Record is too long to be converted to Aleph Sequential./u);
         return;
       }
       throw new Error('Should throw');
@@ -265,7 +245,7 @@ describe('aleph-sequential', () => {
       const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'emptySubAlephSeq'), 'utf8');
       const record = new MarcRecord(JSON.parse(inputRecordJSON));
       const alephSeq = Converter.to(record);
-      expect(alephSeq).to.equal(expectedRecord);
+      assert.deepEqual(alephSeq, expectedRecord);
     });
   });
   describe('#to - empty subfield', () => {
@@ -274,7 +254,7 @@ describe('aleph-sequential', () => {
       const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'spaceSubAlephSeq'), 'utf8');
       const record = new MarcRecord(JSON.parse(inputRecordJSON));
       const alephSeq = Converter.to(record);
-      expect(alephSeq).to.equal(expectedRecord);
+      assert.deepEqual(alephSeq, expectedRecord);
     });
   });
   describe('#to - empty subfield', () => {
@@ -283,7 +263,7 @@ describe('aleph-sequential', () => {
       const expectedRecord = fs.readFileSync(path.resolve(fixturesPath, 'emptySubAlephSeq'), 'utf8');
       const record = new MarcRecord(JSON.parse(inputRecordJSON));
       const alephSeq = Converter.to(record);
-      expect(alephSeq).to.equal(expectedRecord);
+      assert.deepEqual(alephSeq, expectedRecord);
     });
   });
 

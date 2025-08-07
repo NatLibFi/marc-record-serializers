@@ -1,21 +1,3 @@
-/**
-*
-* @licstart  The following is the entire license notice for the JavaScript code in this file.
-*
-* Copyright 2014-2017 Pasi Tuominen
-* Copyright 2018-2021 University Of Helsinki (The National Library Of Finland)
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*
-* @licend  The above is the entire license notice
-* for the JavaScript code in this file.
-*
-*/
-
 import {MarcRecord} from '@natlibfi/marc-record';
 import {XMLSerializer, DOMParser, DOMImplementation} from '@xmldom/xmldom';
 import {EventEmitter} from 'events';
@@ -38,7 +20,7 @@ export function reader(stream, validationOptions = {}) {
 
   function start() {
 
-    let charbuffer = ''; // eslint-disable-line functional/no-let
+    let charbuffer = '';
 
     stream.on('end', () => {
       emitter.emit('end');
@@ -52,10 +34,8 @@ export function reader(stream, validationOptions = {}) {
       charbuffer += data.toString();
 
       debugData(charbuffer);
-      // eslint-disable-next-line functional/no-loop-statements
-      while (1) { // eslint-disable-line no-constant-condition
-
-        let pos = charbuffer.indexOf('<oai_marc'); // eslint-disable-line functional/no-let
+      while (1) {
+        let pos = charbuffer.indexOf('<oai_marc');
 
         if (pos === -1) {
           return;
@@ -155,16 +135,14 @@ export function from(xmlString, validationOptions = {}) {
   const childNodes = recordNode === undefined ? [] : Array.prototype.slice.call(recordNode.childNodes);
   childNodes.filter(notTextNode).forEach(node => {
     switch (node.tagName) {
-    // eslint-disable-next-line functional/no-conditional-statements
-    case 'fixfield':
-      handleControlfieldNode(node);
-      break;
-    // eslint-disable-next-line functional/no-conditional-statements
-    case 'varfield':
-      handleDatafieldNode(node);
-      break;
-    default:
-      throw new Error(`Unable to parse node: ${node.tagName}`);
+      case 'fixfield':
+        handleControlfieldNode(node);
+        break;
+      case 'varfield':
+        handleDatafieldNode(node);
+        break;
+      default:
+        throw new Error(`Unable to parse node: ${node.tagName}`);
     }
 
     function handleControlfieldNode(node) {
@@ -173,12 +151,10 @@ export function from(xmlString, validationOptions = {}) {
       if (node.childNodes[0] !== undefined && node.childNodes[0].nodeType === NODE_TYPE.TEXT_NODE) {
         const value = node.childNodes[0].data;
 
-        // eslint-disable-next-line functional/no-conditional-statements
         if (tag === 'LDR') {
-          record.leader = value; // eslint-disable-line functional/immutable-data
-        // eslint-disable-next-line functional/no-conditional-statements
+          record.leader = value;
         } else {
-          record.appendField({tag, value}); // eslint-disable-line functional/immutable-data
+          record.appendField({tag, value});
         }
       } else {
         throw new Error(`Unable to parse controlfield: ${tag}`);

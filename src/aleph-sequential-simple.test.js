@@ -1,8 +1,9 @@
 import fs from 'fs';
 import path from 'path';
-import {expect} from 'chai';
+import {describe, it} from 'node:test';
+import assert from 'node:assert';
 import {MarcRecord} from '@natlibfi/marc-record';
-import * as Converter from './aleph-sequential';
+import * as Converter from './aleph-sequential.js';
 import createDebugLogger from 'debug';
 
 const debug = createDebugLogger('@natlibfi/marc-record-serializers:aleph-sequential:test');
@@ -10,7 +11,7 @@ const debugData = debug.extend('data');
 
 MarcRecord.setValidationOptions({subfieldValues: false});
 
-const fixturesPath = path.resolve(__dirname, '..', 'test-fixtures', 'aleph-sequential');
+const fixturesPath = path.resolve(import.meta.dirname, '..', 'test-fixtures', 'aleph-sequential');
 const fixtureCountMultiples = fs.readdirSync(fixturesPath).filter(f => (/^multiples_from/u).test(f)).length;
 
 describe('#reader', () => {
@@ -21,7 +22,7 @@ describe('#reader', () => {
     reader.on('end', reject);
     reader.on('error', err => {
       try {
-        expect(err.code).to.equal('ENOENT');
+        assert(err.code, 'ENOENT');
         resolve();
       } catch (exp) {
         reject(exp);
@@ -58,7 +59,7 @@ describe('#reader', () => {
 
     reader.on('error', err => {
       try {
-        expect(err.message).to.match(/^Could not parse/u);
+        assert.match(err.message, /^Could not parse/u);
         resolve();
       } catch (exp) {
         reject(exp);
@@ -78,17 +79,17 @@ describe('#multiples_from', () => {
       const expectedRecordsString = fs.readFileSync(path.resolve(fixturesPath, `multiples_to${index}`), 'utf8');
       const reader = Converter.reader(fs.createReadStream(fromPath));
 
-      reader.on('error', error => errors.push(error)); // eslint-disable-line functional/immutable-data
-      reader.on('data', record => records.push(record)); // eslint-disable-line functional/immutable-data
+      reader.on('error', error => errors.push(error));
+      reader.on('data', record => records.push(record));
       reader.on('end', () => {
         try {
           debugData(records[0]);
           debugData(records[1]);
-          expect(records).to.have.length(2);
+          assert.equal(records.length, 2);
           const [firstRecord, secondRecord] = records;
           const recordsString1 = firstRecord.toString();
           const recordsString2 = secondRecord.toString();
-          expect(`${recordsString1}\n${recordsString2}`).to.equal(expectedRecordsString);
+          assert.deepEqual(`${recordsString1}\n${recordsString2}`, expectedRecordsString);
           resolve();
         } catch (err) {
           reject(err);
