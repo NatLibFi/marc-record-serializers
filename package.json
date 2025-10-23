@@ -11,13 +11,12 @@
 		}
 	],
 	"keywords": [],
-	"homepage": "https://github.com/natlibfi/marc-record-serializers",
+	"homepage": "https://www.npmjs.com/package/@natlibfi/marc-record-serializers",
 	"bugs": {
 		"url": "https://github.com/natlibfi/marc-record-serializers/issues"
 	},
 	"repository": {
-		"type": "git",
-		"url": "git@github.com:natlibfi/marc-record-serializers.git"
+		"url": "https://github.com/NatLibFi/marc-record-serializers"
 	},
 	"license": "MIT",
 	"version": "11.0.0-alpha.2",
@@ -44,7 +43,7 @@
 		"dev:debug": "cross-env LOG_LEVEL=debug DEBUG=@natlibfi/* NODE_ENV=test npm run watch:test"
 	},
 	"dependencies": {
-		"@natlibfi/marc-record": "^10.0.0-alpha.1",
+		"@natlibfi/marc-record": "next",
 		"@xmldom/xmldom": "^0.9.8",
 		"stream-json": "^1.9.1",
 		"xml2js": "^0.6.2",
