@@ -1,30 +1,13 @@
-/**
-*
-* @licstart  The following is the entire license notice for the JavaScript code in this file.
-*
-* Copyright 2014-2017 Pasi Tuominen
-* Copyright 2018-2021 University Of Helsinki (The National Library Of Finland)
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*
-* @licend  The above is the entire license notice
-* for the JavaScript code in this file.
-*
-*/
 import {MarcRecord} from '@natlibfi/marc-record';
 import {Parser, Builder} from 'xml2js';
 import {EventEmitter} from 'events';
 import createDebugLogger from 'debug';
-import {stripPrefix} from 'xml2js/lib/processors';
+import {stripPrefix} from 'xml2js/lib/processors.js';
 
 const debug = createDebugLogger('@natlibfi/marc-record-serializers:marcxml');
 const debugData = debug.extend('data');
 
-export function reader (stream, validationOptions = {}, nameSpace = '') {
+export function reader(stream, validationOptions = {}, nameSpace = '') {
   const emitter = new class extends EventEmitter { }();
   const nameSpacePrefix = nameSpace === '' ? nameSpace : `${nameSpace}:`;
 
@@ -34,7 +17,6 @@ export function reader (stream, validationOptions = {}, nameSpace = '') {
   return emitter;
 
   function start() {
-    // eslint-disable-next-line functional/no-let
     let charbuffer = '';
 
     stream.on('end', () => {
@@ -48,9 +30,7 @@ export function reader (stream, validationOptions = {}, nameSpace = '') {
     stream.on('data', async data => {
       charbuffer += data.toString();
 
-      // eslint-disable-next-line functional/no-loop-statements
-      while (1) { // eslint-disable-line no-constant-condition
-        // eslint-disable-next-line functional/no-let
+      while (1) {
         let pos = charbuffer.indexOf(`<${nameSpacePrefix}record`);
 
         if (pos === -1) {
@@ -61,7 +41,6 @@ export function reader (stream, validationOptions = {}, nameSpace = '') {
 
         charbuffer = charbuffer.substr(pos);
         pos = charbuffer.indexOf(`</${nameSpacePrefix}record>`);
-        /* istanbul ignore if */
         if (pos === -1) {
           return;
         }
@@ -76,7 +55,7 @@ export function reader (stream, validationOptions = {}, nameSpace = '') {
 
         try {
           debug('Emitting record');
-          emitter.emit('data', await from(raw, validationOptions)); // eslint-disable-line no-await-in-loop
+          emitter.emit('data', await from(raw, validationOptions));
         } catch (e) {
           emitter.emit('error', e);
         }
@@ -167,7 +146,6 @@ export async function from(str, validationOptions = {}) {
   const record = new MarcRecord(undefined, validationOptions);
   const obj = await toObject();
 
-  // eslint-disable-next-line functional/immutable-data
   record.leader = obj.record.leader?.[0] || '';
 
   addControlFields();
@@ -177,7 +155,6 @@ export async function from(str, validationOptions = {}) {
 
   function addControlFields() {
     const fields = obj.record.controlfield || [];
-
     fields.forEach(({_: value, $: {tag}}) => record.appendField({tag, value}));
   }
 
