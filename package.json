@@ -43,16 +43,16 @@
 		"dev:debug": "cross-env LOG_LEVEL=debug DEBUG=@natlibfi/* NODE_ENV=test npm run watch:test"
 	},
 	"dependencies": {
-		"@natlibfi/marc-record": "next",
+		"@natlibfi/marc-record": "^10.0.0",
 		"@xmldom/xmldom": "^0.9.8",
 		"stream-json": "^1.9.1",
 		"xml2js": "^0.6.2",
-		"yargs": "^17.7.2"
+		"yargs": "^18.0.0"
 	},
 	"devDependencies": {
-		"cross-env": "^7.0.3",
-		"debug": "^4.4.0",
-		"esbuild": "^0.25.8",
-		"eslint": "^9.32.0"
+		"cross-env": "^10.1.0",
+		"debug": "^4.4.3",
+		"esbuild": "^0.25.12",
+		"eslint": "^9.39.1"
 	}
 }

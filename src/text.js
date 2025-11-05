@@ -14,7 +14,7 @@ export function reader(stream, validationOptions = {}) {
   function start() {
 
     MarcRecord.setValidationOptions(validationOptions);
-    var buffer = ''; // eslint-disable-line
+    let buffer = '';
 
     stream.on('data', data => {
       debug(`streamEvent: data`);

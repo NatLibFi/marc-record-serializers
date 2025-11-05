@@ -130,7 +130,6 @@ export function from(xmlString, validationOptions = {}) {
   debug(`Parsing from xmlstring`);
   const doc = parser.parseFromString(xmlString, 'text/xml');
   // This cannot be simply destructured or everything errors
-  // eslint-disable-next-line prefer-destructuring
   const recordNode = doc.getElementsByTagName('oai_marc')[0];
   const childNodes = recordNode === undefined ? [] : Array.prototype.slice.call(recordNode.childNodes);
   childNodes.filter(notTextNode).forEach(node => {

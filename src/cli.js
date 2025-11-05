@@ -1,5 +1,3 @@
-/* eslint-disable no-process-exit */
-/* eslint-disable no-process-env */
 /* eslint-disable no-console */
 
 import fs from 'fs';

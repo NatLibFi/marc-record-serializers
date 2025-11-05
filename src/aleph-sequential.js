@@ -43,8 +43,6 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
     let brokenCount = 0;
     let currentId;
 
-
-    // eslint-disable-next-line max-statements
     stream.on('data', data => {
       charbuffer += data.toString();
 
@@ -506,7 +504,6 @@ export function to(record, useCrForContinuingResource = false) {
   * Determine the record format for the FMT field.
   * Uses FMT SE (instead of CR) for continuing resource, because Aleph does that
   */
-  // eslint-disable-next-line max-statements
   function recordFormat(record, useCrForContinuingResource) {
     const {leader} = record;
     const l6 = leader.slice(6, 7);
@@ -556,7 +553,6 @@ export function to(record, useCrForContinuingResource = false) {
   }
 }
 
-// eslint-disable-next-line max-statements
 export function from(data, validationOptions = {}) {
   let i = 0;
   const lines = data.split('\n').filter(l => l.length > 0);
