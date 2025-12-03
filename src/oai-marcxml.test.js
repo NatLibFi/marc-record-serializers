@@ -10,6 +10,7 @@ import * as Converter from './oai-marcxml.js';
 //const debug = createDebugLogger('@natlibfi/marc-record-serializers:oai-marcxml:test');
 //const debugData = debug.extend('data');
 
+// eslint-disable-next-line max-lines-per-function
 describe('oai-marcxml', () => {
   const fixturesPath = path.resolve(import.meta.dirname, '..', 'test-fixtures', 'oai-marcxml');
   const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from[0-9]+/u).test(f)).length;

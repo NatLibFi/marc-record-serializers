@@ -13,6 +13,7 @@ import * as OAI_MARCXML from './oai-marcxml.js';
 
 run();
 
+// eslint-disable-next-line max-lines-per-function
 async function run() {
   const VALIDATION_OPTIONS_USAGE = `Validation options:
   111 => {fields: true, subfields: true, subfieldValues: true}
