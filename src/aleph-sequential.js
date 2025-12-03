@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import {MarcRecord} from '@natlibfi/marc-record';
 import {Buffer} from 'buffer';
 // Node polyfill
@@ -29,12 +30,14 @@ const debug = createDebugLogger('@natlibfi/marc-record-serializers:aleph-sequent
 const debugData = debug.extend('data');
 const debugDev = debug.extend('dev');
 
+// eslint-disable-next-line max-lines-per-function
 export function reader(stream, validationOptions = {}, genF001fromSysNo = false) {
 
   const emitter = new class extends EventEmitter { }();
   start();
   return emitter;
 
+  // eslint-disable-next-line max-lines-per-function
   function start() {
 
     let charbuffer = '';
@@ -147,6 +150,7 @@ export function reader(stream, validationOptions = {}, genF001fromSysNo = false)
 * This implementation attempts to mimic the conversion done by marc_to_aleph.sh script and should at least produce a format which is accepted by Aleph
 * Also, javascript strings are UTF-16 so conversion to bytes is necessary to cut the text at correct offsets
 */
+// eslint-disable-next-line max-lines-per-function
 export function to(record, useCrForContinuingResource = false) {
 
   const MAX_FIELD_LENGTH = 2000;
@@ -249,6 +253,7 @@ export function to(record, useCrForContinuingResource = false) {
     return id.padStart(9, '0');
   }
 
+  // eslint-disable-next-line max-lines-per-function
   function formatDatafield(field) {
     let subfieldLines;
     const ind1 = field.ind1 && field.ind1.length > 0 ? field.ind1 : ' ';
@@ -289,6 +294,7 @@ export function to(record, useCrForContinuingResource = false) {
     *   - If it is, cut at separators or at boundary. Create a new line for each segment
     * 4. Repeat step 3 for the rest of the subfields
     **/
+    // eslint-disable-next-line max-lines-per-function
     function reduceToLines(result, subfield, index, arr) {
       let code;
       let sliceOffset;
@@ -335,6 +341,7 @@ export function to(record, useCrForContinuingResource = false) {
         return arr;
       }
 
+      // eslint-disable-next-line max-lines-per-function
       function iterate(segment, firstCall) {
         const HYPHEN = 45;
         const SPACE = 32;
@@ -370,6 +377,7 @@ export function to(record, useCrForContinuingResource = false) {
           return concatByteArrays(Buffer.from(prefix), arr);
         }
 
+        // eslint-disable-next-line max-lines-per-function
         function getSliceOffset(arr) {
           const offset = findSeparatorOffset(arr) || findPeriodOffset(arr) || findSpaceOffset(arr) || SPLIT_MAX_FIELD_LENGTH;
 
@@ -553,6 +561,7 @@ export function to(record, useCrForContinuingResource = false) {
   }
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function from(data, validationOptions = {}) {
   let i = 0;
   const lines = data.split('\n').filter(l => l.length > 0);
