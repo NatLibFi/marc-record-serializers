@@ -5,6 +5,7 @@ import assert from 'node:assert';
 import {MarcRecord} from '@natlibfi/marc-record';
 import * as Converter from './marcxml.js';
 
+// eslint-disable-next-line max-lines-per-function
 describe('marcxml', () => {
   const fixturesPath = path.resolve(import.meta.dirname, '..', 'test-fixtures', 'marcxml');
   const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from[0-9]+/u).test(f)).length;

@@ -9,6 +9,7 @@ import createDebugLogger from 'debug';
 const debug = createDebugLogger('@natlibfi/marc-record-serializers:text:test');
 const debugData = debug.extend('data');
 
+// eslint-disable-next-line max-lines-per-function
 describe('text', () => {
   const fixturesPath = path.resolve(import.meta.dirname, '..', 'test-fixtures', 'text');
   const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from[0-9]+/u).test(f)).length;
@@ -30,6 +31,7 @@ describe('text', () => {
     }));
   });
 
+  // eslint-disable-next-line max-lines-per-function
   describe('#from', () => {
     it('Should convert a single record', () => {
       const fromPath = path.resolve(fixturesPath, 'from1');

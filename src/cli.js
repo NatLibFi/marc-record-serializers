@@ -3,15 +3,17 @@
 import fs from 'fs';
 import path from 'path';
 import yargs from 'yargs';
-import * as Text from './text';
-import * as Json from './json';
-import * as AlephSequential from './aleph-sequential';
-import * as ISO2709 from './iso2709';
-import * as MARCXML from './marcxml';
-import * as OAI_MARCXML from './oai-marcxml';
+
+import * as Text from './text.js';
+import * as Json from './json.js';
+import * as AlephSequential from './aleph-sequential.js';
+import * as ISO2709 from './iso2709.js';
+import * as MARCXML from './marcxml.js';
+import * as OAI_MARCXML from './oai-marcxml.js';
 
 run();
 
+// eslint-disable-next-line max-lines-per-function
 async function run() {
   const VALIDATION_OPTIONS_USAGE = `Validation options:
   111 => {fields: true, subfields: true, subfieldValues: true}
@@ -21,7 +23,7 @@ async function run() {
   text, json, alephseq, marcxml, oai-marcxml, iso2709`;
 
   try {
-    const args = yargs
+    const args = yargs(process.argv.slice(2))
       .scriptName('marc-record-serializers')
       .usage('$0 <inputFormat> <outputFormat> <file>', '', yargs => {
         yargs

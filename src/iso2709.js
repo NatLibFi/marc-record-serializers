@@ -46,6 +46,7 @@ export function reader(stream, validationOptions = {}) {
   }
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function from(dataStr, validationOptions = {}) {
   const leader = dataStr.substring(0, 24);
   const record = {
@@ -215,6 +216,7 @@ export function from(dataStr, validationOptions = {}) {
   }
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function to(record) {
 
   //let tag;

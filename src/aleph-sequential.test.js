@@ -11,6 +11,7 @@ const debug = createDebugLogger('@natlibfi/marc-record-serializers:aleph-sequent
 
 MarcRecord.setValidationOptions({subfieldValues: false});
 
+// eslint-disable-next-line max-lines-per-function
 describe('aleph-sequential', () => {
   const fixturesPath = path.resolve(import.meta.dirname, '..', 'test-fixtures', 'aleph-sequential');
   const fixtureCount = fs.readdirSync(fixturesPath).filter(f => (/^from/u).test(f)).length;
