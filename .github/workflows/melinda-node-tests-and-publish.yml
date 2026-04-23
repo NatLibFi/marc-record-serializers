@@ -72,8 +72,8 @@ jobs:
         with:
           node-version: '22.x'
           registry-url: 'https://registry.npmjs.org'
-      - name: Update npm
-        run: npm install -g npm@latest
+      #- name: Update npm
+      #  run: npm install -g npm@latest
       - name: Clean install
         run: npm ci
       # Publish stable release with --tag latest
