@@ -16,7 +16,7 @@
 		"url": "https://github.com/natlibfi/marc-record-serializers/issues"
 	},
 	"repository": {
-		"url": "https://github.com/NatLibFi/marc-record-serializers"
+		"url": "git+https://github.com/NatLibFi/marc-record-serializers.git"
 	},
 	"license": "MIT",
 	"version": "11.0.3-alpha.3",
