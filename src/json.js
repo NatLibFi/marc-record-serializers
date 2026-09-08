@@ -1,6 +1,9 @@
 import {MarcRecord} from '@natlibfi/marc-record';
-import StreamArray from 'stream-json/streamers/StreamArray.js';
 import {EventEmitter} from 'events';
+
+import {streamArray} from 'stream-json/streamers/stream-array.js';
+import {parser} from 'stream-json';
+import chain from 'stream-chain';
 //import createDebugLogger from 'debug';
 
 //const debug = createDebugLogger('@natlibfi/marc-record-serializers:json');
@@ -13,7 +16,12 @@ export function reader(stream, validationOptions = {}) {
   return emitter;
 
   function start() {
-    const pipeline = stream.pipe(StreamArray.withParser());
+    const pipeline = chain([
+      stream,
+      parser(),
+      streamArray()
+    ]);
+
     pipeline.on('data', data => {
       try {
         emitter.emit('data', new MarcRecord(data.value, validationOptions));
